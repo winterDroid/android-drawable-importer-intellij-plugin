@@ -50,20 +50,12 @@
                     text="Android Icons Import"
                     description="Creates a new Android Asset by the use of Android Icons"
                     >
-                <add-to-group
-                        group-id="de.mprengemann.intellij.plugin.androidicons.group"
-                        anchor="first"
-                        />
-                    </action>
+            </action>
             <action id="de.mprengemann.intellij.plugin.androidicons.AndroidScaleDialog"
                     class="de.mprengemann.intellij.plugin.androidicons.AndroidScaleDialog"
                     text="Android Scaled Import"
                     description="Imports a drawable and scales it to the missing resolutions."
                     >
-                <add-to-group
-                        group-id="de.mprengemann.intellij.plugin.androidicons.group"
-                        anchor="last"
-                        />
             </action>
         </group>
     </actions>

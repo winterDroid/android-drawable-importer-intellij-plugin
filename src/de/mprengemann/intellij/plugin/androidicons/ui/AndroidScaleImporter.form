@@ -40,7 +40,7 @@
           <text value="Resource Name:"/>
         </properties>
       </component>
-      <component id="50271" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="assetSpinner">
+      <component id="50271" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="assetBrowser">
         <constraints>
           <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
@@ -175,7 +175,7 @@
       </vspacer>
       <vspacer id="4ec09">
         <constraints>
-          <grid row="18" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="19" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
       </vspacer>
@@ -305,6 +305,16 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
       </hspacer>
+      <component id="f1d37" class="javax.swing.JCheckBox" binding="XXXHDPICheckBox" default-binding="true">
+        <constraints>
+          <grid row="18" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <selected value="true"/>
+          <text value="XXXHDPI"/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>

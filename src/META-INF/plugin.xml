@@ -1,0 +1,58 @@
+<idea-plugin version="2">
+    <id>de.mprengemann.intellij.plugin.androidicons</id>
+    <name>Android Icons IntelliJ Plugin</name>
+    <version>0.1</version>
+    <vendor email="marcprengemann@gmail.com" url="https://plus.google.com/+MarcPrengemann">Marc Prengemann</vendor>
+
+    <description><![CDATA[
+      This plugin was created to easily use the <a href="http://androidicons.com/">AndroidIcons</a> directly in IntelliJ.<br>
+      <em>Take care: you have do buy them before you can use them!</em>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Initial release
+    ]]>
+    </change-notes>
+
+    <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+    <idea-version since-build="131"/>
+
+    <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    -->
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <applicationConfigurable instance="de.mprengemann.intellij.plugin.androidicons.settings.AndroidIconsSettings" displayName="Android Icons"/>
+    </extensions>
+
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
+
+    <project-components>
+        <!-- Add your project components here -->
+    </project-components>
+
+    <actions>
+        <!-- Add your actions here -->
+        <!--<action class="de.mprengemann.intellij.plugin.androidicons.de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog" id="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog" text="Android Icon"-->
+        <!--description="Create a new Android Asset by the use of Android Icons">-->
+        <!--<add-to-group group-id="NewMenu" relative-to-action="Directory" anchor="after"/>-->
+        <!--</action>-->
+        <action id="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog"
+                class="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog"
+                text="Android Icon"
+                description="Creates a new Android Asset by the use of Android Icons"
+                >
+            <add-to-group
+                    group-id="NewGroup"
+                    anchor="after"
+                    relative-to-action="Android.CreateResourceDirectory"
+                    />
+        </action>
+    </actions>
+
+</idea-plugin>

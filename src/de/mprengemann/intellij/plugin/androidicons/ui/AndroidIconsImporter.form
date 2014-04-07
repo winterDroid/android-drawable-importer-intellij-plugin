@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="de.mprengemann.intellij.plugin.androidicons.ui.WrappedDialog">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="de.mprengemann.intellij.plugin.androidicons.ui.AndroidIconsImporter">
   <grid id="27dc6" binding="container" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="478" height="400"/>
+      <xy x="20" y="20" width="478" height="300"/>
     </constraints>
     <properties>
-      <minimumSize width="478" height="400"/>
-      <preferredSize width="478" height="400"/>
+      <minimumSize width="478" height="300"/>
+      <preferredSize width="478" height="300"/>
     </properties>
     <border type="none"/>
     <children>
@@ -184,60 +184,6 @@
           <text value=""/>
         </properties>
       </component>
-      <grid id="c1b98" layout-manager="GridBagLayout">
-        <constraints>
-          <grid row="14" column="1" row-span="1" col-span="8" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.0"/>
-        </constraints>
-        <properties>
-          <alignmentX value="0.5"/>
-          <alignmentY value="0.5"/>
-          <autoscrolls value="false"/>
-          <enabled value="false"/>
-          <maximumSize width="450" height="100"/>
-          <minimumSize width="450" height="1"/>
-          <preferredSize width="450" height="100"/>
-          <requestFocusEnabled value="false"/>
-          <visible value="true"/>
-        </properties>
-        <border type="bevel-raised" title="Warning"/>
-        <children>
-          <vspacer id="bb86e">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-              <gridbag weightx="0.0" weighty="0.0"/>
-            </constraints>
-          </vspacer>
-          <component id="90783" class="javax.swing.JLabel" binding="warningText">
-            <constraints>
-              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <gridbag weightx="0.0" weighty="0.0"/>
-            </constraints>
-            <properties>
-              <minimumSize width="400" height="50"/>
-              <text value="&lt;html&gt;In at least one of your drawable folders exists already a drawable with your selected export name.&lt;br&gt;Take care that all existing files will be overwritten!&lt;/html&gt;"/>
-            </properties>
-          </component>
-          <vspacer id="419fe">
-            <constraints>
-              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-              <gridbag weightx="0.0" weighty="0.0"/>
-            </constraints>
-          </vspacer>
-          <hspacer id="6816e">
-            <constraints>
-              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-              <gridbag weightx="0.0" weighty="0.0"/>
-            </constraints>
-          </hspacer>
-          <hspacer id="b6a36">
-            <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-              <gridbag weightx="0.0" weighty="0.0"/>
-            </constraints>
-          </hspacer>
-        </children>
-      </grid>
       <hspacer id="36cfc">
         <constraints>
           <grid row="5" column="9" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -258,7 +204,7 @@
       </vspacer>
       <vspacer id="4ec09">
         <constraints>
-          <grid row="15" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="14" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
       </vspacer>

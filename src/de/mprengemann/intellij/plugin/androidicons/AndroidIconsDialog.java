@@ -2,7 +2,7 @@ package de.mprengemann.intellij.plugin.androidicons;
 
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.module.Module;
-import de.mprengemann.intellij.plugin.androidicons.ui.WrappedDialog;
+import de.mprengemann.intellij.plugin.androidicons.ui.AndroidIconsImporter;
 
 /**
  * User: marcprengemann
@@ -14,7 +14,7 @@ public class AndroidIconsDialog extends AnAction {
   public void actionPerformed(AnActionEvent event) {
     Module modul = event.getData(DataKeys.MODULE);
 
-    WrappedDialog dialog = new WrappedDialog(getEventProject(event));
+    AndroidIconsImporter dialog = new AndroidIconsImporter(getEventProject(event));
     dialog.show();
   }
 

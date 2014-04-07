@@ -207,7 +207,7 @@ public class AndroidIconsImporter extends DialogWrapper {
             }
           });
           for (VirtualFile asset : assets) {
-            if (!asset.isDirectory() && asset.getExtension().equalsIgnoreCase("png")) {
+            if (!asset.isDirectory() && asset.getExtension()!= null && asset.getExtension().equalsIgnoreCase("png")) {
               assetSpinner.addItem(asset.getNameWithoutExtension().replace("ic_action_", ""));
             }
           }
@@ -225,9 +225,9 @@ public class AndroidIconsImporter extends DialogWrapper {
     if (checkImageExists()) {
       //YES = 0; NO = 1
       int result = Messages.showYesNoDialog(
-          "There is at least in one of your drawable folders a drawable with the same name. This will be overwritten. Are you sure to import?",
+          "There is at least in one of your drawable folders a drawable with the same name. These will be overwritten. Are you sure to import?",
           "Warning",
-          "Import anyway",
+          "Yes",
           "Cancel",
           Messages.getWarningIcon());
       if (result == 1) {

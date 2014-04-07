@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * User: marcprengemann
@@ -23,6 +25,8 @@ public class AndroidIconsSettings implements Configurable {
   private JComponent                                        mComponent;
   private JPanel                                            mPanel;
   private com.intellij.openapi.ui.TextFieldWithBrowseButton textFieldHome;
+  private JLabel                                            foundColorsText;
+  private JLabel                                            foundAssetsText;
 
   private VirtualFile selectedFile;
   private String      persistedFile;
@@ -48,11 +52,62 @@ public class AndroidIconsSettings implements Configurable {
         super.onFileChoosen(chosenFile);
         selectionPerformed = true;
         selectedFile = chosenFile;
+        scanForAssets();
       }
     });
 
+    scanForAssets();
     mComponent = mPanel;
     return mComponent;
+  }
+
+  private void scanForAssets() {
+    int colorCount = 0;
+    int assetCount = 0;
+    if (selectedFile != null) {
+      VirtualFile[] colorDirs = selectedFile.getChildren();
+      Arrays.sort(colorDirs, new Comparator<VirtualFile>() {
+        @Override
+        public int compare(VirtualFile virtualFile, VirtualFile virtualFile2) {
+          if (virtualFile != null && virtualFile2 != null) {
+            return virtualFile.getNameWithoutExtension().compareTo(virtualFile2.getNameWithoutExtension());
+          }
+          return 0;
+        }
+      });
+      if (colorDirs != null) {
+        for (VirtualFile file : colorDirs) {
+          if (file.isDirectory()) {
+            colorCount++;
+          }
+        }
+
+        if (colorDirs.length > 1) {
+          VirtualFile exColorDir = colorDirs[1];
+          VirtualFile[] densities = exColorDir.getChildren();
+          if (densities != null && densities.length > 1) {
+            VirtualFile exDensity = densities[1];
+            VirtualFile[] assets = exDensity.getChildren();
+            Arrays.sort(assets, new Comparator<VirtualFile>() {
+              @Override
+              public int compare(VirtualFile virtualFile, VirtualFile virtualFile2) {
+                if (virtualFile != null && virtualFile2 != null) {
+                  return virtualFile.getNameWithoutExtension().compareTo(virtualFile2.getNameWithoutExtension());
+                }
+                return 0;
+              }
+            });
+            for (VirtualFile asset : assets) {
+              if (!asset.isDirectory() && asset.getExtension() != null && asset.getExtension().equalsIgnoreCase("png")) {
+                assetCount++;
+              }
+            }
+          }
+        }
+      }
+    }
+    foundColorsText.setText(colorCount + " colors");
+    foundAssetsText.setText(assetCount + " drawables per color");
   }
 
   @Override

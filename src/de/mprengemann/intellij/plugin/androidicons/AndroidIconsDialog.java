@@ -12,8 +12,6 @@ import de.mprengemann.intellij.plugin.androidicons.ui.AndroidIconsImporter;
 public class AndroidIconsDialog extends AnAction {
   @Override
   public void actionPerformed(AnActionEvent event) {
-    Module modul = event.getData(DataKeys.MODULE);
-
     AndroidIconsImporter dialog = new AndroidIconsImporter(getEventProject(event));
     dialog.show();
   }

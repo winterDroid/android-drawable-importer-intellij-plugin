@@ -37,22 +37,35 @@
     </project-components>
 
     <actions>
-        <!-- Add your actions here -->
-        <!--<action class="de.mprengemann.intellij.plugin.androidicons.de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog" id="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog" text="Android Icon"-->
-        <!--description="Create a new Android Asset by the use of Android Icons">-->
-        <!--<add-to-group group-id="NewMenu" relative-to-action="Directory" anchor="after"/>-->
-        <!--</action>-->
-        <action id="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog"
-                class="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog"
-                text="Android Icon"
-                description="Creates a new Android Asset by the use of Android Icons"
-                >
+
+        <group id="de.mprengemann.intellij.plugin.androidicons.group"
+               text="Android Drawable">
             <add-to-group
                     group-id="NewGroup"
                     anchor="after"
                     relative-to-action="Android.CreateResourceDirectory"
                     />
-        </action>
+            <action id="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog"
+                    class="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog"
+                    text="Android Icons Import"
+                    description="Creates a new Android Asset by the use of Android Icons"
+                    >
+                <add-to-group
+                        group-id="de.mprengemann.intellij.plugin.androidicons.group"
+                        anchor="first"
+                        />
+                    </action>
+            <action id="de.mprengemann.intellij.plugin.androidicons.AndroidScaleDialog"
+                    class="de.mprengemann.intellij.plugin.androidicons.AndroidScaleDialog"
+                    text="Android Scaled Import"
+                    description="Imports a drawable and scales it to the missing resolutions."
+                    >
+                <add-to-group
+                        group-id="de.mprengemann.intellij.plugin.androidicons.group"
+                        anchor="last"
+                        />
+            </action>
+        </group>
     </actions>
 
 </idea-plugin>

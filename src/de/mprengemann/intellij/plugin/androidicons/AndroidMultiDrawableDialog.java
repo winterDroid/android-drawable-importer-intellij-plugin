@@ -19,9 +19,8 @@ public class AndroidMultiDrawableDialog extends AnAction {
   public void actionPerformed(AnActionEvent event) {
     Project project = getEventProject(event);
     Module module = event.getData(DataKeys.MODULE);
-    VirtualFile resRoot = AndroidResourcesHelper.getResRootFile(project, module);
 
-    AndroidMultiDrawableImporter dialog = new AndroidMultiDrawableImporter(project, resRoot);
+    AndroidMultiDrawableImporter dialog = new AndroidMultiDrawableImporter(project, module);
     dialog.show();
   }
 }

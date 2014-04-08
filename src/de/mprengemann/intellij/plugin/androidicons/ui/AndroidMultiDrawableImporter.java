@@ -2,6 +2,7 @@ package de.mprengemann.intellij.plugin.androidicons.ui;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
@@ -9,6 +10,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.SimpleMouseListener;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,14 +42,15 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
   private       JTextField                resExportName;
   private       JPanel                    container;
 
-  public AndroidMultiDrawableImporter(@Nullable final Project project, VirtualFile resRoot) {
+  public AndroidMultiDrawableImporter(@Nullable final Project project, Module module) {
     super(project, true);
     this.project = project;
 
     setTitle("Android Multi Drawable Importer");
     setResizable(true);
 
-    initResRoot(project, resRoot);
+    AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
+
     initBrowser("ldpi", ldpiFile);
     initBrowser("mdpi", mdpiFile);
     initBrowser("hdpi", hdpiFile);
@@ -92,31 +95,6 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     if (file.exists()) {
       imageContainer.setIcon(new ImageIcon(file.getAbsolutePath()));
     }
-  }
-
-  private void initResRoot(final Project project, VirtualFile resRoot) {
-    VirtualFile lastResRoot;
-    if (resRoot == null) {
-      lastResRoot = SettingsHelper.getResRootForProject(project);
-    } else {
-      lastResRoot = resRoot;
-      SettingsHelper.saveResRootForProject(project, resRoot.getUrl());
-    }
-    if (lastResRoot != null) {
-      this.resRoot.setText(lastResRoot.getCanonicalPath());
-    }
-
-    FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
-    String title = "Select res directory";
-    workingDirectoryChooserDescriptor.setTitle(title);
-    this.resRoot.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
-    this.resRoot.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
-      @Override
-      protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-        super.onFileChoosen(chosenFile);
-        SettingsHelper.saveResRootForProject(project, chosenFile.getUrl());
-      }
-    });
   }
 
   @Nullable

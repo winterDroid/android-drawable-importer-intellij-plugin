@@ -2,11 +2,13 @@ package de.mprengemann.intellij.plugin.androidicons.ui;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
@@ -59,35 +61,14 @@ public class AndroidScaleImporter extends DialogWrapper {
   private       int                       imageHeight;
   private boolean isNinePatch = false;
 
-  public AndroidScaleImporter(final Project project, VirtualFile resRoot) {
+  public AndroidScaleImporter(final Project project, Module module) {
     super(project, true);
     this.project = project;
 
     setTitle("Android Scale Importer");
     setResizable(true);
 
-    VirtualFile lastResRoot;
-    if (resRoot == null) {
-      lastResRoot = SettingsHelper.getResRootForProject(project);
-    } else {
-      lastResRoot = resRoot;
-      SettingsHelper.saveResRootForProject(project, resRoot.getUrl());
-    }
-    if (lastResRoot != null) {
-      this.resRoot.setText(lastResRoot.getCanonicalPath());
-    }
-
-    FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
-    String title = "Select res directory";
-    workingDirectoryChooserDescriptor.setTitle(title);
-    this.resRoot.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
-    this.resRoot.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
-      @Override
-      protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-        super.onFileChoosen(chosenFile);
-        SettingsHelper.saveResRootForProject(project, chosenFile.getUrl());
-      }
-    });
+    AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
 
     FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
     String title1 = "Select your asset";

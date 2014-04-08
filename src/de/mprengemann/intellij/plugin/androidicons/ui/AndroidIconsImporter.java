@@ -3,14 +3,15 @@ package de.mprengemann.intellij.plugin.androidicons.ui;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -51,39 +52,14 @@ public class AndroidIconsImporter extends DialogWrapper {
   private boolean exportNameChanged = false;
   private File imageFile;
 
-  /**
-   * @param project
-   * @param resRoot
-   */
-  public AndroidIconsImporter(@Nullable final Project project, VirtualFile resRoot) {
+  public AndroidIconsImporter(@Nullable final Project project, Module module) {
     super(project, true);
     this.project = project;
 
     setTitle("Android Icons Importer");
     setResizable(true);
 
-    VirtualFile lastResRoot;
-    if (resRoot == null) {
-      lastResRoot = SettingsHelper.getResRootForProject(project);
-    } else {
-      lastResRoot = resRoot;
-      SettingsHelper.saveResRootForProject(project, resRoot.getUrl());
-    }
-    if (lastResRoot != null) {
-      this.resRoot.setText(lastResRoot.getCanonicalPath());
-    }
-
-    FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
-    String title = "Select res directory";
-    workingDirectoryChooserDescriptor.setTitle(title);
-    this.resRoot.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
-    this.resRoot.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
-      @Override
-      protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-        super.onFileChoosen(chosenFile);
-        SettingsHelper.saveResRootForProject(project, chosenFile.getUrl());
-      }
-    });
+    AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
 
     assetRoot = SettingsHelper.getAssetPath();
     if (assetRoot == null) {

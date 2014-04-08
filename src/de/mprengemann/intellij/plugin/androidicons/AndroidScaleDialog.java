@@ -19,9 +19,8 @@ public class AndroidScaleDialog extends AnAction {
   public void actionPerformed(AnActionEvent event) {
     Project project = getEventProject(event);
     Module module = event.getData(DataKeys.MODULE);
-    VirtualFile resRoot = AndroidResourcesHelper.getResRootFile(project, module);
 
-    AndroidScaleImporter dialog = new AndroidScaleImporter(project, resRoot);
+    AndroidScaleImporter dialog = new AndroidScaleImporter(project, module);
     dialog.show();
   }
 }

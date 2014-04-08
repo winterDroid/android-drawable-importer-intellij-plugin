@@ -295,7 +295,7 @@ public class AndroidIconsImporter extends DialogWrapper {
 
     if (StringUtils.isEmpty(resExportName.getText().trim())) {
       return new ValidationInfo("Please select a name for the drawable.", resExportName);
-    } else if (resExportName.getText().matches("[a-z0-9_.]")) {
+    } else if (!resExportName.getText().matches("[a-z0-9_.]*")) {
       return new ValidationInfo("Please select a valid name for the drawable. There are just \"[a-z0-9_.]\" allowed.", resExportName);
     }
 

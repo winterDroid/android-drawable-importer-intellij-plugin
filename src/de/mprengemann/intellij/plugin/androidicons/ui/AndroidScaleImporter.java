@@ -3,17 +3,19 @@ package de.mprengemann.intellij.plugin.androidicons.ui;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.TextBrowseFolderListener;
-import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.ui.*;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -21,6 +23,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * User: marcprengemann
@@ -52,6 +55,8 @@ public class AndroidScaleImporter extends DialogWrapper {
   private       float                     toXHDPI;
   private       float                     toXXHDPI;
   private       float                     toXXXHDPI;
+  private       int                       imageWidth;
+  private       int                       imageHeight;
 
   public AndroidScaleImporter(final Project project) {
     super(project, true);
@@ -144,8 +149,8 @@ public class AndroidScaleImporter extends DialogWrapper {
         try {
           BufferedImage image = ImageIO.read(file);
           if (image != null) {
-            int imageWidth = image.getWidth();
-            int imageHeight = image.getHeight();
+            imageWidth = image.getWidth();
+            imageHeight = image.getHeight();
 
             targetHeight.setText(String.valueOf(imageHeight));
             targetWidth.setText(String.valueOf(imageWidth));
@@ -248,5 +253,123 @@ public class AndroidScaleImporter extends DialogWrapper {
   @Override
   protected JComponent createCenterPanel() {
     return container;
+  }
+
+  @Nullable
+  @Override
+  protected ValidationInfo doValidate() {
+
+    if (StringUtils.isEmpty(resRoot.getText().trim())) {
+      return new ValidationInfo("Please select the resources root.", resRoot);
+    }
+
+    if (StringUtils.isEmpty(resExportName.getText().trim())) {
+      return new ValidationInfo("Please select a name for the drawable.", resExportName);
+    } else if (!resExportName.getText().matches("[a-z0-9_.]*")) {
+      return new ValidationInfo("Please select a valid name for the drawable. There are just \"[a-z0-9_.]\" allowed.", resExportName);
+    }
+
+    if (StringUtils.isEmpty(assetBrowser.getText().trim())) {
+      return new ValidationInfo("Please select an image.", assetBrowser);
+    }
+
+    if (StringUtils.isEmpty(targetHeight.getText().trim()) || StringUtils.isEmpty(targetWidth.getText().trim())) {
+      if (!targetHeight.getText().matches("[0-9.]*") || !targetWidth.getText().matches("[0-9.]*")) {
+        return new ValidationInfo("Target height and/or width is not a valid number.", targetWidth);
+      }
+      return new ValidationInfo("Target height and/or width is not valid.", targetWidth);
+    }
+
+    return super.doValidate();
+  }
+
+  @Override
+  protected void doOKAction() {
+    if (imageFile != null) {
+      try {
+        if (checkImageExists()) {
+          //YES = 0; NO = 1
+          int result = Messages.showYesNoDialog(
+              "There is at least in one of your drawable folders a drawable with the same name. These will be overwritten. Are you sure to import?",
+              "Warning",
+              "Yes",
+              "Cancel",
+              Messages.getWarningIcon());
+          if (result == 1) {
+            super.doOKAction();
+            return;
+          }
+        }
+
+        int targetWidth = Integer.parseInt(this.targetWidth.getText());
+        int targetHeight = Integer.parseInt(this.targetHeight.getText());
+
+        if (LDPICheckBox.isSelected()) {
+          exportImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight);
+        }
+        if (MDPICheckBox.isSelected()) {
+          exportImage(imageFile, "mdpi", toMDPI, targetWidth, targetHeight);
+        }
+        if (HDPICheckBox.isSelected()) {
+          exportImage(imageFile, "hdpi", toHDPI, targetWidth, targetHeight);
+        }
+        if (XHDPICheckBox.isSelected()) {
+          exportImage(imageFile, "xhdpi", toXHDPI, targetWidth, targetHeight);
+        }
+        if (XXHDPICheckBox.isSelected()) {
+          exportImage(imageFile, "xxhdpi", toXXHDPI, targetWidth, targetHeight);
+        }
+        if (XXXHDPICheckBox.isSelected()) {
+          exportImage(imageFile, "xxxhdpi", toXXXHDPI, targetWidth, targetHeight);
+        }
+
+        project.getBaseDir().refresh(true, true);
+      } catch (Exception ignored) {
+      }
+    }
+
+    super.doOKAction();
+  }
+
+  private void exportImage(File imageFile, String resolution, float scaleFactor, int targetWidth, int targetHeight) throws IOException {
+    BufferedImage image = ImageIO.read(imageFile);
+    int type = image.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : image.getType();
+
+    int newWidth = (int) (scaleFactor*targetWidth);
+    int newHeight = (int) (scaleFactor*targetHeight);
+
+    BufferedImage resizeImageJpg = resizeImage(image, newWidth, newHeight, type);
+
+    File exportFile = new File(resRoot.getText().trim() + "/drawable-" + resolution + "/" + resExportName.getText().trim());
+    if (!exportFile.getParentFile().exists()) {
+      FileUtils.forceMkdir(exportFile.getParentFile());
+    }
+
+    ImageIO.write(resizeImageJpg, "png", exportFile);
+  }
+
+  private static BufferedImage resizeImage(BufferedImage originalImage, int newWidth, int newHeight, int type) {
+    BufferedImage resizedImage = UIUtil.createImage(newWidth, newHeight, type);
+    Graphics2D g = resizedImage.createGraphics();
+    g.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
+    g.dispose();
+
+    return resizedImage;
+  }
+
+  private boolean checkImageExists() {
+    String resRootText = resRoot.getText();
+    String drawableLDPIPath = resRootText + "/drawable-lpdi/";
+    String drawableMDPIPath = resRootText + "/drawable-mdpi/";
+    String drawableHDPIPath = resRootText + "/drawable-hdpi/";
+    String drawableXHDPIPath = resRootText + "/drawable-xhdpi/";
+    String drawableXXHDPIPath = resRootText + "/drawable-xxhdpi/";
+
+    for (String path : Arrays.asList(drawableLDPIPath, drawableMDPIPath, drawableHDPIPath, drawableXHDPIPath, drawableXXHDPIPath)) {
+      if (new File(path + resExportName.getText()).exists()) {
+        return true;
+      }
+    }
+    return false;
   }
 }

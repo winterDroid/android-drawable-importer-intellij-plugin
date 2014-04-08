@@ -15,13 +15,15 @@
     </change-notes>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="131"/>
+    <idea-version since-build="123.72"/>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
          on how to target different products -->
     <!-- uncomment to enable plugin in all products
     -->
-    <depends>com.intellij.modules.lang</depends>
+    <!--<depends>com.intellij.modules.lang</depends>-->
+    <depends>com.intellij.modules.java</depends>
+    <depends>org.jetbrains.android</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
@@ -37,9 +39,8 @@
     </project-components>
 
     <actions>
-
         <group id="de.mprengemann.intellij.plugin.androidicons.group"
-               text="Android Drawable">
+               text="Android Drawable" popup="true">
             <add-to-group
                     group-id="NewGroup"
                     anchor="after"
@@ -55,6 +56,12 @@
                     class="de.mprengemann.intellij.plugin.androidicons.AndroidScaleDialog"
                     text="Android Scaled Import"
                     description="Imports a drawable and scales it to the missing resolutions."
+                    >
+            </action>
+            <action id="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableImporter"
+                    class="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableDialog"
+                    text="Android Multi Drawable Import"
+                    description="Imports several drawables into the associated resources folders and renames them."
                     >
             </action>
         </group>

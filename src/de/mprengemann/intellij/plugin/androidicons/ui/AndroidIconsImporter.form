@@ -178,6 +178,8 @@
         </constraints>
         <properties>
           <alignmentX value="0.5"/>
+          <horizontalAlignment value="0"/>
+          <horizontalTextPosition value="0"/>
           <maximumSize width="200" height="200"/>
           <minimumSize width="100" height="100"/>
           <preferredSize width="100" height="100"/>

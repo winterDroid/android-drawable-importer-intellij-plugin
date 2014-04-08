@@ -57,24 +57,31 @@ public class AndroidScaleImporter extends DialogWrapper {
   private       float                     toXXXHDPI;
   private       int                       imageWidth;
   private       int                       imageHeight;
+  private boolean isNinePatch = false;
 
-  public AndroidScaleImporter(final Project project) {
+  public AndroidScaleImporter(final Project project, VirtualFile resRoot) {
     super(project, true);
     this.project = project;
 
     setTitle("Android Scale Importer");
     setResizable(true);
 
-    VirtualFile lastResRoot = SettingsHelper.getResRootForProject(project);
+    VirtualFile lastResRoot;
+    if (resRoot == null) {
+      lastResRoot = SettingsHelper.getResRootForProject(project);
+    } else {
+      lastResRoot = resRoot;
+      SettingsHelper.saveResRootForProject(project, resRoot.getUrl());
+    }
     if (lastResRoot != null) {
-      resRoot.setText(lastResRoot.getCanonicalPath());
+      this.resRoot.setText(lastResRoot.getCanonicalPath());
     }
 
     FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
     String title = "Select res directory";
     workingDirectoryChooserDescriptor.setTitle(title);
-    resRoot.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
-    resRoot.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
+    this.resRoot.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
+    this.resRoot.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
       @Override
       protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
         super.onFileChoosen(chosenFile);
@@ -91,6 +98,7 @@ public class AndroidScaleImporter extends DialogWrapper {
       protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
         super.onFileChoosen(chosenFile);
         selectedImage = chosenFile;
+        isNinePatch = chosenFile.getName().endsWith(".9.png");
         updateImage();
         fillImageInformation();
       }
@@ -335,8 +343,8 @@ public class AndroidScaleImporter extends DialogWrapper {
     BufferedImage image = ImageIO.read(imageFile);
     int type = image.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : image.getType();
 
-    int newWidth = (int) (scaleFactor*targetWidth);
-    int newHeight = (int) (scaleFactor*targetHeight);
+    int newWidth = (int) (scaleFactor * targetWidth);
+    int newHeight = (int) (scaleFactor * targetHeight);
 
     BufferedImage resizeImageJpg = resizeImage(image, newWidth, newHeight, type);
 

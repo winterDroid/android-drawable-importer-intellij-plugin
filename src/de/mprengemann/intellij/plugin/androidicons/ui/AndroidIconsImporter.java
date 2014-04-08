@@ -53,24 +53,31 @@ public class AndroidIconsImporter extends DialogWrapper {
 
   /**
    * @param project
+   * @param resRoot
    */
-  public AndroidIconsImporter(@Nullable final Project project) {
+  public AndroidIconsImporter(@Nullable final Project project, VirtualFile resRoot) {
     super(project, true);
     this.project = project;
 
     setTitle("Android Icons Importer");
     setResizable(true);
 
-    VirtualFile lastResRoot = SettingsHelper.getResRootForProject(project);
+    VirtualFile lastResRoot;
+    if (resRoot == null) {
+      lastResRoot = SettingsHelper.getResRootForProject(project);
+    } else {
+      lastResRoot = resRoot;
+      SettingsHelper.saveResRootForProject(project, resRoot.getUrl());
+    }
     if (lastResRoot != null) {
-      resRoot.setText(lastResRoot.getCanonicalPath());
+      this.resRoot.setText(lastResRoot.getCanonicalPath());
     }
 
     FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
     String title = "Select res directory";
     workingDirectoryChooserDescriptor.setTitle(title);
-    resRoot.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
-    resRoot.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
+    this.resRoot.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
+    this.resRoot.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
       @Override
       protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
         super.onFileChoosen(chosenFile);

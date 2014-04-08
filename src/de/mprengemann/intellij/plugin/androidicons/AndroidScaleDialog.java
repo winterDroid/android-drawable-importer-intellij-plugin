@@ -2,8 +2,12 @@ package de.mprengemann.intellij.plugin.androidicons;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import de.mprengemann.intellij.plugin.androidicons.ui.AndroidIconsImporter;
+import com.intellij.openapi.actionSystem.DataKeys;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.ui.AndroidScaleImporter;
+import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 
 /**
  * User: marcprengemann
@@ -13,7 +17,11 @@ import de.mprengemann.intellij.plugin.androidicons.ui.AndroidScaleImporter;
 public class AndroidScaleDialog extends AnAction {
   @Override
   public void actionPerformed(AnActionEvent event) {
-    AndroidScaleImporter dialog = new AndroidScaleImporter(getEventProject(event));
+    Project project = getEventProject(event);
+    Module module = event.getData(DataKeys.MODULE);
+    VirtualFile resRoot = AndroidResourcesHelper.getResRootFile(project, module);
+
+    AndroidScaleImporter dialog = new AndroidScaleImporter(project, resRoot);
     dialog.show();
   }
 }

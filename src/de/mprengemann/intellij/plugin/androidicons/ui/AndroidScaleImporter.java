@@ -2,6 +2,7 @@ package de.mprengemann.intellij.plugin.androidicons.ui;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.fileChooser.ex.FileDrop;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
@@ -25,9 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * User: marcprengemann
@@ -72,7 +71,7 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
 
-    FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
+    final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
     String title1 = "Select your asset";
     imageDescriptor.setTitle(title1);
     assetBrowser.addBrowseFolderListener(title1, null, project, imageDescriptor);
@@ -84,6 +83,31 @@ public class AndroidScaleImporter extends DialogWrapper {
         isNinePatch = chosenFile.getName().endsWith(".9.png");
         updateImage();
         fillImageInformation();
+      }
+    });
+    new FileDrop(assetBrowser.getTextField(), new FileDrop.Target() {
+      @Override
+      public FileChooserDescriptor getDescriptor() {
+        return imageDescriptor;
+      }
+
+      @Override
+      public boolean isHiddenShown() {
+        return false;
+      }
+
+      @Override
+      public void dropFiles(java.util.List<VirtualFile> virtualFiles) {
+        if (virtualFiles != null) {
+          if (virtualFiles.size() == 1) {
+            VirtualFile chosenFile = virtualFiles.get(0);
+            assetBrowser.setText(chosenFile.getCanonicalPath());
+            selectedImage = chosenFile;
+            isNinePatch = chosenFile.getName().endsWith(".9.png");
+            updateImage();
+            fillImageInformation();
+          }
+        }
       }
     });
 

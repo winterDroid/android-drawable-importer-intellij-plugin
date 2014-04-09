@@ -2,6 +2,8 @@ package de.mprengemann.intellij.plugin.androidicons.ui;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.fileChooser.ex.FileDrop;
+import com.intellij.openapi.fileEditor.impl.text.FileDropHandler;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -64,7 +66,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
   }
 
   private void initBrowser(String resolution, final TextFieldWithBrowseButton browseButton) {
-    FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
+    final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
     String title1 = "Select your " + resolution + " asset";
     imageDescriptor.setTitle(title1);
     browseButton.addBrowseFolderListener(title1, null, project, imageDescriptor);
@@ -82,6 +84,31 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
       @Override
       public void mouseClicked(MouseEvent mouseEvent) {
         updateImage(browseButton.getText());
+      }
+    });
+    new FileDrop(browseButton.getTextField(), new FileDrop.Target() {
+      @Override
+      public FileChooserDescriptor getDescriptor() {
+        return imageDescriptor;
+      }
+
+      @Override
+      public boolean isHiddenShown() {
+        return false;
+      }
+
+      @Override
+      public void dropFiles(List<VirtualFile> virtualFiles) {
+        if (virtualFiles != null) {
+          if (virtualFiles.size() == 1) {
+            VirtualFile chosenFile = virtualFiles.get(0);
+            browseButton.setText(chosenFile.getCanonicalPath());
+            updateImage(chosenFile.getCanonicalPath());
+            if (StringUtils.isEmpty(resExportName.getText().trim())) {
+              resExportName.setText(chosenFile.getName());
+            }
+          }
+        }
       }
     });
   }

@@ -46,20 +46,20 @@
                     anchor="after"
                     relative-to-action="Android.CreateResourceDirectory"
                     />
-            <action id="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog"
-                    class="de.mprengemann.intellij.plugin.androidicons.AndroidIconsDialog"
+            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsDialog"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsDialog"
                     text="Android Icons Import"
                     description="Creates a new Android Asset by the use of Android Icons"
                     >
             </action>
-            <action id="de.mprengemann.intellij.plugin.androidicons.AndroidScaleDialog"
-                    class="de.mprengemann.intellij.plugin.androidicons.AndroidScaleDialog"
+            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleDialog"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleDialog"
                     text="Android Scaled Import"
                     description="Imports a drawable and scales it to the missing resolutions."
                     >
             </action>
             <action id="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableImporter"
-                    class="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableDialog"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidMultiDrawableDialog"
                     text="Android Multi Drawable Import"
                     description="Imports several drawables into the associated resources folders and renames them."
                     >

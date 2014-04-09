@@ -25,39 +25,17 @@ import java.util.List;
 public class AndroidResourcesHelper {
 
   public static void getResRootFile(Project project, Module module, ResourcesDialog.ResourceSelectionListener listener) {
-    AndroidFacet currentFacet = null;
-    if (module != null) {
-      List<AndroidFacet> facets = Lists.newArrayList();
-      List<AndroidFacet> applicationFacets = AndroidUtils.getApplicationFacets(project);
-      for (AndroidFacet facet : applicationFacets) {
-        if (!isTestProject(facet)) {
-          facets.add(facet);
-        }
-      }
-
-      for (AndroidFacet facet : facets) {
-        if (facet.getModule().getName().equals(module.getName())) {
-          currentFacet = facet;
-          break;
-        }
-      }
-    }
+    AndroidFacet currentFacet = AndroidFacetUtils.getInstance(project, module);
 
     if (currentFacet != null) {
       List<VirtualFile> allResourceDirectories = currentFacet.getAllResourceDirectories();
       if (allResourceDirectories.size() == 1) {
         listener.onResourceSelected(allResourceDirectories.get(0));
       } else if (allResourceDirectories.size() > 1) {
-        ResourcesDialog dialog = new ResourcesDialog(project, Arrays.asList(project.getBaseDir().getChildren()), listener);
+        ResourcesDialog dialog = new ResourcesDialog(project, allResourceDirectories, listener);
         dialog.show();
       }
     }
-  }
-
-  private static boolean isTestProject(AndroidFacet facet) {
-    return facet.getManifest() != null
-           && facet.getManifest().getInstrumentations() != null
-           && !facet.getManifest().getInstrumentations().isEmpty();
   }
 
   public static void initResourceBrowser(final Project project, Module module, final String title, final TextFieldWithBrowseButton browser) {

@@ -9,10 +9,9 @@ import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
-import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.SimpleMouseListener;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +21,9 @@ import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * User: marcprengemann
@@ -116,28 +118,35 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
 
   @Override
   protected void doOKAction() {
+    List<File> sources = new ArrayList<File>();
+    List<File> targets = new ArrayList<File>();
 
-    exportImage("ldpi", ldpiFile);
-    exportImage("mdpi", mdpiFile);
-    exportImage("hdpi", hdpiFile);
-    exportImage("xhdpi", xhdpiFile);
-    exportImage("xxhdpi", xxhdpiFile);
-    exportImage("xxxhdpi", xxxhdpiFile);
+    addDataIfNecessary("ldpi", ldpiFile, sources, targets);
+    addDataIfNecessary("mdpi", mdpiFile, sources, targets);
+    addDataIfNecessary("hdpi", hdpiFile, sources, targets);
+    addDataIfNecessary("xhdpi", xhdpiFile, sources, targets);
+    addDataIfNecessary("xxhdpi", xxhdpiFile, sources, targets);
+    addDataIfNecessary("xxxhdpi", xxxhdpiFile, sources, targets);
+
+    try {
+      RefactorHelper.copy(project, sources, targets);
+    } catch (IOException ignored) {
+    }
 
     super.doOKAction();
   }
 
-  private void exportImage(String resolution, TextFieldWithBrowseButton browser) {
+  private void addDataIfNecessary(String resolution, TextFieldWithBrowseButton browser, List<File> sources, List<File> targets) {
     if (browser != null) {
       String sourceString = browser.getText().trim();
       String targetString = resRoot.getText().trim() + "/drawable-" + resolution + "/" + resExportName.getText().trim();
       if (!StringUtils.isEmpty(sourceString)) {
         File target = new File(targetString);
         File source = new File(sourceString);
-        try {
-          FileUtils.forceMkdir(target.getParentFile());
-          FileUtils.copyFile(source, target);
-        } catch (IOException ignored) {
+
+        if (source.exists()) {
+          sources.add(source);
+          targets.add(target);
         }
       }
     }

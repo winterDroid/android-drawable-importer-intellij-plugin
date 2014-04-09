@@ -12,7 +12,7 @@ import com.intellij.openapi.vfs.VirtualFileManager;
  */
 public class SettingsHelper {
   private static final String PATH     = "assetPath";
-  private static final String RES_ROOT = "resRoot";
+  private static final String RES_ROOT = "resourcesRoot";
 
   public static VirtualFile getAssetPath() {
     String persistedFile = getAssetPathString();
@@ -25,12 +25,12 @@ public class SettingsHelper {
   }
 
   public static void saveAssetPath(VirtualFile file) {
-    saveAssetPath(file != null ? file.getUrl() : "");
+    saveAssetPath(file != null ? file.getUrl() : null);
   }
 
   public static String getAssetPathString() {
     PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
-    return propertiesComponent.getValue(PATH, "");
+    return propertiesComponent.getValue(PATH);
   }
 
   public static void saveResRootForProject(Project project, String fileUrl) {
@@ -40,11 +40,15 @@ public class SettingsHelper {
 
   public static VirtualFile getResRootForProject(Project project) {
     String persistedFile = getResRootStringForProject(project);
-    return VirtualFileManager.getInstance().findFileByUrl(persistedFile);
+    if (persistedFile != null) {
+      return VirtualFileManager.getInstance().findFileByUrl(persistedFile);
+    } else {
+      return null;
+    }
   }
 
   public static String getResRootStringForProject(Project project) {
     PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
-    return propertiesComponent.getValue(RES_ROOT, "");
+    return propertiesComponent.getValue(RES_ROOT);
   }
 }

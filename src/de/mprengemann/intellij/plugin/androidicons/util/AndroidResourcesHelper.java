@@ -49,6 +49,8 @@ public class AndroidResourcesHelper {
           SettingsHelper.saveResRootForProject(project, resDir.getUrl());
         }
       });
+    } else {
+      browser.setText(resRoot.getCanonicalPath());
     }
 
     FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();

@@ -5,12 +5,15 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.*;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
-import org.apache.commons.io.FileUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,7 +94,6 @@ public class AndroidIconsImporter extends DialogWrapper {
       public void actionPerformed(ActionEvent event) {
         assetColor = (String) colorSpinner.getSelectedItem();
         updateImage();
-        checkImageExists();
       }
     });
 
@@ -99,7 +102,6 @@ public class AndroidIconsImporter extends DialogWrapper {
       public void actionPerformed(ActionEvent event) {
         assetName = (String) assetSpinner.getSelectedItem();
         updateImage();
-        checkImageExists();
       }
     });
 
@@ -120,27 +122,10 @@ public class AndroidIconsImporter extends DialogWrapper {
       @Override
       public void keyReleased(KeyEvent keyEvent) {
         super.keyReleased(keyEvent);
-        checkImageExists();
       }
     });
 
     init();
-  }
-
-  private boolean checkImageExists() {
-    String resRootText = resRoot.getText();
-    String drawableLDPIPath = resRootText + "/drawable-lpdi/";
-    String drawableMDPIPath = resRootText + "/drawable-mdpi/";
-    String drawableHDPIPath = resRootText + "/drawable-hdpi/";
-    String drawableXHDPIPath = resRootText + "/drawable-xhdpi/";
-    String drawableXXHDPIPath = resRootText + "/drawable-xxhdpi/";
-
-    for (String path : Arrays.asList(drawableLDPIPath, drawableMDPIPath, drawableHDPIPath, drawableXHDPIPath, drawableXXHDPIPath)) {
-      if (new File(path + resExportName.getText()).exists()) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private void updateImage() {
@@ -157,47 +142,51 @@ public class AndroidIconsImporter extends DialogWrapper {
   }
 
   private void fillComboBoxes() {
-    VirtualFile[] colorDirs = assetRoot.getChildren();
-    Arrays.sort(colorDirs, new Comparator<VirtualFile>() {
-      @Override
-      public int compare(VirtualFile virtualFile, VirtualFile virtualFile2) {
-        if (virtualFile != null && virtualFile2 != null) {
-          return virtualFile.getNameWithoutExtension().compareTo(virtualFile2.getNameWithoutExtension());
+    if (this.assetRoot.getCanonicalPath() != null) {
+      File assetRoot = new File(this.assetRoot.getCanonicalPath());
+      final FilenameFilter systemFileNameFiler = new FilenameFilter() {
+        @Override
+        public boolean accept(File file, String s) {
+          return !s.startsWith(".");
         }
-        return 0;
-      }
-    });
-    if (colorDirs != null) {
-      for (VirtualFile file : colorDirs) {
-        if (file.isDirectory()) {
-          colorSpinner.addItem(file.getNameWithoutExtension().replace("_", " "));
-        }
-      }
-
-      if (colorDirs.length > 1) {
-        VirtualFile exColorDir = colorDirs[1];
-        VirtualFile[] densities = exColorDir.getChildren();
-        if (densities != null && densities.length > 1) {
-          VirtualFile exDensity = densities[1];
-          VirtualFile[] assets = exDensity.getChildren();
-          Arrays.sort(assets, new Comparator<VirtualFile>() {
-            @Override
-            public int compare(VirtualFile virtualFile, VirtualFile virtualFile2) {
-              if (virtualFile != null && virtualFile2 != null) {
-                return virtualFile.getNameWithoutExtension().compareTo(virtualFile2.getNameWithoutExtension());
-              }
-              return 0;
-            }
-          });
-          for (VirtualFile asset : assets) {
-            if (!asset.isDirectory() && asset.getExtension()!= null && asset.getExtension().equalsIgnoreCase("png")) {
-              assetSpinner.addItem(asset.getNameWithoutExtension().replace("ic_action_", ""));
-            }
+      };
+      File[] colorDirs = assetRoot.listFiles(systemFileNameFiler);
+      Comparator<File> alphabeticalComparator = new Comparator<File>() {
+        @Override
+        public int compare(File file1, File file2) {
+          if (file1 != null && file2 != null) {
+            return file1.getName().compareTo(file2.getName());
           }
+          return 0;
+        }
+      };
+      Arrays.sort(colorDirs, alphabeticalComparator);
+      if (colorDirs != null) {
+        for (File file : colorDirs) {
+          if (file.isDirectory()) {
+            colorSpinner.addItem(file.getName().replace("_", " "));
+          }
+        }
 
-          assetColor = (String) colorSpinner.getSelectedItem();
-          assetName = (String) assetSpinner.getSelectedItem();
-          updateImage();
+        if (colorDirs.length >= 1) {
+          File exColorDir = colorDirs[0];
+          File[] densities = exColorDir.listFiles(systemFileNameFiler);
+          if (densities != null && densities.length >= 1) {
+            File exDensity = densities[0];
+            File[] assets = exDensity.listFiles(systemFileNameFiler);
+            Arrays.sort(assets, alphabeticalComparator);
+            for (File asset : assets) {
+              if (!asset.isDirectory()) {
+                String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
+                if (extension.equalsIgnoreCase("png")) {
+                  assetSpinner.addItem(asset.getName().replace("ic_action_", "").replace("." + extension, ""));
+                }
+              }
+            }
+            assetColor = (String) colorSpinner.getSelectedItem();
+            assetName = (String) assetSpinner.getSelectedItem();
+            updateImage();
+          }
         }
       }
     }
@@ -205,19 +194,6 @@ public class AndroidIconsImporter extends DialogWrapper {
 
   @Override
   protected void doOKAction() {
-    if (checkImageExists()) {
-      //YES = 0; NO = 1
-      int result = Messages.showYesNoDialog(
-          "There is at least in one of your drawable folders a drawable with the same name. These will be overwritten. Are you sure to import?",
-          "Warning",
-          "Yes",
-          "Cancel",
-          Messages.getWarningIcon());
-      if (result == 1) {
-        super.doOKAction();
-        return;
-      }
-    }
     importIcons();
     super.doOKAction();
   }
@@ -240,32 +216,30 @@ public class AndroidIconsImporter extends DialogWrapper {
       paths.add(new FromToPath("xxhdpi"));
     }
 
-    for (FromToPath path : paths) {
-      if (!copyDrawable(path)) {
-        Messages.showErrorDialog(
-            project,
-            "An error occured while copying the " + path.resolution + " drawable. Please try again.",
-            "Import Canceled");
-        return;
-      }
-    }
-    project.getBaseDir().refresh(true, true);
+    copyDrawables(paths);
   }
 
-  private boolean copyDrawable(FromToPath path) {
+  private boolean copyDrawables(List<FromToPath> paths) {
     try {
-      File source = new File(path.source);
-      File target = new File(path.target);
-
-      if (source.exists()) {
-        FileUtils.forceMkdir(target.getParentFile());
-        FileUtils.copyFile(source, target);
+      if (paths != null && paths.size() > 0) {
+        List<File> sources = new ArrayList<File>();
+        List<File> targets = new ArrayList<File>();
+        File source;
+        for (FromToPath path : paths) {
+          source = new File(path.source);
+          if (source.exists()) {
+            sources.add(source);
+            targets.add(new File(path.target));
+          }
+        }
+        RefactorHelper.copy(project, sources, targets);
       } else {
         return false;
       }
     } catch (IOException e) {
       return false;
     }
+
     return true;
   }
 

@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -64,42 +66,34 @@ public class AndroidIconsSettings implements Configurable {
   private void scanForAssets() {
     int colorCount = 0;
     int assetCount = 0;
-    if (selectedFile != null) {
-      VirtualFile[] colorDirs = selectedFile.getChildren();
-      Arrays.sort(colorDirs, new Comparator<VirtualFile>() {
+    if (this.selectedFile.getCanonicalPath() != null) {
+      File assetRoot = new File(this.selectedFile.getCanonicalPath());
+      final FilenameFilter systemFileNameFiler = new FilenameFilter() {
         @Override
-        public int compare(VirtualFile virtualFile, VirtualFile virtualFile2) {
-          if (virtualFile != null && virtualFile2 != null) {
-            return virtualFile.getNameWithoutExtension().compareTo(virtualFile2.getNameWithoutExtension());
-          }
-          return 0;
+        public boolean accept(File file, String s) {
+          return !s.startsWith(".");
         }
-      });
+      };
+      File[] colorDirs = assetRoot.listFiles(systemFileNameFiler);
       if (colorDirs != null) {
-        for (VirtualFile file : colorDirs) {
+        for (File file : colorDirs) {
           if (file.isDirectory()) {
             colorCount++;
           }
         }
 
-        if (colorDirs.length > 1) {
-          VirtualFile exColorDir = colorDirs[1];
-          VirtualFile[] densities = exColorDir.getChildren();
-          if (densities != null && densities.length > 1) {
-            VirtualFile exDensity = densities[1];
-            VirtualFile[] assets = exDensity.getChildren();
-            Arrays.sort(assets, new Comparator<VirtualFile>() {
-              @Override
-              public int compare(VirtualFile virtualFile, VirtualFile virtualFile2) {
-                if (virtualFile != null && virtualFile2 != null) {
-                  return virtualFile.getNameWithoutExtension().compareTo(virtualFile2.getNameWithoutExtension());
+        if (colorDirs.length >= 1) {
+          File exColorDir = colorDirs[0];
+          File[] densities = exColorDir.listFiles(systemFileNameFiler);
+          if (densities != null && densities.length >= 1) {
+            File exDensity = densities[0];
+            File[] assets = exDensity.listFiles(systemFileNameFiler);
+            for (File asset : assets) {
+              if (!asset.isDirectory()) {
+                String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
+                if (extension.equalsIgnoreCase("png")) {
+                  assetCount++;
                 }
-                return 0;
-              }
-            });
-            for (VirtualFile asset : assets) {
-              if (!asset.isDirectory() && asset.getExtension() != null && asset.getExtension().equalsIgnoreCase("png")) {
-                assetCount++;
               }
             }
           }

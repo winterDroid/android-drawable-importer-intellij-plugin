@@ -7,8 +7,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ui.UIUtil;
-import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
@@ -25,7 +25,9 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * User: marcprengemann
@@ -293,26 +295,35 @@ public class AndroidScaleImporter extends DialogWrapper {
         int targetWidth = Integer.parseInt(this.targetWidth.getText());
         int targetHeight = Integer.parseInt(this.targetHeight.getText());
 
+        java.util.List<File> sources = new ArrayList<File>();
+        java.util.List<File> targets = new ArrayList<File>();
+
         if (LDPICheckBox.isSelected()) {
-          exportImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight);
+          sources.add(exportTempImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight));
+          targets.add(getTargetFile("ldpi"));
         }
         if (MDPICheckBox.isSelected()) {
-          exportImage(imageFile, "mdpi", toMDPI, targetWidth, targetHeight);
+          sources.add(exportTempImage(imageFile, "mdpi", toMDPI, targetWidth, targetHeight));
+          targets.add(getTargetFile("mdpi"));
         }
         if (HDPICheckBox.isSelected()) {
-          exportImage(imageFile, "hdpi", toHDPI, targetWidth, targetHeight);
+          sources.add(exportTempImage(imageFile, "hdpi", toHDPI, targetWidth, targetHeight));
+          targets.add(getTargetFile("hdpi"));
         }
         if (XHDPICheckBox.isSelected()) {
-          exportImage(imageFile, "xhdpi", toXHDPI, targetWidth, targetHeight);
+          sources.add(exportTempImage(imageFile, "xhdpi", toXHDPI, targetWidth, targetHeight));
+          targets.add(getTargetFile("xhdpi"));
         }
         if (XXHDPICheckBox.isSelected()) {
-          exportImage(imageFile, "xxhdpi", toXXHDPI, targetWidth, targetHeight);
+          sources.add(exportTempImage(imageFile, "xxhdpi", toXXHDPI, targetWidth, targetHeight));
+          targets.add(getTargetFile("xxhdpi"));
         }
         if (XXXHDPICheckBox.isSelected()) {
-          exportImage(imageFile, "xxxhdpi", toXXXHDPI, targetWidth, targetHeight);
+          sources.add(exportTempImage(imageFile, "xxxhdpi", toXXXHDPI, targetWidth, targetHeight));
+          targets.add(getTargetFile("xxxhdpi"));
         }
 
-        project.getBaseDir().refresh(true, true);
+        RefactorHelper.move(project, sources, targets);
       } catch (Exception ignored) {
       }
     }
@@ -320,7 +331,11 @@ public class AndroidScaleImporter extends DialogWrapper {
     super.doOKAction();
   }
 
-  private void exportImage(File imageFile, String resolution, float scaleFactor, int targetWidth, int targetHeight) throws IOException {
+  private File getTargetFile(String resolution) {
+    return new File(resRoot.getText().trim() + "/drawable-" + resolution + "/" + resExportName.getText().trim());
+  }
+
+  private File exportTempImage(File imageFile, String resolution, float scaleFactor, int targetWidth, int targetHeight) throws IOException {
     BufferedImage image = ImageIO.read(imageFile);
     int type = image.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : image.getType();
 
@@ -329,12 +344,17 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     BufferedImage resizeImageJpg = resizeImage(image, newWidth, newHeight, type);
 
-    File exportFile = new File(resRoot.getText().trim() + "/drawable-" + resolution + "/" + resExportName.getText().trim());
-    if (!exportFile.getParentFile().exists()) {
-      FileUtils.forceMkdir(exportFile.getParentFile());
+    String exportName = resExportName.getText().trim();
+    File exportFile = RefactorHelper.getTempImageFile(project, resolution, exportName);
+    if (exportFile != null) {
+      if (!exportFile.getParentFile().exists()) {
+        FileUtils.forceMkdir(exportFile.getParentFile());
+      }
+      ImageIO.write(resizeImageJpg, "png", exportFile);
+      return exportFile;
+    } else {
+      throw new IOException("Couldn't find .idea path.");
     }
-
-    ImageIO.write(resizeImageJpg, "png", exportFile);
   }
 
   private static BufferedImage resizeImage(BufferedImage originalImage, int newWidth, int newHeight, int type) {

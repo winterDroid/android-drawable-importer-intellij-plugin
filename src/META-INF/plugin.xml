@@ -40,30 +40,29 @@
 
     <actions>
         <group id="de.mprengemann.intellij.plugin.androidicons.group"
-               text="Android Drawable" popup="true">
+               text="Drawable"
+               popup="false"
+               class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidAssetUtilsGroup"
+               icon="/icons/android.png">
             <add-to-group
                     group-id="NewGroup"
                     anchor="after"
-                    relative-to-action="Android.CreateResourceDirectory"
+                    relative-to-action="NewAndroidAssetImage"
                     />
-            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsDialog"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsDialog"
-                    text="Android Icons Import"
-                    description="Creates a new Android Asset by the use of Android Icons"
+            <separator/>
+            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsAction"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsAction"
                     >
             </action>
-            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleDialog"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleDialog"
-                    text="Android Scaled Import"
-                    description="Imports a drawable and scales it to the missing resolutions."
+            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction"
                     >
             </action>
             <action id="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableImporter"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidMultiDrawableDialog"
-                    text="Android Multi Drawable Import"
-                    description="Imports several drawables into the associated resources folders and renames them."
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidMultiDrawableAction"
                     >
             </action>
+            <separator/>
         </group>
     </actions>
 

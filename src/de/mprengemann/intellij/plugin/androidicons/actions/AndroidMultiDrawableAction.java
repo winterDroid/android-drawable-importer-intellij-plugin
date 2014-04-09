@@ -9,23 +9,27 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiPackage;
-import de.mprengemann.intellij.plugin.androidicons.ui.AndroidScaleImporter;
+import de.mprengemann.intellij.plugin.androidicons.ui.AndroidMultiDrawableImporter;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
-import org.jetbrains.android.facet.AndroidFacet;
+import icons.AndroidIcons;
 
 /**
  * User: marcprengemann
- * Date: 07.04.14
- * Time: 11:09
+ * Date: 08.04.14
+ * Time: 14:45
  */
-public class AndroidScaleDialog extends AnAction {
+public class AndroidMultiDrawableAction extends AnAction {
+
+  public AndroidMultiDrawableAction() {
+    super("Multisource-Drawable", "Imports several drawables into the associated resources folders and renames them.", AndroidIcons.Android);
+  }
+
   @Override
   public void actionPerformed(AnActionEvent event) {
     Project project = getEventProject(event);
     Module module = event.getData(DataKeys.MODULE);
 
-    AndroidScaleImporter dialog = new AndroidScaleImporter(project, module);
+    AndroidMultiDrawableImporter dialog = new AndroidMultiDrawableImporter(project, module);
     dialog.show();
   }
 

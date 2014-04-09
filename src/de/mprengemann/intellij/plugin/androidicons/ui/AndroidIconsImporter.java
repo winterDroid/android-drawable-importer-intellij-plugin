@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -97,6 +98,9 @@ public class AndroidIconsImporter extends DialogWrapper {
       }
     });
 
+    AssetSpinnerRenderer renderer = new AssetSpinnerRenderer();
+    //noinspection GtkPreferredJComboBoxRenderer
+    assetSpinner.setRenderer(renderer);
     assetSpinner.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent event) {
@@ -280,6 +284,22 @@ public class AndroidIconsImporter extends DialogWrapper {
 
       this.source = assetRoot.getCanonicalPath() + "/" + assetColor.replace(" ", "_") + "/" + resolution + "/" + fromName;
       this.target = resRootText + "/drawable-" + resolution + "/" + toName;
+    }
+  }
+
+  private class AssetSpinnerRenderer extends DefaultListCellRenderer {
+    @Override
+    public Component getListCellRendererComponent(JList jList, Object o, int i, boolean b, boolean b2) {
+      JLabel label = (JLabel) super.getListCellRendererComponent(jList, o, i, b, b2);
+      if (label != null) {
+        String item = (String) assetSpinner.getItemAt(i);
+        String path = "/black/mdpi/ic_action_" + item + ".png";
+        File imageFile = new File(assetRoot.getCanonicalPath() + path);
+        if (imageFile.exists()) {
+          label.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
+        }
+      }
+      return label;
     }
   }
 }

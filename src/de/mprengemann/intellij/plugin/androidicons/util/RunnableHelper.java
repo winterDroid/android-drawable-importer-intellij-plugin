@@ -11,12 +11,12 @@ import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.project.Project;
 
 public class RunnableHelper {
-  public static void runReadCommand(Project project, Runnable cmd) {
-    CommandProcessor.getInstance().executeCommand(project, new ReadAction(cmd), "Foo", "Bar");
-  }
+//  public static void runReadCommand(Project project, Runnable cmd) {
+//    CommandProcessor.getInstance().executeCommand(project, new ReadAction(cmd), "Foo", "Bar");
+//  }
 
   public static void runWriteCommand(Project project, Runnable cmd) {
-    CommandProcessor.getInstance().executeCommand(project, new WriteAction(cmd), "Foo", "Bar");
+    CommandProcessor.getInstance().executeCommand(project, new WriteAction(cmd), "Import drawables", project.getName());
   }
 
   static class ReadAction implements Runnable {

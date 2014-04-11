@@ -38,10 +38,12 @@ public class AndroidIconsSettings implements Configurable {
   @Override
   public JComponent createComponent() {
     persistedFile = SettingsHelper.getAssetPathString();
-    VirtualFile loadedFile = VirtualFileManager.getInstance().findFileByUrl(persistedFile);
-    if (loadedFile != null) {
-      textFieldHome.setText(loadedFile.getCanonicalPath());
-      selectedFile = loadedFile;
+    if (persistedFile != null) {
+      VirtualFile loadedFile = VirtualFileManager.getInstance().findFileByUrl(persistedFile);
+      if (loadedFile != null) {
+        textFieldHome.setText(loadedFile.getCanonicalPath());
+        selectedFile = loadedFile;
+      }
     }
 
     FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
@@ -66,7 +68,7 @@ public class AndroidIconsSettings implements Configurable {
   private void scanForAssets() {
     int colorCount = 0;
     int assetCount = 0;
-    if (this.selectedFile.getCanonicalPath() != null) {
+    if (this.selectedFile != null && this.selectedFile.getCanonicalPath() != null) {
       File assetRoot = new File(this.selectedFile.getCanonicalPath());
       final FilenameFilter systemFileNameFiler = new FilenameFilter() {
         @Override

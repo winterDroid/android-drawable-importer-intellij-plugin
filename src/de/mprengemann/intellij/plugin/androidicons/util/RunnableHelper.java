@@ -15,34 +15,34 @@ public class RunnableHelper {
 //    CommandProcessor.getInstance().executeCommand(project, new ReadAction(cmd), "Foo", "Bar");
 //  }
 
-  public static void runWriteCommand(Project project, Runnable cmd) {
-    CommandProcessor.getInstance().executeCommand(project, new WriteAction(cmd), "Import drawables", project.getName());
-  }
-
-  static class ReadAction implements Runnable {
-    ReadAction(Runnable cmd) {
-      this.cmd = cmd;
+    public static void runWriteCommand(Project project, Runnable cmd) {
+        CommandProcessor.getInstance().executeCommand(project, new WriteAction(cmd), "Import drawables", project.getName());
     }
 
-    public void run() {
-      ApplicationManager.getApplication().runReadAction(cmd);
+    static class ReadAction implements Runnable {
+        ReadAction(Runnable cmd) {
+            this.cmd = cmd;
+        }
+
+        public void run() {
+            ApplicationManager.getApplication().runReadAction(cmd);
+        }
+
+        Runnable cmd;
     }
 
-    Runnable cmd;
-  }
+    static class WriteAction implements Runnable {
+        WriteAction(Runnable cmd) {
+            this.cmd = cmd;
+        }
 
-  static class WriteAction implements Runnable {
-    WriteAction(Runnable cmd) {
-      this.cmd = cmd;
+        public void run() {
+            ApplicationManager.getApplication().runWriteAction(cmd);
+        }
+
+        Runnable cmd;
     }
 
-    public void run() {
-      ApplicationManager.getApplication().runWriteAction(cmd);
+    private RunnableHelper() {
     }
-
-    Runnable cmd;
-  }
-
-  private RunnableHelper() {
-  }
 }

@@ -16,21 +16,21 @@ import icons.AndroidIcons;
  */
 public class AndroidScaleAction extends AnAction {
 
-  public AndroidScaleAction() {
-    super("Scaled Drawable", "Imports a drawable and scales it to the missing resolutions.", AndroidIcons.Android);
-  }
+    public AndroidScaleAction() {
+        super("Scaled Drawable", "Imports a drawable and scales it to the missing resolutions.", AndroidIcons.Android);
+    }
 
-  @Override
-  public void actionPerformed(AnActionEvent event) {
-    Project project = getEventProject(event);
-    Module module = event.getData(DataKeys.MODULE);
+    @Override
+    public void actionPerformed(AnActionEvent event) {
+        Project project = getEventProject(event);
+        Module module = event.getData(DataKeys.MODULE);
 
-    AndroidScaleImporter dialog = new AndroidScaleImporter(project, module);
-    dialog.show();
-  }
+        AndroidScaleImporter dialog = new AndroidScaleImporter(project, module);
+        dialog.show();
+    }
 
-  @Override
-  public void update(AnActionEvent e) {
-    AndroidFacetUtils.updateActionVisibility(e);
-  }
+    @Override
+    public void update(AnActionEvent e) {
+        AndroidFacetUtils.updateActionVisibility(e);
+    }
 }

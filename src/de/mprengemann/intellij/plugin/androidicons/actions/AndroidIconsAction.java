@@ -16,22 +16,22 @@ import icons.AndroidIcons;
  */
 public class AndroidIconsAction extends AnAction {
 
-  public AndroidIconsAction() {
-    super("AndroidIcons Drawable", "Creates a new Android Asset by the use of Android Icons", AndroidIcons.Android);
-  }
+    public AndroidIconsAction() {
+        super("AndroidIcons Drawable", "Creates a new Android Asset by the use of Android Icons", AndroidIcons.Android);
+    }
 
-  @Override
-  public void actionPerformed(AnActionEvent event) {
-    Project project = getEventProject(event);
-    Module module = event.getData(DataKeys.MODULE);
+    @Override
+    public void actionPerformed(AnActionEvent event) {
+        Project project = getEventProject(event);
+        Module module = event.getData(DataKeys.MODULE);
 
-    AndroidIconsImporter dialog = new AndroidIconsImporter(project, module);
-    dialog.show();
-  }
+        AndroidIconsImporter dialog = new AndroidIconsImporter(project, module);
+        dialog.show();
+    }
 
-  @Override
-  public void update(AnActionEvent e) {
-    AndroidFacetUtils.updateActionVisibility(e);
-  }
+    @Override
+    public void update(AnActionEvent e) {
+        AndroidFacetUtils.updateActionVisibility(e);
+    }
 
 }

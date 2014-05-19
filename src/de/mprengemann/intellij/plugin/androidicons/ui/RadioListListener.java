@@ -6,5 +6,5 @@ package de.mprengemann.intellij.plugin.androidicons.ui;
  * Time: 16:06
  */
 public interface RadioListListener {
-  void radioSelectionChanged(int selectedIndex);
+    void radioSelectionChanged(int selectedIndex);
 }

@@ -20,46 +20,46 @@ import java.util.List;
  * Time: 08:40
  */
 public class AndroidFacetUtils {
-  public static AndroidFacet getInstance(Project project, Module module) {
-    AndroidFacet currentFacet = null;
-    if (module != null) {
-      List<AndroidFacet> facets = Lists.newArrayList();
-      List<AndroidFacet> applicationFacets = AndroidUtils.getApplicationFacets(project);
-      for (AndroidFacet facet : applicationFacets) {
-        if (!isTestProject(facet)) {
-          facets.add(facet);
-        }
-      }
+    public static AndroidFacet getInstance(Project project, Module module) {
+        AndroidFacet currentFacet = null;
+        if (module != null) {
+            List<AndroidFacet> facets = Lists.newArrayList();
+            List<AndroidFacet> applicationFacets = AndroidUtils.getApplicationFacets(project);
+            for (AndroidFacet facet : applicationFacets) {
+                if (!isTestProject(facet)) {
+                    facets.add(facet);
+                }
+            }
 
-      for (AndroidFacet facet : facets) {
-        if (facet.getModule().getName().equals(module.getName())) {
-          currentFacet = facet;
-          break;
+            for (AndroidFacet facet : facets) {
+                if (facet.getModule().getName().equals(module.getName())) {
+                    currentFacet = facet;
+                    break;
+                }
+            }
         }
-      }
+        return currentFacet;
     }
-    return currentFacet;
-  }
 
-  public static boolean isTestProject(AndroidFacet facet) {
-    return facet.getManifest() != null
-           && facet.getManifest().getInstrumentations() != null
-           && !facet.getManifest().getInstrumentations().isEmpty();
-  }
-
-  public static void updateActionVisibility(AnActionEvent e) {
-    Module module = e.getData(LangDataKeys.MODULE);
-    PsiElement file = e.getData(LangDataKeys.PSI_ELEMENT);
-    boolean visible = false;
-    if (module != null && AndroidFacetUtils.getInstance(AnAction.getEventProject(e), module) != null) {
-      if (file instanceof PsiDirectory) {
-        PsiDirectory dir = (PsiDirectory) file;
-        JavaDirectoryService dirService = JavaDirectoryService.getInstance();
-        if (dirService != null) {
-          visible = true;
-        }
-      }
+    public static boolean isTestProject(AndroidFacet facet) {
+        return facet.getManifest() != null
+                && facet.getManifest().getInstrumentations() != null
+                && !facet.getManifest().getInstrumentations().isEmpty();
     }
-    e.getPresentation().setVisible(visible);
-  }
+
+    public static void updateActionVisibility(AnActionEvent e) {
+        Module module = e.getData(LangDataKeys.MODULE);
+        PsiElement file = e.getData(LangDataKeys.PSI_ELEMENT);
+        boolean visible = false;
+        if (module != null && AndroidFacetUtils.getInstance(AnAction.getEventProject(e), module) != null) {
+            if (file instanceof PsiDirectory) {
+                PsiDirectory dir = (PsiDirectory) file;
+                JavaDirectoryService dirService = JavaDirectoryService.getInstance();
+                if (dirService != null) {
+                    visible = true;
+                }
+            }
+        }
+        e.getPresentation().setVisible(visible);
+    }
 }

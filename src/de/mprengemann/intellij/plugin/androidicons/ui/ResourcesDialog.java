@@ -16,56 +16,56 @@ import java.util.List;
  * Time: 15:36
  */
 public class ResourcesDialog extends DialogWrapper {
-  private final ResourceSelectionListener    listener;
-  private       JPanel                       container;
-  private       RadioButtonList<VirtualFile> list;
-  private VirtualFile selectedDir = null;
+    private final ResourceSelectionListener listener;
+    private JPanel container;
+    private RadioButtonList<VirtualFile> list;
+    private VirtualFile selectedDir = null;
 
-  public ResourcesDialog(Project project, final List<VirtualFile> items, ResourceSelectionListener listener) {
-    super(project, true);
+    public ResourcesDialog(Project project, final List<VirtualFile> items, ResourceSelectionListener listener) {
+        super(project, true);
 
-    this.listener = listener;
+        this.listener = listener;
 
-    list.setItems(items, new Function<VirtualFile, String>() {
-      @Override
-      public String fun(VirtualFile virtualFile) {
-        return virtualFile.getCanonicalPath();
-      }
-    });
-    list.setRadioListListener(new RadioListListener() {
-      @Override
-      public void radioSelectionChanged(int selectedIndex) {
-        selectedDir = items.get(selectedIndex);
-      }
-    });
+        list.setItems(items, new Function<VirtualFile, String>() {
+            @Override
+            public String fun(VirtualFile virtualFile) {
+                return virtualFile.getCanonicalPath();
+            }
+        });
+        list.setRadioListListener(new RadioListListener() {
+            @Override
+            public void radioSelectionChanged(int selectedIndex) {
+                selectedDir = items.get(selectedIndex);
+            }
+        });
 
-    init();
-  }
-
-  @Override
-  protected void doOKAction() {
-    if (listener != null) {
-      listener.onResourceSelected(selectedDir);
+        init();
     }
-    super.doOKAction();
-  }
 
-  @Nullable
-  @Override
-  protected ValidationInfo doValidate() {
-    if (selectedDir == null) {
-      return new ValidationInfo("Please select a resource dir.", list);
+    @Override
+    protected void doOKAction() {
+        if (listener != null) {
+            listener.onResourceSelected(selectedDir);
+        }
+        super.doOKAction();
     }
-    return super.doValidate();
-  }
 
-  @Nullable
-  @Override
-  protected JComponent createCenterPanel() {
-    return container;
-  }
+    @Nullable
+    @Override
+    protected ValidationInfo doValidate() {
+        if (selectedDir == null) {
+            return new ValidationInfo("Please select a resource dir.", list);
+        }
+        return super.doValidate();
+    }
 
-  public interface ResourceSelectionListener {
-    void onResourceSelected(VirtualFile resDir);
-  }
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return container;
+    }
+
+    public interface ResourceSelectionListener {
+        void onResourceSelected(VirtualFile resDir);
+    }
 }

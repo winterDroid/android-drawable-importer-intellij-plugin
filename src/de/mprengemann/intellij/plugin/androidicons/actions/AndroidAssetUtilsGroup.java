@@ -10,9 +10,9 @@ import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
  * Time: 14:12
  */
 public class AndroidAssetUtilsGroup extends DefaultActionGroup {
-  @Override
-  public void update(AnActionEvent e) {
-    super.update(e);
-    AndroidFacetUtils.updateActionVisibility(e);
-  }
+    @Override
+    public void update(AnActionEvent e) {
+        super.update(e);
+        AndroidFacetUtils.updateActionVisibility(e);
+    }
 }

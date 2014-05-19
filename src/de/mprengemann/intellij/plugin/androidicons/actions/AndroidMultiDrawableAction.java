@@ -16,21 +16,21 @@ import icons.AndroidIcons;
  */
 public class AndroidMultiDrawableAction extends AnAction {
 
-  public AndroidMultiDrawableAction() {
-    super("Multisource-Drawable", "Imports several drawables into the associated resources folders and renames them.", AndroidIcons.Android);
-  }
+    public AndroidMultiDrawableAction() {
+        super("Multisource-Drawable", "Imports several drawables into the associated resources folders and renames them.", AndroidIcons.Android);
+    }
 
-  @Override
-  public void actionPerformed(AnActionEvent event) {
-    Project project = getEventProject(event);
-    Module module = event.getData(DataKeys.MODULE);
+    @Override
+    public void actionPerformed(AnActionEvent event) {
+        Project project = getEventProject(event);
+        Module module = event.getData(DataKeys.MODULE);
 
-    AndroidMultiDrawableImporter dialog = new AndroidMultiDrawableImporter(project, module);
-    dialog.show();
-  }
+        AndroidMultiDrawableImporter dialog = new AndroidMultiDrawableImporter(project, module);
+        dialog.show();
+    }
 
-  @Override
-  public void update(AnActionEvent e) {
-    AndroidFacetUtils.updateActionVisibility(e);
-  }
+    @Override
+    public void update(AnActionEvent e) {
+        AndroidFacetUtils.updateActionVisibility(e);
+    }
 }

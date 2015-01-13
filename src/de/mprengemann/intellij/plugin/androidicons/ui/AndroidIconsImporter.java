@@ -1,8 +1,5 @@
 package de.mprengemann.intellij.plugin.androidicons.ui;
 
-import com.intellij.openapi.fileChooser.FileChooser;
-import com.intellij.openapi.fileChooser.FileChooserDescriptor;
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -10,7 +7,6 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
@@ -31,11 +27,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * User: marcprengemann
- * Date: 04.04.14
- * Time: 16:29
- */
 public class AndroidIconsImporter extends DialogWrapper {
 
     private VirtualFile assetRoot;
@@ -55,7 +46,6 @@ public class AndroidIconsImporter extends DialogWrapper {
     private String assetColor;
     private String assetName;
     private boolean exportNameChanged = false;
-    private File imageFile;
 
     public AndroidIconsImporter(@Nullable final Project project, Module module) {
         super(project, true);
@@ -68,29 +58,11 @@ public class AndroidIconsImporter extends DialogWrapper {
 
         assetRoot = SettingsHelper.getAssetPath();
         if (assetRoot == null) {
-//            FileChooserDescriptor assetDirChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
-//            assetDirChooserDescriptor.setTitle("Select Android Icons Asset Folder");
-//            FileChooser.chooseFile(assetDirChooserDescriptor, project, null, new Consumer<VirtualFile>() {
-//                @Override
-//                public void consume(VirtualFile virtualFile) {
-//                    if (virtualFile != null) {
-//                        SettingsHelper.saveAssetPath(virtualFile);
-//                        assetRoot = virtualFile;
-//                        fillComboBoxes();
-//                    } else {
-//                        Messages.showMessageDialog(
-//                                project,
-//                                "You have to select the Android Icons asset folder!",
-//                                "Error",
-//                                Messages.getWarningIcon());
-//                    }
-//                }
-//            });
             Messages.showMessageDialog(
-                                project,
-                                "You have to select the Android Icons asset folder in the settings!",
-                                "Error",
-                                Messages.getErrorIcon());
+                project,
+                "You have to select the Android Icons asset folder in the settings!",
+                "Error",
+                Messages.getErrorIcon());
             doCancelAction();
         } else {
             fillComboBoxes();
@@ -141,7 +113,7 @@ public class AndroidIconsImporter extends DialogWrapper {
     private void updateImage() {
         if (imageContainer != null) {
             String path = "/" + assetColor.replace(" ", "_") + "/xxhdpi/ic_action_" + assetName + ".png";
-            imageFile = new File(assetRoot.getCanonicalPath() + path);
+            File imageFile = new File(assetRoot.getCanonicalPath() + path);
             if (imageFile.exists()) {
                 imageContainer.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
             }
@@ -171,32 +143,31 @@ public class AndroidIconsImporter extends DialogWrapper {
                 }
             };
             Arrays.sort(colorDirs, alphabeticalComparator);
-            if (colorDirs != null) {
-                for (File file : colorDirs) {
-                    if (file.isDirectory()) {
-                        colorSpinner.addItem(file.getName().replace("_", " "));
-                    }
+            for (File file : colorDirs) {
+                if (file.isDirectory()) {
+                    colorSpinner.addItem(file.getName().replace("_", " "));
                 }
+            }
 
-                if (colorDirs.length >= 1) {
-                    File exColorDir = colorDirs[0];
-                    File[] densities = exColorDir.listFiles(systemFileNameFiler);
-                    if (densities != null && densities.length >= 1) {
-                        File exDensity = densities[0];
-                        File[] assets = exDensity.listFiles(systemFileNameFiler);
-                        Arrays.sort(assets, alphabeticalComparator);
-                        for (File asset : assets) {
-                            if (!asset.isDirectory()) {
-                                String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
-                                if (extension.equalsIgnoreCase("png")) {
-                                    assetSpinner.addItem(asset.getName().replace("ic_action_", "").replace("." + extension, ""));
-                                }
+            if (colorDirs.length >= 1) {
+                File exColorDir = colorDirs[0];
+                File[] densities = exColorDir.listFiles(systemFileNameFiler);
+                if (densities != null && densities.length >= 1) {
+                    File exDensity = densities[0];
+                    File[] assets = exDensity.listFiles(systemFileNameFiler);
+                    Arrays.sort(assets, alphabeticalComparator);
+                    for (File asset : assets) {
+                        if (!asset.isDirectory()) {
+                            String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
+                            if (extension.equalsIgnoreCase("png")) {
+                                assetSpinner.addItem(asset.getName().replace("ic_action_",
+                                                                             "").replace("." + extension, ""));
                             }
                         }
-                        assetColor = (String) colorSpinner.getSelectedItem();
-                        assetName = (String) assetSpinner.getSelectedItem();
-                        updateImage();
                     }
+                    assetColor = (String) colorSpinner.getSelectedItem();
+                    assetName = (String) assetSpinner.getSelectedItem();
+                    updateImage();
                 }
             }
         }
@@ -263,7 +234,9 @@ public class AndroidIconsImporter extends DialogWrapper {
         if (StringUtils.isEmpty(resExportName.getText().trim())) {
             return new ValidationInfo("Please select a name for the drawable.", resExportName);
         } else if (!resExportName.getText().matches("[a-z0-9_.]*")) {
-            return new ValidationInfo("Please select a valid name for the drawable. There are just \"[a-z0-9_.]\" allowed.", resExportName);
+            return new ValidationInfo(
+                "Please select a valid name for the drawable. There are just \"[a-z0-9_.]\" allowed.",
+                resExportName);
         }
 
         return null;
@@ -288,7 +261,8 @@ public class AndroidIconsImporter extends DialogWrapper {
             String fromName = "ic_action_" + assetName + ".png";
             String toName = resExportName.getText();
 
-            this.source = assetRoot.getCanonicalPath() + "/" + assetColor.replace(" ", "_") + "/" + resolution + "/" + fromName;
+            this.source = assetRoot.getCanonicalPath() + "/" + assetColor.replace(" ",
+                                                                                  "_") + "/" + resolution + "/" + fromName;
             this.target = resRootText + "/drawable-" + resolution + "/" + toName;
         }
     }

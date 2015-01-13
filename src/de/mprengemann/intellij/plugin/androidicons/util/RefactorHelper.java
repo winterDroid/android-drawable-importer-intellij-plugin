@@ -17,13 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * User: marcprengemann
- * Date: 09.04.14
- * Time: 09:06
- */
 public class RefactorHelper {
-
 
     private static int selection;
 
@@ -71,7 +65,7 @@ public class RefactorHelper {
                         file = files.get(i);
                         dir = dirs.get(i);
                         name = names.get(i);
-                        if (checkFileExist(dir, new int[]{selection}, file, name, "Copy")) {
+                        if (checkFileExist(dir, new int[] {selection}, file, name, "Copy")) {
                             continue;
                         }
                         dir.copyFileFrom(name, file);
@@ -84,7 +78,11 @@ public class RefactorHelper {
         throw new IOException("File not found. No idea why.");
     }
 
-    public static boolean checkFileExist(@Nullable PsiDirectory targetDirectory, int[] choice, PsiFile file, String name, String title) {
+    public static boolean checkFileExist(@Nullable PsiDirectory targetDirectory,
+                                         int[] choice,
+                                         PsiFile file,
+                                         String name,
+                                         String title) {
         if (targetDirectory == null) {
             return false;
         }
@@ -92,9 +90,11 @@ public class RefactorHelper {
         if (existing != null && !existing.equals(file)) {
             int selection;
             if (choice == null || choice[0] == -1) {
-                String message = String.format("File '%s' already exists in directory '%s'", name, targetDirectory.getVirtualFile().getPath());
-                String[] options = choice == null ? new String[]{"Overwrite", "Skip"}
-                        : new String[]{"Overwrite", "Skip", "Overwrite for all", "Skip for all"};
+                String message = String.format("File '%s' already exists in directory '%s'",
+                                               name,
+                                               targetDirectory.getVirtualFile().getPath());
+                String[] options = choice == null ? new String[] {"Overwrite", "Skip"}
+                                                  : new String[] {"Overwrite", "Skip", "Overwrite for all", "Skip for all"};
                 selection = Messages.showDialog(message, title, options, 0, Messages.getQuestionIcon());
                 if (selection == 2 || selection == 3) {
                     RefactorHelper.selection = selection;

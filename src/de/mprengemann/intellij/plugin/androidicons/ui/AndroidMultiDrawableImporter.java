@@ -70,8 +70,8 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         browseButton.addBrowseFolderListener(title1, null, project, imageDescriptor);
         browseButton.addBrowseFolderListener(new TextBrowseFolderListener(imageDescriptor) {
             @Override
-            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChoosen(chosenFile);
+            protected void onFileChosen(@NotNull VirtualFile chosenFile) {
+                super.onFileChosen(chosenFile);
                 updateImage(chosenFile.getCanonicalPath());
                 if (StringUtils.isEmpty(resExportName.getText().trim())) {
                     resExportName.setText(chosenFile.getName());

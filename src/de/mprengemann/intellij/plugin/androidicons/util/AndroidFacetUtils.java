@@ -1,6 +1,5 @@
 package de.mprengemann.intellij.plugin.androidicons.util;
 
-import com.google.common.collect.Lists;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
@@ -12,18 +11,14 @@ import com.intellij.psi.PsiElement;
 import org.jetbrains.android.facet.AndroidFacet;
 import org.jetbrains.android.util.AndroidUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * User: marcprengemann
- * Date: 09.04.14
- * Time: 08:40
- */
 public class AndroidFacetUtils {
     public static AndroidFacet getInstance(Project project, Module module) {
         AndroidFacet currentFacet = null;
         if (module != null) {
-            List<AndroidFacet> facets = Lists.newArrayList();
+            List<AndroidFacet> facets = new ArrayList<AndroidFacet>();
             List<AndroidFacet> applicationFacets = AndroidUtils.getApplicationFacets(project);
             for (AndroidFacet facet : applicationFacets) {
                 if (!isTestProject(facet)) {
@@ -53,7 +48,6 @@ public class AndroidFacetUtils {
         boolean visible = false;
         if (module != null && AndroidFacetUtils.getInstance(AnAction.getEventProject(e), module) != null) {
             if (file instanceof PsiDirectory) {
-                PsiDirectory dir = (PsiDirectory) file;
                 JavaDirectoryService dirService = JavaDirectoryService.getInstance();
                 if (dirService != null) {
                     visible = true;

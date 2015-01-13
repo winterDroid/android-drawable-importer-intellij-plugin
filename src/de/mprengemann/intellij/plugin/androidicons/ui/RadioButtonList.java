@@ -17,13 +17,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.Map;
-
-/**
- * User: marcprengemann
- * Date: 08.04.14
- * Time: 16:02
- */
 
 public class RadioButtonList<T> extends JBList {
 
@@ -76,8 +69,8 @@ public class RadioButtonList<T> extends JBList {
                         int iconArea;
                         try {
                             iconArea = radioButton.getMargin().left +
-                                    ((BasicRadioButtonUI) radioButton.getUI()).getDefaultIcon().getIconWidth() +
-                                    radioButton.getIconTextGap();
+                                       ((BasicRadioButtonUI) radioButton.getUI()).getDefaultIcon().getIconWidth() +
+                                       radioButton.getIconTextGap();
                         } catch (ClassCastException c) {
                             iconArea = DEFAULT_RADIO_WIDTH;
                         }
@@ -90,14 +83,6 @@ public class RadioButtonList<T> extends JBList {
                 return false;
             }
         }.installOn(this);
-    }
-
-    public void setStringItems(final Map<String, Boolean> items) {
-        clear();
-        for (Map.Entry<String, Boolean> entry : items.entrySet()) {
-            //noinspection unchecked
-            addItem((T) entry.getKey(), entry.getKey(), entry.getValue());
-        }
     }
 
     public void setItems(final List<T> items, @Nullable Function<T, String> converter) {
@@ -119,37 +104,9 @@ public class RadioButtonList<T> extends JBList {
         ((DefaultListModel) getModel()).addElement(checkBox);
     }
 
-    public void updateItem(@NotNull T oldItem, @NotNull T newItem) {
-        JRadioButton checkBox = myItemMap.remove(oldItem);
-        myItemMap.put(newItem, checkBox);
-    }
-
-    @Nullable
-    public T getItemAt(int index) {
-        JRadioButton radioButton = (JRadioButton) getModel().getElementAt(index);
-        List<T> value = myItemMap.getKeysByValue(radioButton);
-        return value == null || value.isEmpty() ? null : value.get(0);
-    }
-
     public void clear() {
         ((DefaultListModel) getModel()).clear();
         myItemMap.clear();
-    }
-
-    public boolean isItemSelected(int index) {
-        return ((JRadioButton) getModel().getElementAt(index)).isSelected();
-    }
-
-    public boolean isItemSelected(T item) {
-        JRadioButton radioButton = myItemMap.get(item);
-        return radioButton != null && radioButton.isSelected();
-    }
-
-    public void setItemSelected(T item, boolean selected) {
-        JRadioButton radioButton = myItemMap.get(item);
-        if (radioButton != null) {
-            radioButton.setSelected(selected);
-        }
     }
 
     private void setSelected(JRadioButton radioButton, int index) {
@@ -187,7 +144,11 @@ public class RadioButtonList<T> extends JBList {
         }
 
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus) {
             JRadioButton radioButton = (JRadioButton) value;
             if (!UIUtil.isUnderNimbusLookAndFeel()) {
                 radioButton.setBackground(getBackground(isSelected, radioButton));

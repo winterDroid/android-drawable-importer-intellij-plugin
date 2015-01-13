@@ -7,7 +7,6 @@
     <description><![CDATA[
       There are three main features:<br><br>
       <b>1. AndroidIcons Drawable Import</b><br>
-      If you have bought the icon pack from <a href="http://www.androidicons.com/">AndroidIcons</a> you can import them now pretty easy.<br>
       You are able to select the asset, specify your color, change the target resource name and select all the resolutions you want to import.<br>
       All the missing folders will be created automatically. If there are already drawables with the same name, you will be warned.<br>
       <br>

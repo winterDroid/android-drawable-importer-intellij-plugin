@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.ui.AndroidScaleImporter;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import icons.AndroidIcons;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * User: marcprengemann
@@ -21,7 +22,7 @@ public class AndroidScaleAction extends AnAction {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent event) {
+    public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = getEventProject(event);
         Module module = event.getData(DataKeys.MODULE);
 
@@ -30,7 +31,7 @@ public class AndroidScaleAction extends AnAction {
     }
 
     @Override
-    public void update(AnActionEvent e) {
+    public void update(@NotNull AnActionEvent e) {
         AndroidFacetUtils.updateActionVisibility(e);
     }
 }

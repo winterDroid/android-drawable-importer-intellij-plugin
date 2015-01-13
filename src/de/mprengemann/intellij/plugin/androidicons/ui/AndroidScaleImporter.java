@@ -10,6 +10,7 @@ import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
@@ -31,13 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-/**
- * User: marcprengemann
- * Date: 07.04.14
- * Time: 11:10
- */
 public class AndroidScaleImporter extends DialogWrapper {
     private final Project project;
     private JPanel container;
@@ -63,8 +58,6 @@ public class AndroidScaleImporter extends DialogWrapper {
     private float toXHDPI;
     private float toXXHDPI;
     private float toXXXHDPI;
-    private int imageWidth;
-    private int imageHeight;
     private boolean isNinePatch = false;
 
     public AndroidScaleImporter(final Project project, Module module) {
@@ -76,15 +69,15 @@ public class AndroidScaleImporter extends DialogWrapper {
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
 
-        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType
-                ());
+        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(
+            ImageFileTypeManager.getInstance().getImageFileType());
         String title1 = "Select your asset";
         imageDescriptor.setTitle(title1);
         assetBrowser.addBrowseFolderListener(title1, null, project, imageDescriptor);
         assetBrowser.addBrowseFolderListener(new TextBrowseFolderListener(imageDescriptor) {
             @Override
-            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChoosen(chosenFile);
+            protected void onFileChosen(@NotNull VirtualFile chosenFile) {
+                super.onFileChosen(chosenFile);
                 selectedImage = chosenFile;
                 isNinePatch = chosenFile.getName().endsWith(".9.png");
                 updateImage();
@@ -170,8 +163,8 @@ public class AndroidScaleImporter extends DialogWrapper {
                 try {
                     BufferedImage image = ImageIO.read(file);
                     if (image != null) {
-                        imageWidth = image.getWidth();
-                        imageHeight = image.getHeight();
+                        int imageWidth = image.getWidth();
+                        int imageHeight = image.getHeight();
 
                         if (isNinePatch) {
                             imageHeight -= 2;
@@ -292,7 +285,9 @@ public class AndroidScaleImporter extends DialogWrapper {
         if (StringUtils.isEmpty(resExportName.getText().trim())) {
             return new ValidationInfo("Please select a name for the drawable.", resExportName);
         } else if (!resExportName.getText().matches("[a-z0-9_.]*")) {
-            return new ValidationInfo("Please select a valid name for the drawable. There are just \"[a-z0-9_.]\" allowed.", resExportName);
+            return new ValidationInfo(
+                "Please select a valid name for the drawable. There are just \"[a-z0-9_.]\" allowed.",
+                resExportName);
         }
 
         if (StringUtils.isEmpty(assetBrowser.getText().trim())) {
@@ -356,7 +351,11 @@ public class AndroidScaleImporter extends DialogWrapper {
         return new File(resRoot.getText().trim() + "/drawable-" + resolution + "/" + resExportName.getText().trim());
     }
 
-    private File exportTempImage(File imageFile, String resolution, float scaleFactor, int targetWidth, int targetHeight) throws IOException {
+    private File exportTempImage(File imageFile,
+                                 String resolution,
+                                 float scaleFactor,
+                                 int targetWidth,
+                                 int targetHeight) throws IOException {
         BufferedImage resizeImageJpg;
         if (isNinePatch) {
             resizeImageJpg = resizeNinePatchImage(scaleFactor, targetWidth, targetHeight, imageFile, resolution);
@@ -386,9 +385,13 @@ public class AndroidScaleImporter extends DialogWrapper {
         }
     }
 
-    private BufferedImage resizeNinePatchImage(float scaleFactor, int targetWidth, int targetHeight, File imageFile, String resolution) throws IOException {
+    private BufferedImage resizeNinePatchImage(float scaleFactor,
+                                               int targetWidth,
+                                               int targetHeight,
+                                               File imageFile,
+                                               String resolution) throws IOException {
         BufferedImage image = ImageIO.read(imageFile);
-        int type = /*image.getType() == 0 ?*/ BufferedImage.TYPE_INT_ARGB /*: image.getType()*/;
+        int type = BufferedImage.TYPE_INT_ARGB;
 
         int newWidth = (int) (scaleFactor * (targetWidth + 2));
         int newHeight = (int) (scaleFactor * (targetHeight + 2));
@@ -420,13 +423,16 @@ public class AndroidScaleImporter extends DialogWrapper {
         BufferedImage trimedImage = UIUtil.createImage(inputImage.getWidth() - 2, inputImage.getHeight() - 2, type);
         Graphics2D g = trimedImage.createGraphics();
         g.drawImage(inputImage, 0, 0, trimedImage.getWidth(),
-                trimedImage.getHeight(), 1, 1, inputImage.getWidth() - 1,
-                inputImage.getHeight() - 1, null);
+                    trimedImage.getHeight(), 1, 1, inputImage.getWidth() - 1,
+                    inputImage.getHeight() - 1, null);
         g.dispose();
         return trimedImage;
     }
 
-    private BufferedImage generateBordersImage(BufferedImage source, int trimedWidth, int trimedHeight, int type) throws Wrong9PatchException {
+    private BufferedImage generateBordersImage(BufferedImage source,
+                                               int trimedWidth,
+                                               int trimedHeight,
+                                               int type) throws Wrong9PatchException {
         BufferedImage finalBorder = UIUtil.createImage(trimedWidth + 2, trimedHeight + 2, type);
         int cutW = source.getWidth() - 2;
         int cutH = source.getHeight() - 2;
@@ -443,21 +449,39 @@ public class AndroidScaleImporter extends DialogWrapper {
         rightBorder.setRGB(0, 0, 1, cutH, source.getRGB(cutW + 1, 1, 1, cutH, null, 0, 1), 0, 1);
         verifyBorderImage(rightBorder);
         rightBorder = resizeBorder(rightBorder, 1, trimedHeight, type);
-        finalBorder.setRGB(trimedWidth + 1, 1, 1, trimedHeight, rightBorder.getRGB(0, 0, 1, trimedHeight, null, 0, 1), 0, 1);
+        finalBorder.setRGB(trimedWidth + 1,
+                           1,
+                           1,
+                           trimedHeight,
+                           rightBorder.getRGB(0, 0, 1, trimedHeight, null, 0, 1),
+                           0,
+                           1);
 
         // top border
         BufferedImage topBorder = UIUtil.createImage(cutW, 1, type);
         topBorder.setRGB(0, 0, cutW, 1, source.getRGB(1, 0, cutW, 1, null, 0, cutW), 0, cutW);
         verifyBorderImage(topBorder);
         topBorder = resizeBorder(topBorder, trimedWidth, 1, type);
-        finalBorder.setRGB(1, 0, trimedWidth, 1, topBorder.getRGB(0, 0, trimedWidth, 1, null, 0, trimedWidth), 0, trimedWidth);
+        finalBorder.setRGB(1,
+                           0,
+                           trimedWidth,
+                           1,
+                           topBorder.getRGB(0, 0, trimedWidth, 1, null, 0, trimedWidth),
+                           0,
+                           trimedWidth);
 
         // bottom border
         BufferedImage bottomBorder = UIUtil.createImage(cutW, 1, type);
         bottomBorder.setRGB(0, 0, cutW, 1, source.getRGB(1, cutH + 1, cutW, 1, null, 0, cutW), 0, cutW);
         verifyBorderImage(bottomBorder);
         bottomBorder = resizeBorder(bottomBorder, trimedWidth, 1, type);
-        finalBorder.setRGB(1, trimedHeight + 1, trimedWidth, 1, bottomBorder.getRGB(0, 0, trimedWidth, 1, null, 0, trimedWidth), 0, trimedWidth);
+        finalBorder.setRGB(1,
+                           trimedHeight + 1,
+                           trimedWidth,
+                           1,
+                           bottomBorder.getRGB(0, 0, trimedWidth, 1, null, 0, trimedWidth),
+                           0,
+                           trimedWidth);
 
         return finalBorder;
     }
@@ -496,9 +520,9 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     private void verifyBorderImage(BufferedImage border) throws Wrong9PatchException {
         int[] rgb = border.getRGB(0, 0, border.getWidth(), border.getHeight(), null, 0, border.getWidth());
-        for (int i = 0; i < rgb.length; i++) {
-            if ((0xff000000 & rgb[i]) != 0) {
-                if (rgb[i] != 0xff000000 && rgb[i] != 0xffff0000) {
+        for (int aRgb : rgb) {
+            if ((0xff000000 & aRgb) != 0) {
+                if (aRgb != 0xff000000 && aRgb != 0xffff0000) {
                     throw new Wrong9PatchException();
                 }
             }
@@ -507,7 +531,7 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     private void enforceBorderColors(BufferedImage inputImage) {
         Graphics2D g = inputImage.createGraphics();
-        g.setBackground(new Color(0, 0, 0, 0));
+        g.setBackground(new JBColor(new Color(0, 0, 0, 0), null));
         g.clearRect(1, 1, inputImage.getWidth() - 2, inputImage.getHeight() - 2);
         g.dispose();
         int w = inputImage.getWidth();
@@ -528,13 +552,13 @@ public class AndroidScaleImporter extends DialogWrapper {
         inputImage.setRGB(w - 1, 0, 0x0);
     }
 
-    private BufferedImage resizeNormaleImage(float scaleFactor, int targetWidth, int targetHeight, File imageFile) throws IOException {
+    private BufferedImage resizeNormaleImage(float scaleFactor,
+                                             int targetWidth,
+                                             int targetHeight,
+                                             File imageFile) throws IOException {
         BufferedImage image = ImageIO.read(imageFile);
-        int type = /*image.getType() == 0 ?*/ BufferedImage.TYPE_INT_ARGB /*: image.getType()*/;
-
         int newWidth = (int) (scaleFactor * targetWidth);
         int newHeight = (int) (scaleFactor * targetHeight);
-
         return Scalr.resize(image, newWidth, newHeight, Scalr.OP_ANTIALIAS);
     }
 }

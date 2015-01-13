@@ -5,6 +5,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import org.apache.http.util.TextUtils;
@@ -22,9 +23,8 @@ import java.io.FilenameFilter;
  * Time: 10:32
  */
 public class AndroidIconsSettings implements Configurable {
-    private JComponent mComponent;
-    private JPanel mPanel;
-    private com.intellij.openapi.ui.TextFieldWithBrowseButton textFieldHome;
+    private JPanel panel;
+    private TextFieldWithBrowseButton textFieldHome;
     private JLabel foundColorsText;
     private JLabel foundAssetsText;
 
@@ -59,8 +59,7 @@ public class AndroidIconsSettings implements Configurable {
         });
 
         scanForAssets();
-        mComponent = mPanel;
-        return mComponent;
+        return panel;
     }
 
     private void scanForAssets() {

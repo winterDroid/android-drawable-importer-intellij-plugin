@@ -14,11 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-/**
- * User: marcprengemann
- * Date: 08.04.14
- * Time: 14:20
- */
 public class AndroidResourcesHelper {
 
     public static void getResRootFile(Project project, Module module, ResourcesDialog.ResourceSelectionListener listener) {

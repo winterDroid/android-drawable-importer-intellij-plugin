@@ -76,13 +76,11 @@ public class AndroidScaleImporter extends DialogWrapper {
         imageDescriptor.setTitle(title1);
         assetBrowser.addBrowseFolderListener(title1, null, project, imageDescriptor);
         assetBrowser.addBrowseFolderListener(new TextBrowseFolderListener(imageDescriptor) {
+
             @Override
-            protected void onFileChosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChosen(chosenFile);
-                selectedImage = chosenFile;
-                isNinePatch = chosenFile.getName().endsWith(".9.png");
-                updateImage();
-                fillImageInformation();
+            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
+                super.onFileChoosen(chosenFile);
+                updateImageInformation(chosenFile);
             }
         });
         new FileDrop(assetBrowser.getTextField(), new FileDrop.Target() {
@@ -102,10 +100,7 @@ public class AndroidScaleImporter extends DialogWrapper {
                     if (virtualFiles.size() == 1) {
                         VirtualFile chosenFile = virtualFiles.get(0);
                         assetBrowser.setText(chosenFile.getCanonicalPath());
-                        selectedImage = chosenFile;
-                        isNinePatch = chosenFile.getName().endsWith(".9.png");
-                        updateImage();
-                        fillImageInformation();
+                        updateImageInformation(chosenFile);
                     }
                 }
             }
@@ -154,6 +149,13 @@ public class AndroidScaleImporter extends DialogWrapper {
         });
 
         init();
+    }
+
+    private void updateImageInformation(VirtualFile chosenFile) {
+        selectedImage = chosenFile;
+        isNinePatch = chosenFile.getName().endsWith(".9.png");
+        updateImage();
+        fillImageInformation();
     }
 
     private void fillImageInformation() {
@@ -266,7 +268,9 @@ public class AndroidScaleImporter extends DialogWrapper {
     }
 
     private void updateImage() {
-        if (imageContainer == null || selectedImage == null || selectedImage.getCanonicalPath() == null) {
+        if (imageContainer == null || 
+            selectedImage == null || 
+            selectedImage.getCanonicalPath() == null) {
             return;
         }
         imageFile = new File(selectedImage.getCanonicalPath());

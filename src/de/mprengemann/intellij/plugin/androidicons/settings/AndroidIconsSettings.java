@@ -51,8 +51,8 @@ public class AndroidIconsSettings implements Configurable {
         textFieldHome.addBrowseFolderListener(title, null, null, workingDirectoryChooserDescriptor);
         textFieldHome.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
             @Override
-            protected void onFileChosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChosen(chosenFile);
+            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
+                super.onFileChoosen(chosenFile);
                 selectionPerformed = true;
                 selectedFile = chosenFile;
                 scanForAssets();
@@ -95,11 +95,13 @@ public class AndroidIconsSettings implements Configurable {
                     if (densities != null && densities.length >= 1) {
                         File exDensity = densities[0];
                         File[] assets = exDensity.listFiles(systemFileNameFiler);
-                        for (File asset : assets) {
-                            if (!asset.isDirectory()) {
-                                String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
-                                if (extension.equalsIgnoreCase("png")) {
-                                    assetCount++;
+                        if (assets != null) {
+                            for (File asset : assets) {
+                                if (!asset.isDirectory()) {
+                                    String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
+                                    if (extension.equalsIgnoreCase("png")) {
+                                        assetCount++;
+                                    }
                                 }
                             }
                         }

@@ -18,6 +18,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -58,8 +60,6 @@ public class AndroidIconsImporter extends DialogWrapper {
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
 
         assetRoot = SettingsHelper.getAssetPath();
-        fillComboBoxes();
-
         colorSpinner.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -79,6 +79,8 @@ public class AndroidIconsImporter extends DialogWrapper {
             }
         });
 
+        fillComboBoxes();
+
         resExportName.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent keyEvent) {
@@ -96,6 +98,13 @@ public class AndroidIconsImporter extends DialogWrapper {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 super.keyReleased(keyEvent);
+            }
+        });
+        imageContainer.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                super.componentResized(e);
+                updateImage();
             }
         });
 
@@ -164,10 +173,8 @@ public class AndroidIconsImporter extends DialogWrapper {
             }
             assetSpinner.addItem(asset.getName().replace("ic_action_", "").replace("." + extension, ""));
         }
-        assetSpinner.setSelectedIndex(0);
         assetColor = (String) colorSpinner.getSelectedItem();
         assetName = (String) assetSpinner.getSelectedItem();
-        updateImage();
     }
 
     @Override

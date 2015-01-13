@@ -1,4 +1,4 @@
-Android Icons Plugin
+Android Drawable Importer Plugin
 =========================================
 
 Adds an option to IntelliJ to import drawables in different resolutions from AndroidIcons, 

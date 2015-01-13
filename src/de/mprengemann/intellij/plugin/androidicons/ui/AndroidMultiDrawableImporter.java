@@ -50,7 +50,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         this.project = project;
 
         setTitle("Android Multi Drawable Importer");
-        setResizable(true);
+        setResizable(false);
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
 

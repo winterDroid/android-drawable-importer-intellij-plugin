@@ -66,7 +66,7 @@ public class AndroidScaleImporter extends DialogWrapper {
         this.project = project;
 
         setTitle("Android Scale Importer");
-        setResizable(true);
+        setResizable(false);
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
 

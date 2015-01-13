@@ -10,11 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.util.List;
 
-/**
- * User: marcprengemann
- * Date: 08.04.14
- * Time: 15:36
- */
 public class ResourcesDialog extends DialogWrapper {
     private final ResourceSelectionListener listener;
     private JPanel container;

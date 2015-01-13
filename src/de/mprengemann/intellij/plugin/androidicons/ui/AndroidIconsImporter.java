@@ -53,7 +53,7 @@ public class AndroidIconsImporter extends DialogWrapper {
         this.project = project;
 
         setTitle("Android Icons Importer");
-        setResizable(true);
+        setResizable(false);
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
 
@@ -115,53 +115,59 @@ public class AndroidIconsImporter extends DialogWrapper {
     }
 
     private void fillComboBoxes() {
-        if (this.assetRoot.getCanonicalPath() != null) {
-            File assetRoot = new File(this.assetRoot.getCanonicalPath());
-            final FilenameFilter systemFileNameFiler = new FilenameFilter() {
-                @Override
-                public boolean accept(File file, String s) {
-                    return !s.startsWith(".");
-                }
-            };
-            File[] colorDirs = assetRoot.listFiles(systemFileNameFiler);
-            Comparator<File> alphabeticalComparator = new Comparator<File>() {
-                @Override
-                public int compare(File file1, File file2) {
-                    if (file1 != null && file2 != null) {
-                        return file1.getName().compareTo(file2.getName());
-                    }
-                    return 0;
-                }
-            };
-            Arrays.sort(colorDirs, alphabeticalComparator);
-            for (File file : colorDirs) {
-                if (file.isDirectory()) {
-                    colorSpinner.addItem(file.getName().replace("_", " "));
-                }
-            }
-
-            if (colorDirs.length >= 1) {
-                File exColorDir = colorDirs[0];
-                File[] densities = exColorDir.listFiles(systemFileNameFiler);
-                if (densities != null && densities.length >= 1) {
-                    File exDensity = densities[0];
-                    File[] assets = exDensity.listFiles(systemFileNameFiler);
-                    Arrays.sort(assets, alphabeticalComparator);
-                    for (File asset : assets) {
-                        if (!asset.isDirectory()) {
-                            String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
-                            if (extension.equalsIgnoreCase("png")) {
-                                assetSpinner.addItem(asset.getName().replace("ic_action_",
-                                                                             "").replace("." + extension, ""));
-                            }
-                        }
-                    }
-                    assetColor = (String) colorSpinner.getSelectedItem();
-                    assetName = (String) assetSpinner.getSelectedItem();
-                    updateImage();
-                }
-            }
+        if (this.assetRoot.getCanonicalPath() == null) {
+            return;
         }
+        File assetRoot = new File(this.assetRoot.getCanonicalPath());
+        final FilenameFilter systemFileNameFiler = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return !s.startsWith(".");
+            }
+        };
+        File[] colorDirs = assetRoot.listFiles(systemFileNameFiler);
+        Comparator<File> alphabeticalComparator = new Comparator<File>() {
+            @Override
+            public int compare(File file1, File file2) {
+                if (file1 != null && file2 != null) {
+                    return file1.getName().compareTo(file2.getName());
+                }
+                return 0;
+            }
+        };
+        Arrays.sort(colorDirs, alphabeticalComparator);
+        for (File file : colorDirs) {
+            if (!file.isDirectory()) {
+                continue;
+            }
+            colorSpinner.addItem(file.getName().replace("_", " "));
+        }
+
+        if (colorDirs.length < 1) {
+            return;
+        }
+        File exColorDir = colorDirs[0];
+        File[] densities = exColorDir.listFiles(systemFileNameFiler);
+        if (densities == null || densities.length < 1) {
+            return;
+        }
+        File exDensity = densities[0];
+        File[] assets = exDensity.listFiles(systemFileNameFiler);
+        Arrays.sort(assets, alphabeticalComparator);
+        for (File asset : assets) {
+            if (asset.isDirectory()) {
+                continue;
+            }
+            String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
+            if (!extension.equalsIgnoreCase("png")) {
+                continue;
+            }
+            assetSpinner.addItem(asset.getName().replace("ic_action_", "").replace("." + extension, ""));
+        }
+        assetSpinner.setSelectedIndex(0);
+        assetColor = (String) colorSpinner.getSelectedItem();
+        assetName = (String) assetSpinner.getSelectedItem();
+        updateImage();
     }
 
     @Override

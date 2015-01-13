@@ -1,5 +1,6 @@
 package de.mprengemann.intellij.plugin.androidicons.settings;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.options.Configurable;
@@ -14,19 +15,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 
-/**
- * User: marcprengemann
- * Date: 04.04.14
- * Time: 10:32
- */
 public class AndroidIconsSettings implements Configurable {
+    private static final String ANDROID_ICONS_URL = "http://www.androidicons.com/";
     private JPanel panel;
     private TextFieldWithBrowseButton textFieldHome;
     private JLabel foundColorsText;
     private JLabel foundAssetsText;
+    private JButton openBrowser;
 
     private VirtualFile selectedFile;
     private String persistedFile;
@@ -42,6 +42,7 @@ public class AndroidIconsSettings implements Configurable {
                 textFieldHome.setText(loadedFile.getCanonicalPath());
                 selectedFile = loadedFile;
             }
+            openBrowser.setVisible(false);
         }
 
         FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
@@ -50,11 +51,18 @@ public class AndroidIconsSettings implements Configurable {
         textFieldHome.addBrowseFolderListener(title, null, null, workingDirectoryChooserDescriptor);
         textFieldHome.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
             @Override
-            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChoosen(chosenFile);
+            protected void onFileChosen(@NotNull VirtualFile chosenFile) {
+                super.onFileChosen(chosenFile);
                 selectionPerformed = true;
                 selectedFile = chosenFile;
                 scanForAssets();
+            }
+        });
+        openBrowser.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                BrowserUtil.browse(ANDROID_ICONS_URL);
             }
         });
 

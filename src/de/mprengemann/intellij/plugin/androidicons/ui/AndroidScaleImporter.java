@@ -140,15 +140,15 @@ public class AndroidScaleImporter extends DialogWrapper {
         });
         targetHeight.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent keyEvent) {
-                super.keyTyped(keyEvent);
+            public void keyReleased(KeyEvent keyEvent) {
+                super.keyReleased(keyEvent);
                 updateNewSizes();
             }
         });
         targetWidth.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent keyEvent) {
-                super.keyTyped(keyEvent);
+            public void keyReleased(KeyEvent keyEvent) {
+                super.keyReleased(keyEvent);
                 updateNewSizes();
             }
         });
@@ -157,32 +157,35 @@ public class AndroidScaleImporter extends DialogWrapper {
     }
 
     private void fillImageInformation() {
-        if (selectedImage != null) {
-            String canonicalPath = selectedImage.getCanonicalPath();
-            if (canonicalPath != null) {
-                File file = new File(canonicalPath);
-                try {
-                    BufferedImage image = ImageIO.read(file);
-                    if (image != null) {
-                        int imageWidth = image.getWidth();
-                        int imageHeight = image.getHeight();
-
-                        if (isNinePatch) {
-                            imageHeight -= 2;
-                            imageWidth -= 2;
-                        }
-
-                        targetHeight.setText(String.valueOf(imageHeight));
-                        targetWidth.setText(String.valueOf(imageWidth));
-
-                        resExportName.setText(selectedImage.getName());
-
-                        updateScaleFactors();
-                        updateNewSizes();
-                    }
-                } catch (IOException ignored) {
-                }
+        if (selectedImage == null) {
+            return;
+        }
+        String canonicalPath = selectedImage.getCanonicalPath();
+        if (canonicalPath == null) {
+            return;
+        }
+        File file = new File(canonicalPath);
+        try {
+            BufferedImage image = ImageIO.read(file);
+            if (image == null) {
+                return;
             }
+            int imageWidth = image.getWidth();
+            int imageHeight = image.getHeight();
+
+            if (isNinePatch) {
+                imageHeight -= 2;
+                imageWidth -= 2;
+            }
+
+            targetHeight.setText(String.valueOf(imageHeight));
+            targetWidth.setText(String.valueOf(imageWidth));
+
+            resExportName.setText(selectedImage.getName());
+
+            updateScaleFactors();
+            updateNewSizes();
+        } catch (IOException ignored) {
         }
     }
 
@@ -190,16 +193,18 @@ public class AndroidScaleImporter extends DialogWrapper {
         try {
             int targetWidth = Integer.parseInt(this.targetWidth.getText());
             int targetHeight = Integer.parseInt(this.targetHeight.getText());
-
-            LDPICheckBox.setText("LDPI (" + (int) (toLDPI * targetWidth) + "px x " + (int) (toLDPI * targetHeight) + " px)");
-            MDPICheckBox.setText("MDPI (" + (int) (toMDPI * targetWidth) + "px x " + (int) (toMDPI * targetHeight) + " px)");
-            HDPICheckBox.setText("HDPI (" + (int) (toHDPI * targetWidth) + "px x " + (int) (toHDPI * targetHeight) + " px)");
-            XHDPICheckBox.setText("XHDPI (" + (int) (toXHDPI * targetWidth) + "px x " + (int) (toXHDPI * targetHeight) + " px)");
-            XXHDPICheckBox.setText("XXHDPI (" + (int) (toXXHDPI * targetWidth) + "px x " + (int) (toXXHDPI * targetHeight) + " px)");
-            XXXHDPICheckBox.setText("XXXHDPI (" + (int) (toXXXHDPI * targetWidth) + "px x " + (int) (toXXXHDPI * targetHeight) + " px)");
-
+            updateNewSizes(targetWidth, targetHeight);
         } catch (Exception ignored) {
         }
+    }
+
+    private void updateNewSizes(int targetWidth, int targetHeight) {
+        LDPICheckBox.setText("LDPI (" + (int) (toLDPI * targetWidth) + "px x " + (int) (toLDPI * targetHeight) + " px)");
+        MDPICheckBox.setText("MDPI (" + (int) (toMDPI * targetWidth) + "px x " + (int) (toMDPI * targetHeight) + " px)");
+        HDPICheckBox.setText("HDPI (" + (int) (toHDPI * targetWidth) + "px x " + (int) (toHDPI * targetHeight) + " px)");
+        XHDPICheckBox.setText("XHDPI (" + (int) (toXHDPI * targetWidth) + "px x " + (int) (toXHDPI * targetHeight) + " px)");
+        XXHDPICheckBox.setText("XXHDPI (" + (int) (toXXHDPI * targetWidth) + "px x " + (int) (toXXHDPI * targetHeight) + " px)");
+        XXXHDPICheckBox.setText("XXXHDPI (" + (int) (toXXXHDPI * targetWidth) + "px x " + (int) (toXXXHDPI * targetHeight) + " px)");
     }
 
     private void updateScaleFactors() {
@@ -261,10 +266,11 @@ public class AndroidScaleImporter extends DialogWrapper {
     }
 
     private void updateImage() {
-        if (imageContainer != null && selectedImage != null && selectedImage.getCanonicalPath() != null) {
-            imageFile = new File(selectedImage.getCanonicalPath());
-            ImageUtils.updateImage(imageContainer, imageFile);
+        if (imageContainer == null || selectedImage == null || selectedImage.getCanonicalPath() == null) {
+            return;
         }
+        imageFile = new File(selectedImage.getCanonicalPath());
+        ImageUtils.updateImage(imageContainer, imageFile);
     }
 
     @Nullable
@@ -362,7 +368,7 @@ public class AndroidScaleImporter extends DialogWrapper {
         if (isNinePatch) {
             resizeImageJpg = resizeNinePatchImage(scaleFactor, targetWidth, targetHeight, imageFile, resolution);
         } else {
-            resizeImageJpg = resizeNormaleImage(scaleFactor, targetWidth, targetHeight, imageFile);
+            resizeImageJpg = resizeNormalImage(scaleFactor, targetWidth, targetHeight, imageFile);
         }
 
         return saveImageTempFile(resolution, resizeImageJpg, "");
@@ -554,10 +560,10 @@ public class AndroidScaleImporter extends DialogWrapper {
         inputImage.setRGB(w - 1, 0, 0x0);
     }
 
-    private BufferedImage resizeNormaleImage(float scaleFactor,
-                                             int targetWidth,
-                                             int targetHeight,
-                                             File imageFile) throws IOException {
+    private BufferedImage resizeNormalImage(float scaleFactor,
+                                            int targetWidth,
+                                            int targetHeight,
+                                            File imageFile) throws IOException {
         BufferedImage image = ImageIO.read(imageFile);
         int newWidth = (int) (scaleFactor * targetWidth);
         int newHeight = (int) (scaleFactor * targetHeight);

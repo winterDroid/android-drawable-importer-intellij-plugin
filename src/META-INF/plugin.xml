@@ -14,7 +14,7 @@
       Select an asset and specify the resolution of it. If you want to scale the to be imported image as well, you should select "other" and then fill out the "target resolution" and the "target width / height". Then you can specify all the resolutions, to which the drawable should be resized to.<br>
       This works also with 9-Patch-Images. But take care: sometimes it's necessary to remove / add about one "pixel" in the 9-Patch-Editor. But just try it :)<br>
       <br>
-      <b>3. Multisource-Drawable<b><br>
+      <b>3. Multisource-Drawable</b><br>
       Ever got a zip with drawables for your Android project by your designer with the following structure?<br><br>
       root/<br>
       ./drawable_ldpi.png<br>

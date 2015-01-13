@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -262,9 +263,7 @@ public class AndroidScaleImporter extends DialogWrapper {
     private void updateImage() {
         if (imageContainer != null && selectedImage != null && selectedImage.getCanonicalPath() != null) {
             imageFile = new File(selectedImage.getCanonicalPath());
-            if (imageFile.exists()) {
-                imageContainer.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
-            }
+            ImageUtils.updateImage(imageContainer, imageFile);
         }
     }
 
@@ -306,42 +305,45 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        if (imageFile != null) {
-            try {
-                int targetWidth = Integer.parseInt(this.targetWidth.getText());
-                int targetHeight = Integer.parseInt(this.targetHeight.getText());
+        if (imageFile == null) {
+            super.doOKAction();
+            return;
+        }
 
-                java.util.List<File> sources = new ArrayList<File>();
-                java.util.List<File> targets = new ArrayList<File>();
+        try {
+            int targetWidth = Integer.parseInt(this.targetWidth.getText());
+            int targetHeight = Integer.parseInt(this.targetHeight.getText());
 
-                if (LDPICheckBox.isSelected()) {
-                    sources.add(exportTempImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight));
-                    targets.add(getTargetFile("ldpi"));
-                }
-                if (MDPICheckBox.isSelected()) {
-                    sources.add(exportTempImage(imageFile, "mdpi", toMDPI, targetWidth, targetHeight));
-                    targets.add(getTargetFile("mdpi"));
-                }
-                if (HDPICheckBox.isSelected()) {
-                    sources.add(exportTempImage(imageFile, "hdpi", toHDPI, targetWidth, targetHeight));
-                    targets.add(getTargetFile("hdpi"));
-                }
-                if (XHDPICheckBox.isSelected()) {
-                    sources.add(exportTempImage(imageFile, "xhdpi", toXHDPI, targetWidth, targetHeight));
-                    targets.add(getTargetFile("xhdpi"));
-                }
-                if (XXHDPICheckBox.isSelected()) {
-                    sources.add(exportTempImage(imageFile, "xxhdpi", toXXHDPI, targetWidth, targetHeight));
-                    targets.add(getTargetFile("xxhdpi"));
-                }
-                if (XXXHDPICheckBox.isSelected()) {
-                    sources.add(exportTempImage(imageFile, "xxxhdpi", toXXXHDPI, targetWidth, targetHeight));
-                    targets.add(getTargetFile("xxxhdpi"));
-                }
+            java.util.List<File> sources = new ArrayList<File>();
+            java.util.List<File> targets = new ArrayList<File>();
 
-                RefactorHelper.move(project, sources, targets);
-            } catch (Exception ignored) {
+            if (LDPICheckBox.isSelected()) {
+                sources.add(exportTempImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight));
+                targets.add(getTargetFile("ldpi"));
             }
+            if (MDPICheckBox.isSelected()) {
+                sources.add(exportTempImage(imageFile, "mdpi", toMDPI, targetWidth, targetHeight));
+                targets.add(getTargetFile("mdpi"));
+            }
+            if (HDPICheckBox.isSelected()) {
+                sources.add(exportTempImage(imageFile, "hdpi", toHDPI, targetWidth, targetHeight));
+                targets.add(getTargetFile("hdpi"));
+            }
+            if (XHDPICheckBox.isSelected()) {
+                sources.add(exportTempImage(imageFile, "xhdpi", toXHDPI, targetWidth, targetHeight));
+                targets.add(getTargetFile("xhdpi"));
+            }
+            if (XXHDPICheckBox.isSelected()) {
+                sources.add(exportTempImage(imageFile, "xxhdpi", toXXHDPI, targetWidth, targetHeight));
+                targets.add(getTargetFile("xxhdpi"));
+            }
+            if (XXXHDPICheckBox.isSelected()) {
+                sources.add(exportTempImage(imageFile, "xxxhdpi", toXXXHDPI, targetWidth, targetHeight));
+                targets.add(getTargetFile("xxxhdpi"));
+            }
+
+            RefactorHelper.move(project, sources, targets);
+        } catch (Exception ignored) {
         }
 
         super.doOKAction();

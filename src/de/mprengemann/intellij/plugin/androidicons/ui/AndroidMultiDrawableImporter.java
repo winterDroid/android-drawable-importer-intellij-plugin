@@ -11,6 +11,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.SimpleMouseListener;
 import org.apache.commons.lang.StringUtils;
@@ -114,13 +115,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     private void updateImage(String fileString) {
         if (fileString != null && !StringUtils.isEmpty(fileString)) {
             File file = new File(fileString);
-            updateImage(file);
-        }
-    }
-
-    private void updateImage(File file) {
-        if (file.exists()) {
-            imageContainer.setIcon(new ImageIcon(file.getAbsolutePath()));
+            ImageUtils.updateImage(imageContainer, file);
         }
     }
 

@@ -50,8 +50,8 @@ public class AndroidResourcesHelper {
         browser.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
         browser.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
             @Override
-            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChoosen(chosenFile);
+            protected void onFileChosen(@NotNull VirtualFile chosenFile) {
+                super.onFileChosen(chosenFile);
                 SettingsHelper.saveResRootForProject(project, chosenFile.getUrl());
             }
         });

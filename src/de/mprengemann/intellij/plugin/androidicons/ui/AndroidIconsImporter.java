@@ -9,6 +9,7 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -57,16 +58,7 @@ public class AndroidIconsImporter extends DialogWrapper {
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
 
         assetRoot = SettingsHelper.getAssetPath();
-        if (assetRoot == null) {
-            Messages.showMessageDialog(
-                project,
-                "You have to select the Android Icons asset folder in the settings!",
-                "Error",
-                Messages.getErrorIcon());
-            doCancelAction();
-        } else {
-            fillComboBoxes();
-        }
+        fillComboBoxes();
 
         colorSpinner.addActionListener(new ActionListener() {
             @Override
@@ -111,15 +103,14 @@ public class AndroidIconsImporter extends DialogWrapper {
     }
 
     private void updateImage() {
-        if (imageContainer != null) {
-            String path = "/" + assetColor.replace(" ", "_") + "/xxhdpi/ic_action_" + assetName + ".png";
-            File imageFile = new File(assetRoot.getCanonicalPath() + path);
-            if (imageFile.exists()) {
-                imageContainer.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
-            }
-            if (!exportNameChanged) {
-                resExportName.setText("ic_action_" + assetName + ".png");
-            }
+        if (imageContainer == null) {
+            return;
+        }
+        String path = "/" + assetColor.replace(" ", "_") + "/xxhdpi/ic_action_" + assetName + ".png";
+        File imageFile = new File(assetRoot.getCanonicalPath() + path);
+        ImageUtils.updateImage(imageContainer, imageFile);
+        if (!exportNameChanged) {
+            resExportName.setText("ic_action_" + assetName + ".png");
         }
     }
 

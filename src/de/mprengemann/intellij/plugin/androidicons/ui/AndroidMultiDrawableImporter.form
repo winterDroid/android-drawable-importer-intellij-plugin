@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="de.mprengemann.intellij.plugin.androidicons.ui.AndroidMultiDrawableImporter">
+  <grid id="27dc6" binding="container" layout-manager="GridLayoutManager" row-count="17" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="478" height="409"/>
+    </constraints>
+    <properties>
+      <minimumSize width="478" height="350"/>
+      <preferredSize width="478" height="350"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <component id="46112" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="LDPI Asset:"/>
+        </properties>
+      </component>
+      <component id="5ee16" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Resource Name:"/>
+        </properties>
+      </component>
+      <component id="216a5" class="javax.swing.JTextField" binding="resExportName">
+        <constraints>
+          <grid row="13" column="3" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="3a3c4" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Resources root:"/>
+        </properties>
+      </component>
+      <component id="6670c" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="resRoot">
+        <constraints>
+          <grid row="15" column="3" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="283f6" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="MDPI Asset:"/>
+        </properties>
+      </component>
+      <component id="bb437" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="HDPI Asset:"/>
+        </properties>
+      </component>
+      <component id="ab4d4" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="XHDPI Asset:"/>
+        </properties>
+      </component>
+      <component id="ed1d6" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="XXHDPI Asset:"/>
+        </properties>
+      </component>
+      <component id="c2714" class="javax.swing.JLabel" binding="imageContainer">
+        <constraints>
+          <grid row="1" column="5" row-span="11" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <alignmentX value="0.5"/>
+          <horizontalAlignment value="0"/>
+          <horizontalTextPosition value="0"/>
+          <maximumSize width="200" height="200"/>
+          <minimumSize width="100" height="100"/>
+          <preferredSize width="100" height="100"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="64707" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="ldpiFile">
+        <constraints>
+          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="141a6" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="mdpiFile">
+        <constraints>
+          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="b619b" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="hdpiFile">
+        <constraints>
+          <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="be6f8" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="xhdpiFile">
+        <constraints>
+          <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="6442" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="xxhdpiFile">
+        <constraints>
+          <grid row="9" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="fbc8b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="XXXHDPI Asset:"/>
+        </properties>
+      </component>
+      <component id="792b1" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="xxxhdpiFile">
+        <constraints>
+          <grid row="11" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+    </children>
+  </grid>
+</form>

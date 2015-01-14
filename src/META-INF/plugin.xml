@@ -1,6 +1,6 @@
 <idea-plugin version="2">
     <id>de.mprengemann.intellij.plugin.androidicons</id>
-    <name>Android Drawable Utils</name>
+    <name>Android Drawable Importer</name>
     <version>0.1</version>
     <vendor email="marcprengemann@gmail.com" url="https://plus.google.com/+MarcPrengemann">Marc Prengemann</vendor>
 

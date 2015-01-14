@@ -1,8 +1,40 @@
 Android Drawable Importer Plugin
 =========================================
 
-Adds an option to IntelliJ to import drawables in different resolutions from AndroidIcons, 
-own "drawable repos" and scale a certain image down/up to the defined resolutions.
+![alt text](https://github.com/winterDroid/android-drawable-importer-intellij-plugin/raw/master/images/menu.png "New menu")
+
+This plugin consists of 3 main features. You can access them by a **right-click** anywhere inside an **Android module** under **New**.
+
+1. AndroidIcons Drawable Import  
+   You are able to select the asset, specify your color, change the target resource name and select all the resolutions you want to import.  
+   All the missing folders will be created automatically. If there are already drawables with the same name, you will be warned.  
+   
+   ![alt text](https://github.com/winterDroid/android-drawable-importer-intellij-plugin/raw/master/images/android_icons.png "AndroidIcons import dialog")
+   
+   *You can download AndroidIcons here for free: [http://www.androidicons.com/](http://www.androidicons.com/)*
+
+2. Scaled Drawable  
+   Select an asset and specify the resolution of it. If you want to scale the to be imported image as well, you should select **other** and then fill out the **target resolution** and the **target width / height**. Then you can specify all the resolutions, to which the drawable should be resized to.  
+   This works also with 9-Patch-Images. But take care: sometimes it's necessary to remove / add about one "pixel" in the 9-Patch-Editor. But just try it :)  
+   
+   ![alt text](https://github.com/winterDroid/android-drawable-importer-intellij-plugin/raw/master/images/scale.png "Scaled drawable import dialog")
+
+
+3. Multisource-Drawable  
+   Ever got a zip with drawables for your Android project by your designer with the following structure?  
+      ```
+      root/  
+            ./drawable_ldpi.png  
+            ./drawable_mdpi.png  
+            ./drawable_hdpi.png  
+            ./drawable_xhdpi.png  
+      ```
+            
+   No problem! Now you can just select for every resolution a different asset, specify one name for them, and the rest is done by the plugin.
+   
+   ![alt text](https://github.com/winterDroid/android-drawable-importer-intellij-plugin/raw/master/images/multi.png "Multi drawable sources import dialog")
+
+*Hint: When you select an asset, you can also just drag a file from your finder / explorer to the text field and drop it there.*
 
 License
 =========================================

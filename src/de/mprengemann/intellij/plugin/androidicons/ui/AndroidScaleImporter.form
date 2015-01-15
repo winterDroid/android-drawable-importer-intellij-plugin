@@ -212,6 +212,14 @@
           <text value=""/>
         </properties>
       </component>
+      <component id="d2496" class="javax.swing.JCheckBox" binding="aspectRatioLock">
+        <constraints>
+          <grid row="5" column="5" row-span="2" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value=""/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>

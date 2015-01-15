@@ -51,6 +51,7 @@ public class AndroidScaleImporter extends DialogWrapper {
     private JCheckBox XXHDPICheckBox;
     private JLabel imageContainer;
     private JCheckBox XXXHDPICheckBox;
+    private JCheckBox aspectRatioLock;
     private VirtualFile selectedImage;
     private File imageFile;
     private float toLDPI;
@@ -60,6 +61,8 @@ public class AndroidScaleImporter extends DialogWrapper {
     private float toXXHDPI;
     private float toXXXHDPI;
     private boolean isNinePatch = false;
+    private int originalImageWidth = -1;
+    private int originalImageHeight = -1;
 
     public AndroidScaleImporter(final Project project, Module module) {
         super(project, true);
@@ -115,8 +118,12 @@ public class AndroidScaleImporter extends DialogWrapper {
                 targetResolutionSpinner.setEnabled(setEnabled);
                 targetWidth.setEnabled(setEnabled);
                 targetHeight.setEnabled(setEnabled);
+                aspectRatioLock.setEnabled(setEnabled);
 
                 if (!setEnabled) {
+                    aspectRatioLock.setSelected(true);
+                    targetHeight.setText(originalImageHeight == -1 ? "" : Integer.toString(originalImageHeight));
+                    targetWidth.setText(originalImageWidth == -1 ? "" : Integer.toString(originalImageWidth));
                     updateScaleFactors();
                     updateNewSizes();
                 }
@@ -137,6 +144,7 @@ public class AndroidScaleImporter extends DialogWrapper {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 super.keyReleased(keyEvent);
+                updateTargetWidth();
                 updateNewSizes();
             }
         });
@@ -144,11 +152,43 @@ public class AndroidScaleImporter extends DialogWrapper {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 super.keyReleased(keyEvent);
+                updateTargetHeight();
                 updateNewSizes();
             }
         });
 
+        aspectRatioLock.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateTargetHeight();
+            }
+        });
+
         init();
+    }
+
+    private void updateTargetWidth() {
+        if (!aspectRatioLock.isSelected()) {
+            return;
+        }
+        try {
+            int targetHeight = Integer.parseInt(this.targetHeight.getText());
+            int newTargetWidth = (int) ((float) (originalImageWidth * targetHeight) / (float) originalImageHeight);
+            targetWidth.setText(Integer.toString(newTargetWidth));
+        } catch (Exception ignored) {
+        }
+    }
+    
+    private void updateTargetHeight() {
+        if (!aspectRatioLock.isSelected()) {
+            return;
+        }
+        try {
+            int targetWidth = Integer.parseInt(this.targetWidth.getText());
+            int newTargetHeight = (int) ((float) (originalImageHeight * targetWidth) / (float) originalImageWidth);
+            targetHeight.setText(Integer.toString(newTargetHeight));
+        } catch (Exception ignored) {
+        }
     }
 
     private void updateImageInformation(VirtualFile chosenFile) {
@@ -172,16 +212,16 @@ public class AndroidScaleImporter extends DialogWrapper {
             if (image == null) {
                 return;
             }
-            int imageWidth = image.getWidth();
-            int imageHeight = image.getHeight();
+            originalImageWidth = image.getWidth();
+            originalImageHeight = image.getHeight();
 
             if (isNinePatch) {
-                imageHeight -= 2;
-                imageWidth -= 2;
+                originalImageHeight -= 2;
+                originalImageWidth -= 2;
             }
-
-            targetHeight.setText(String.valueOf(imageHeight));
-            targetWidth.setText(String.valueOf(imageWidth));
+            
+            targetHeight.setText(String.valueOf(originalImageHeight));
+            targetWidth.setText(String.valueOf(originalImageWidth));
 
             resExportName.setText(selectedImage.getName());
 

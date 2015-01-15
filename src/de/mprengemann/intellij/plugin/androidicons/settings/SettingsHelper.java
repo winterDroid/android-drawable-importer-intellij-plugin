@@ -4,12 +4,10 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import org.apache.http.util.TextUtils;
 
 public class SettingsHelper {
     private static final String PATH = "assetPath";
     private static final String RES_ROOT = "resourcesRoot";
-    private static final String DEFAULT_PATH = "/assets";
 
     public static VirtualFile getAssetPath() {
         String persistedFile = getAssetPathString();
@@ -27,8 +25,7 @@ public class SettingsHelper {
 
     public static String getAssetPathString() {
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
-        String value = propertiesComponent.getValue(PATH);
-        return TextUtils.isEmpty(value) ? DEFAULT_PATH : value;
+        return propertiesComponent.getValue(PATH);
     }
 
     public static void saveResRootForProject(Project project, String fileUrl) {

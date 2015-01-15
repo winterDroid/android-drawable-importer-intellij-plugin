@@ -42,7 +42,6 @@ public class AndroidIconsSettings implements Configurable {
                 textFieldHome.setText(loadedFile.getCanonicalPath());
                 selectedFile = loadedFile;
             }
-            openBrowser.setVisible(false);
         }
 
         FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();

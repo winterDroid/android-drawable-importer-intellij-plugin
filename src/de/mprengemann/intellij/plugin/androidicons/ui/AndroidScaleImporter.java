@@ -121,6 +121,7 @@ public class AndroidScaleImporter extends DialogWrapper {
                 aspectRatioLock.setEnabled(setEnabled);
 
                 if (!setEnabled) {
+                    aspectRatioLock.setSelected(true);
                     targetHeight.setText(originalImageHeight == -1 ? "" : Integer.toString(originalImageHeight));
                     targetWidth.setText(originalImageWidth == -1 ? "" : Integer.toString(originalImageWidth));
                     updateScaleFactors();
@@ -156,12 +157,6 @@ public class AndroidScaleImporter extends DialogWrapper {
             }
         });
 
-        aspectRatioLock.setIcon(new ImageIcon(getClass().getResource("/icons/unlocked.png")));
-        aspectRatioLock.setSelectedIcon(new ImageIcon(getClass().getResource("/icons/locked.png")));
-        aspectRatioLock.setDisabledIcon(new ImageIcon(getClass().getResource("/icons/unlocked_disabled.png")));
-        aspectRatioLock.setDisabledSelectedIcon(new ImageIcon(getClass().getResource("/icons/locked_disabled.png")));
-        aspectRatioLock.setSelected(true);
-        aspectRatioLock.setEnabled(false);
         aspectRatioLock.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

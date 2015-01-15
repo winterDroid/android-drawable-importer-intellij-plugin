@@ -217,6 +217,12 @@
           <grid row="5" column="5" row-span="2" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <disabledIcon value="icons/unlocked_disabled.png"/>
+          <disabledSelectedIcon value="icons/locked_disabled.png"/>
+          <enabled value="false"/>
+          <icon value="icons/unlocked.png"/>
+          <selected value="true"/>
+          <selectedIcon value="icons/locked.png"/>
           <text value=""/>
         </properties>
       </component>

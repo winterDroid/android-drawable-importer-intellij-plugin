@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.ResizeAlgorithm;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +48,8 @@ public class AndroidScaleImporter extends DialogWrapper {
     private JLabel imageContainer;
     private JCheckBox XXXHDPICheckBox;
     private JCheckBox aspectRatioLock;
+    private JComboBox methodSpinner;
+    private JComboBox algorithmSpinner;
     private VirtualFile selectedImage;
     private File imageFile;
     private float toLDPI;
@@ -158,7 +161,21 @@ public class AndroidScaleImporter extends DialogWrapper {
                 updateTargetHeight();
             }
         });
-
+        
+        algorithmSpinner.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ResizeAlgorithm algorithm = ResizeAlgorithm.from((String) algorithmSpinner.getSelectedItem());
+                methodSpinner.removeAllItems();
+                for (String method : algorithm.getMethods()) {
+                    methodSpinner.addItem(method);
+                }
+            }
+        });
+        for (ResizeAlgorithm algorithms : ResizeAlgorithm.values()) {
+            algorithmSpinner.addItem(algorithms.toString());
+        }
+        
         init();
     }
 
@@ -173,7 +190,7 @@ public class AndroidScaleImporter extends DialogWrapper {
         } catch (Exception ignored) {
         }
     }
-    
+
     private void updateTargetHeight() {
         if (!aspectRatioLock.isSelected()) {
             return;
@@ -214,7 +231,7 @@ public class AndroidScaleImporter extends DialogWrapper {
                 originalImageHeight -= 2;
                 originalImageWidth -= 2;
             }
-            
+
             targetHeight.setText(String.valueOf(originalImageHeight));
             targetWidth.setText(String.valueOf(originalImageWidth));
 
@@ -303,8 +320,8 @@ public class AndroidScaleImporter extends DialogWrapper {
     }
 
     private void updateImage() {
-        if (imageContainer == null || 
-            selectedImage == null || 
+        if (imageContainer == null ||
+            selectedImage == null ||
             selectedImage.getCanonicalPath() == null) {
             return;
         }
@@ -404,16 +421,25 @@ public class AndroidScaleImporter extends DialogWrapper {
                                  int targetHeight) throws IOException {
         BufferedImage resizeImageJpg;
         String resName = resExportName.getText().trim();
+        ResizeAlgorithm algorithm = ResizeAlgorithm.from((String) algorithmSpinner.getSelectedItem());
+        Object method = algorithm.getMethod((String) methodSpinner.getSelectedItem());
         if (isNinePatch) {
-            resizeImageJpg = ImageUtils.resizeNinePatchImage(scaleFactor,
+            resizeImageJpg = ImageUtils.resizeNinePatchImage(algorithm,
+                                                             method,
+                                                             scaleFactor,
                                                              targetWidth,
                                                              targetHeight,
                                                              imageFile,
-                                                             resolution, 
+                                                             resolution,
                                                              project,
                                                              resName);
         } else {
-            resizeImageJpg = ImageUtils.resizeNormalImage(scaleFactor, targetWidth, targetHeight, imageFile);
+            resizeImageJpg = ImageUtils.resizeNormalImage(algorithm,
+                                                          method,
+                                                          imageFile,
+                                                          scaleFactor,
+                                                          targetWidth,
+                                                          targetHeight);
         }
 
         return ImageUtils.saveImageTempFile(resolution, resizeImageJpg, project, ImageUtils.getExportName("", resName));

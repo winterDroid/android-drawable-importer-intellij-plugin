@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.ui.Wrong9PatchException;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.imgscalr.Scalr;
@@ -69,22 +70,65 @@ public class ImageUtils {
         return dScale;
     }
 
-    public static BufferedImage resizeNormalImage(float scaleFactor,
+    public static BufferedImage resizeNormalImage(ResizeAlgorithm algorithm,
+                                                  Object method,
+                                                  File imageFile,
+                                                  float scaleFactor,
                                                   int targetWidth,
-                                                  int targetHeight,
-                                                  File imageFile) throws IOException {
+                                                  int targetHeight) throws IOException {
         BufferedImage image = ImageIO.read(imageFile);
-        int newWidth = (int) (scaleFactor * targetWidth);
-        int newHeight = (int) (scaleFactor * targetHeight);
-        return Scalr.resize(image, newWidth, newHeight, Scalr.OP_ANTIALIAS);
+        return resizeNormalImage(algorithm, method, image, scaleFactor, targetWidth, targetHeight);
     }
 
-    public static BufferedImage resizeNinePatchImage(float scaleFactor,
+    public static BufferedImage resizeNormalImage(ResizeAlgorithm algorithm,
+                                                  Object method,
+                                                  BufferedImage image,
+                                                  float scaleFactor,
+                                                  int targetWidth,
+                                                  int targetHeight) throws IOException {
+        int newWidth = (int) (scaleFactor * targetWidth);
+        int newHeight = (int) (scaleFactor * targetHeight);
+        BufferedImage resizedImage = null;
+        Graphics2D graphics;
+        switch (algorithm) {
+            case SCALR:
+                Scalr.Method scalrMethod = (Scalr.Method) method;
+                resizedImage = Scalr.resize(image, scalrMethod, newWidth, newHeight, Scalr.OP_ANTIALIAS);
+                break;
+            case GRAPHICS:
+                resizedImage = UIUtil.createImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+                graphics = resizedImage.createGraphics();
+                if (method != null) {
+                    RenderingHints hint = (RenderingHints) method;
+                    graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
+                    graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                }
+                graphics.drawImage(image, 0, 0, newWidth, newHeight, null);
+                graphics.dispose();
+                break;
+            case IMAGE:
+                resizedImage = UIUtil.createImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+                graphics = resizedImage.createGraphics();
+                Integer scalingMethod = (Integer) method;
+                graphics.drawImage(image.getScaledInstance(newWidth, newHeight, scalingMethod), 0, 0, newWidth, newHeight, null);
+                graphics.dispose();
+                break;
+            case THUMBNAILATOR:
+                return Thumbnails.of(image)
+                                 .size(newWidth, newHeight)
+                                 .asBufferedImage();
+        }
+        return resizedImage;
+    }
+
+    public static BufferedImage resizeNinePatchImage(ResizeAlgorithm algorithm,
+                                                     Object method,
+                                                     float scaleFactor,
                                                      int targetWidth,
                                                      int targetHeight,
                                                      File imageFile,
-                                                     String resolution, 
-                                                     Project project, 
+                                                     String resolution,
+                                                     Project project,
                                                      String name) throws IOException {
         BufferedImage image = ImageIO.read(imageFile);
         int type = BufferedImage.TYPE_INT_ARGB;
@@ -94,7 +138,7 @@ public class ImageUtils {
 
         BufferedImage trimedImage = trim9PBorder(image, type);
         saveImageTempFile(resolution, trimedImage, project, getExportName("trimmed", name));
-        trimedImage = Scalr.resize(trimedImage, newWidth, newHeight);
+        trimedImage = resizeNormalImage(algorithm, method, trimedImage, 1f, newWidth, newHeight);
         saveImageTempFile(resolution, trimedImage, project, getExportName("trimmedResized", name));
 
         BufferedImage borderImage;
@@ -136,9 +180,9 @@ public class ImageUtils {
     }
 
     public static BufferedImage generateBordersImage(BufferedImage source,
-                                               int trimedWidth,
-                                               int trimedHeight,
-                                               int type) throws Wrong9PatchException {
+                                                     int trimedWidth,
+                                                     int trimedHeight,
+                                                     int type) throws Wrong9PatchException {
         BufferedImage finalBorder = UIUtil.createImage(trimedWidth + 2, trimedHeight + 2, type);
         int cutW = source.getWidth() - 2;
         int cutH = source.getHeight() - 2;
@@ -258,7 +302,10 @@ public class ImageUtils {
         inputImage.setRGB(w - 1, 0, 0x0);
     }
 
-    public static File saveImageTempFile(String resolution, BufferedImage resizeImageJpg, Project project, String exportName) throws IOException {
+    public static File saveImageTempFile(String resolution,
+                                         BufferedImage resizeImageJpg,
+                                         Project project,
+                                         String exportName) throws IOException {
         File exportFile = RefactorHelper.getTempImageFile(project, resolution, exportName);
         if (exportFile != null) {
             if (!exportFile.getParentFile().exists()) {

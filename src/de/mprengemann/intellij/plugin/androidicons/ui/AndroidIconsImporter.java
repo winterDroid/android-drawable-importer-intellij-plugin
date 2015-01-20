@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -118,7 +119,7 @@ public class AndroidIconsImporter extends DialogWrapper {
         File imageFile = new File(assetRoot.getCanonicalPath() + path);
         ImageUtils.updateImage(imageContainer, imageFile);
         if (!exportNameChanged) {
-            resExportName.setText("ic_action_" + assetName + ".png");
+            resExportName.setText("ic_action_" + assetName);
         }
     }
 
@@ -170,7 +171,7 @@ public class AndroidIconsImporter extends DialogWrapper {
             if (!extension.equalsIgnoreCase("png")) {
                 continue;
             }
-            assetSpinner.addItem(asset.getName().replace("ic_action_", "").replace("." + extension, ""));
+            assetSpinner.addItem(ExportNameUtils.getExportNameFromFilename(asset.getName()).replace("ic_action_", ""));
         }
         assetColor = (String) colorSpinner.getSelectedItem();
         assetName = (String) assetSpinner.getSelectedItem();
@@ -208,12 +209,10 @@ public class AndroidIconsImporter extends DialogWrapper {
             if (paths != null && paths.size() > 0) {
                 List<File> sources = new ArrayList<File>();
                 List<File> targets = new ArrayList<File>();
-                File source;
                 for (FromToPath path : paths) {
-                    source = new File(path.source);
-                    if (source.exists()) {
-                        sources.add(source);
-                        targets.add(new File(path.target));
+                    if (path.source.exists()) {
+                        sources.add(path.source);
+                        targets.add(path.target);
                     }
                 }
                 RefactorHelper.copy(project, sources, targets);
@@ -252,8 +251,8 @@ public class AndroidIconsImporter extends DialogWrapper {
     }
 
     private class FromToPath {
-        public final String source;
-        public final String target;
+        public final File source;
+        public final File target;
         public final String resolution;
 
         private FromToPath(String resolution) {
@@ -264,9 +263,8 @@ public class AndroidIconsImporter extends DialogWrapper {
             String fromName = "ic_action_" + assetName + ".png";
             String toName = resExportName.getText();
 
-            this.source = assetRoot.getCanonicalPath() + "/" + assetColor.replace(" ",
-                                                                                  "_") + "/" + resolution + "/" + fromName;
-            this.target = resRootText + "/drawable-" + resolution + "/" + toName;
+            this.source = new File(assetRoot.getCanonicalPath() + "/" + assetColor.replace(" ", "_") + "/" + resolution + "/" + fromName);
+            this.target = ImageUtils.getTargetFile(resRootText, resolution, toName);
         }
     }
 

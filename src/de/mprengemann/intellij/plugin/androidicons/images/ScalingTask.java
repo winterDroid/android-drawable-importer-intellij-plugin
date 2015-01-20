@@ -87,27 +87,27 @@ public class ScalingTask extends DumbModeTask {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            targets.add(getTargetFile("ldpi"));
+            targets.add(ImageUtils.getTargetFile(path, "ldpi", exportName));
         }
         if (scaleToMDPI) {
             sources.add(exportTempImage(imageFile, "mdpi", toMDPI, targetWidth, targetHeight));
-            targets.add(getTargetFile("mdpi"));
+            targets.add(ImageUtils.getTargetFile(path, "mdpi", exportName));
         }
         if (scaleToHDPI) {
             sources.add(exportTempImage(imageFile, "hdpi", toHDPI, targetWidth, targetHeight));
-            targets.add(getTargetFile("hdpi"));
+            targets.add(ImageUtils.getTargetFile(path, "hdpi", exportName));
         }
         if (scaleToXHDPI) {
             sources.add(exportTempImage(imageFile, "xhdpi", toXHDPI, targetWidth, targetHeight));
-            targets.add(getTargetFile("xhdpi"));
+            targets.add(ImageUtils.getTargetFile(path, "xhdpi", exportName));
         }
         if (scaleToXXHDPI) {
             sources.add(exportTempImage(imageFile, "xxhdpi", toXXHDPI, targetWidth, targetHeight));
-            targets.add(getTargetFile("xxhdpi"));
+            targets.add(ImageUtils.getTargetFile(path, "xxhdpi", exportName));
         }
         if (scaleToXXXHDPI) {
             sources.add(exportTempImage(imageFile, "xxxhdpi", toXXXHDPI, targetWidth, targetHeight));
-            targets.add(getTargetFile("xxxhdpi"));
+            targets.add(ImageUtils.getTargetFile(path, "xxxhdpi", exportName));
         }
 
         DumbService.getInstance(project).runWhenSmart(new Runnable() {
@@ -149,11 +149,6 @@ public class ScalingTask extends DumbModeTask {
     public void addXXXHDPI(float toXXXHDPI) {
         this.scaleToXXXHDPI = true;
         this.toXXXHDPI = toXXXHDPI;
-    }
-
-
-    private File getTargetFile(String resolution) {
-        return new File(path + "/drawable-" + resolution + "/" + exportName);
     }
 
     private File exportTempImage(File imageFile,

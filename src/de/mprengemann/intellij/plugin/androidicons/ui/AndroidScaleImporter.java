@@ -1,5 +1,6 @@
 package de.mprengemann.intellij.plugin.androidicons.ui;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
@@ -29,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AndroidScaleImporter extends DialogWrapper {
     private final Project project;
@@ -375,8 +377,8 @@ public class AndroidScaleImporter extends DialogWrapper {
             int targetWidth = Integer.parseInt(this.targetWidth.getText());
             int targetHeight = Integer.parseInt(this.targetHeight.getText());
 
-            java.util.List<File> sources = new ArrayList<File>();
-            java.util.List<File> targets = new ArrayList<File>();
+            List<File> sources = new ArrayList<File>();
+            List<File> targets = new ArrayList<File>();
 
             if (LDPICheckBox.isSelected()) {
                 sources.add(exportTempImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight));
@@ -404,7 +406,8 @@ public class AndroidScaleImporter extends DialogWrapper {
             }
 
             RefactorHelper.move(project, sources, targets);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Logger.getInstance(AndroidScaleImporter.class).error("doOK", e);
         }
 
         super.doOKAction();

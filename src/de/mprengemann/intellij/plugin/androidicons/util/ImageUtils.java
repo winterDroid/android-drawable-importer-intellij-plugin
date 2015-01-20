@@ -90,29 +90,10 @@ public class ImageUtils {
         int newWidth = (int) (scaleFactor * targetWidth);
         int newHeight = (int) (scaleFactor * targetHeight);
         BufferedImage resizedImage = null;
-        Graphics2D graphics;
         switch (algorithm) {
             case SCALR:
                 Scalr.Method scalrMethod = (Scalr.Method) method;
                 resizedImage = Scalr.resize(image, scalrMethod, newWidth, newHeight, Scalr.OP_ANTIALIAS);
-                break;
-            case GRAPHICS:
-                resizedImage = UIUtil.createImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-                graphics = resizedImage.createGraphics();
-                if (method != null) {
-                    RenderingHints hint = (RenderingHints) method;
-                    graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
-                    graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                }
-                graphics.drawImage(image, 0, 0, newWidth, newHeight, null);
-                graphics.dispose();
-                break;
-            case IMAGE:
-                resizedImage = UIUtil.createImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-                graphics = resizedImage.createGraphics();
-                Integer scalingMethod = (Integer) method;
-                graphics.drawImage(image.getScaledInstance(newWidth, newHeight, scalingMethod), 0, 0, newWidth, newHeight, null);
-                graphics.dispose();
                 break;
             case THUMBNAILATOR:
                 return Thumbnails.of(image)
@@ -312,7 +293,7 @@ public class ImageUtils {
             if (!exportFile.getParentFile().exists()) {
                 FileUtils.forceMkdir(exportFile.getParentFile());
             }
-            ImageIO.write(resizeImageJpg, "png", exportFile);
+            ImageIO.write(resizeImageJpg, "PNG", exportFile);
             return exportFile;
         } else {
             throw new IOException("Couldn't find .idea path.");

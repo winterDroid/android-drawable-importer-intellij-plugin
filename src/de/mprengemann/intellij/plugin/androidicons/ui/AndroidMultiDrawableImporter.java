@@ -12,6 +12,7 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.SimpleMouseListener;
 import org.apache.commons.lang.StringUtils;
@@ -74,10 +75,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
             @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
-                updateImage(chosenFile.getCanonicalPath());
-                if (StringUtils.isEmpty(resExportName.getText().trim())) {
-                    resExportName.setText(chosenFile.getName());
-                }
+                fillImageInformation(chosenFile);
             }
         });
         browseButton.getTextField().addMouseListener(new SimpleMouseListener() {
@@ -103,14 +101,18 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
                     if (virtualFiles.size() == 1) {
                         VirtualFile chosenFile = virtualFiles.get(0);
                         browseButton.setText(chosenFile.getCanonicalPath());
-                        updateImage(chosenFile.getCanonicalPath());
-                        if (StringUtils.isEmpty(resExportName.getText().trim())) {
-                            resExportName.setText(chosenFile.getName());
-                        }
+                        fillImageInformation(chosenFile);
                     }
                 }
             }
         });
+    }
+
+    private void fillImageInformation(VirtualFile chosenFile) {
+        updateImage(chosenFile.getCanonicalPath());
+        if (StringUtils.isEmpty(resExportName.getText().trim())) {
+            resExportName.setText(ExportNameUtils.getExportNameFromFilename(chosenFile.getName()));
+        }
     }
 
     private void updateImage(String fileString) {
@@ -158,18 +160,18 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     }
 
     private void addDataIfNecessary(String resolution, TextFieldWithBrowseButton browser, List<File> sources, List<File> targets) {
-        if (browser != null) {
-            String sourceString = browser.getText().trim();
-            String targetString = resRoot.getText().trim() + "/drawable-" + resolution + "/" + resExportName.getText().trim();
-            if (!StringUtils.isEmpty(sourceString)) {
-                File target = new File(targetString);
-                File source = new File(sourceString);
-
-                if (source.exists()) {
-                    sources.add(source);
-                    targets.add(target);
-                }
-            }
+        if (browser == null) {
+            return;
+        }
+        String sourceString = browser.getText().trim();
+        if (StringUtils.isEmpty(sourceString)) {
+            return;
+        }
+        File target = ImageUtils.getTargetFile(resRoot.getText().trim(), resolution, resExportName.getText().trim());
+        File source = new File(sourceString);
+        if (source.exists()) {
+            sources.add(source);
+            targets.add(target);
         }
     }
 

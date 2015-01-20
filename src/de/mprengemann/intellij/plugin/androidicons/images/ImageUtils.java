@@ -20,6 +20,8 @@ import java.io.IOException;
 
 public class ImageUtils {
 
+    public static final String TARGET_FILE_PATTERN = "%s/drawable-%s/%s.png";
+
     public static void updateImage(JLabel imageContainer, File imageFile) {
         if (!imageFile.exists()) {
             return;
@@ -300,5 +302,9 @@ public class ImageUtils {
         } else {
             throw new IOException("Couldn't find .idea path.");
         }
+    }
+
+    public static File getTargetFile(String path, String resolution, String exportName) {
+        return new File(String.format(TARGET_FILE_PATTERN, path, resolution, exportName));
     }
 }

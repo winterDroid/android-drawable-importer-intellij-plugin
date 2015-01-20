@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.ScalingTask;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.ResizeAlgorithm;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
@@ -236,7 +237,7 @@ public class AndroidScaleImporter extends DialogWrapper {
             targetHeight.setText(String.valueOf(originalImageHeight));
             targetWidth.setText(String.valueOf(originalImageWidth));
 
-            resExportName.setText(selectedImage.getName());
+            resExportName.setText(ExportNameUtils.getExportNameFromFilename(selectedImage.getName()));
 
             updateScaleFactors();
             updateNewSizes();

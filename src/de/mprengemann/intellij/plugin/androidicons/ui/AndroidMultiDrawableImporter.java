@@ -6,13 +6,13 @@ import com.intellij.openapi.fileChooser.ex.FileDrop;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageFileBrowserFolderActionListener;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.SimpleMouseListener;
 import org.apache.commons.lang.StringUtils;
@@ -66,18 +66,19 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     }
 
     private void initBrowser(String resolution, final TextFieldWithBrowseButton browseButton) {
-        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
+        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(
+            ImageFileTypeManager.getInstance().getImageFileType());
         String title1 = "Select your " + resolution + " asset";
         imageDescriptor.setTitle(title1);
-        browseButton.addBrowseFolderListener(title1, null, project, imageDescriptor);
-        browseButton.addBrowseFolderListener(new TextBrowseFolderListener(imageDescriptor) {
-            @Override
-            @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
-            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChoosen(chosenFile);
-                fillImageInformation(chosenFile);
-            }
-        });
+        ImageFileBrowserFolderActionListener actionListener = new ImageFileBrowserFolderActionListener(title1, project, browseButton, imageDescriptor) {
+                @Override
+                @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
+                protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
+                    super.onFileChoosen(chosenFile);
+                    fillImageInformation(chosenFile);
+                }
+            };
+        browseButton.addBrowseFolderListener(project, actionListener);
         browseButton.getTextField().addMouseListener(new SimpleMouseListener() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
@@ -133,7 +134,9 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         if (StringUtils.isEmpty(resExportName.getText().trim())) {
             return new ValidationInfo("Please select a name for the drawable.", resExportName);
         } else if (!resExportName.getText().matches("[a-z0-9_.]*")) {
-            return new ValidationInfo("Please select a valid name for the drawable. There are just \"[a-z0-9_.]\" allowed.", resExportName);
+            return new ValidationInfo(
+                "Please select a valid name for the drawable. There are just \"[a-z0-9_.]\" allowed.",
+                resExportName);
         }
 
         return super.doValidate();
@@ -159,7 +162,10 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         super.doOKAction();
     }
 
-    private void addDataIfNecessary(String resolution, TextFieldWithBrowseButton browser, List<File> sources, List<File> targets) {
+    private void addDataIfNecessary(String resolution,
+                                    TextFieldWithBrowseButton browser,
+                                    List<File> sources,
+                                    List<File> targets) {
         if (browser == null) {
             return;
         }

@@ -1,7 +1,6 @@
 package de.mprengemann.intellij.plugin.androidicons.images;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.DumbModeTask;
 import com.intellij.openapi.project.DumbService;
@@ -69,8 +68,6 @@ public class ScalingTask extends DumbModeTask {
             public void run() {
                 try {
                     scaleImages(progressIndicator);
-                } catch (ProcessCanceledException e) {
-                    throw e;
                 } catch (IOException ignored) {
                 }
             }
@@ -85,7 +82,11 @@ public class ScalingTask extends DumbModeTask {
         final List<File> targets = new ArrayList<File>();
 
         if (scaleToLDPI) {
-            sources.add(exportTempImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight));
+            try {
+                sources.add(exportTempImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             targets.add(getTargetFile("ldpi"));
         }
         if (scaleToMDPI) {

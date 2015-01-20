@@ -50,6 +50,7 @@ public class AndroidIconsSettings implements Configurable {
         textFieldHome.addBrowseFolderListener(title, null, null, workingDirectoryChooserDescriptor);
         textFieldHome.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
             @Override
+            @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
                 selectionPerformed = true;

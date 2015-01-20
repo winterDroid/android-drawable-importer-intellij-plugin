@@ -77,8 +77,8 @@ public class AndroidScaleImporter extends DialogWrapper {
         imageDescriptor.setTitle(title1);
         assetBrowser.addBrowseFolderListener(title1, null, project, imageDescriptor);
         assetBrowser.addBrowseFolderListener(new TextBrowseFolderListener(imageDescriptor) {
-
             @Override
+            @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
                 updateImageInformation(chosenFile);

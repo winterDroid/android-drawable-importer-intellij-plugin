@@ -11,7 +11,11 @@ public class SettingsHelper {
 
     public static VirtualFile getAssetPath() {
         String persistedFile = getAssetPathString();
-        return VirtualFileManager.getInstance().findFileByUrl(persistedFile);
+        if (persistedFile != null) {
+            return VirtualFileManager.getInstance().findFileByUrl(persistedFile);
+        } else {
+            return null;
+        }
     }
 
     public static void saveAssetPath(String fileUrl) {

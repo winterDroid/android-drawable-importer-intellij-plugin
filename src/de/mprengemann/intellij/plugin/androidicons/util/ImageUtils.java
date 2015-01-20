@@ -37,6 +37,7 @@ public class ImageUtils {
         int imageViewHeight = imageContainer.getHeight();
         double factor = getScaleFactorToFit(new Dimension(imageWidth, imageHeight),
                                             new Dimension(imageViewWidth, imageViewHeight));
+        factor = Math.min(factor, 1f);
         imageWidth = (int) (factor * imageWidth);
         imageHeight = (int) (factor * imageHeight);
         if (imageWidth <= 0 || imageHeight <= 0 ||

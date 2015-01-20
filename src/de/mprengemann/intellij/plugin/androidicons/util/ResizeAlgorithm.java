@@ -3,7 +3,6 @@ package de.mprengemann.intellij.plugin.androidicons.util;
 import org.imgscalr.Scalr;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,7 +45,7 @@ public enum ResizeAlgorithm {
                 methods = Arrays.asList("Default");
                 break;
             default:
-                methods = new ArrayList<String>();
+                throw new IllegalArgumentException();
         }
         return methods;
     }
@@ -93,7 +92,7 @@ public enum ResizeAlgorithm {
             default:
                 return null;
         }
-        return null;
+        throw new IllegalArgumentException("Method doesn't exist: " + method);
     }
 
     @Override
@@ -111,6 +110,6 @@ public enum ResizeAlgorithm {
         } else if (THUMBNAILATOR.name.equals(algorithm)) {
             return THUMBNAILATOR;
         }
-        return null;
+        throw new IllegalArgumentException("Algorithm doesn't exist: " + algorithm);
     }
 }

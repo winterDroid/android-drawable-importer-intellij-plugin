@@ -5,15 +5,16 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.ScalingTask;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
-import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ResizeAlgorithm;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
@@ -29,8 +30,6 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AndroidScaleImporter extends DialogWrapper {
     private final Project project;
@@ -163,7 +162,7 @@ public class AndroidScaleImporter extends DialogWrapper {
                 updateTargetHeight();
             }
         });
-        
+
         algorithmSpinner.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -177,7 +176,7 @@ public class AndroidScaleImporter extends DialogWrapper {
         for (ResizeAlgorithm algorithms : ResizeAlgorithm.values()) {
             algorithmSpinner.addItem(algorithms.toString());
         }
-        
+
         init();
     }
 
@@ -374,77 +373,42 @@ public class AndroidScaleImporter extends DialogWrapper {
         }
 
         try {
-            int targetWidth = Integer.parseInt(this.targetWidth.getText());
-            int targetHeight = Integer.parseInt(this.targetHeight.getText());
+            final int targetWidth = Integer.parseInt(this.targetWidth.getText());
+            final int targetHeight = Integer.parseInt(this.targetHeight.getText());
+            final File imageFile = this.imageFile;
 
-            List<File> sources = new ArrayList<File>();
-            List<File> targets = new ArrayList<File>();
+            ResizeAlgorithm algorithm = ResizeAlgorithm.from((String) algorithmSpinner.getSelectedItem());
+            ScalingTask task = new ScalingTask(project, imageFile, targetWidth, targetHeight,
+                                               resRoot.getText().trim(),
+                                               resExportName.getText().trim(),
+                                               algorithm,
+                                               algorithm.getMethod((String) methodSpinner.getSelectedItem()),
+                                               isNinePatch);
 
             if (LDPICheckBox.isSelected()) {
-                sources.add(exportTempImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight));
-                targets.add(getTargetFile("ldpi"));
+                task.addLDPI(toLDPI);
             }
             if (MDPICheckBox.isSelected()) {
-                sources.add(exportTempImage(imageFile, "mdpi", toMDPI, targetWidth, targetHeight));
-                targets.add(getTargetFile("mdpi"));
+                task.addMDPI(toMDPI);
             }
             if (HDPICheckBox.isSelected()) {
-                sources.add(exportTempImage(imageFile, "hdpi", toHDPI, targetWidth, targetHeight));
-                targets.add(getTargetFile("hdpi"));
+                task.addHDPI(toHDPI);
             }
             if (XHDPICheckBox.isSelected()) {
-                sources.add(exportTempImage(imageFile, "xhdpi", toXHDPI, targetWidth, targetHeight));
-                targets.add(getTargetFile("xhdpi"));
+                task.addXHDPI(toXHDPI);
             }
             if (XXHDPICheckBox.isSelected()) {
-                sources.add(exportTempImage(imageFile, "xxhdpi", toXXHDPI, targetWidth, targetHeight));
-                targets.add(getTargetFile("xxhdpi"));
+                task.addXXHDPI(toXXHDPI);
             }
             if (XXXHDPICheckBox.isSelected()) {
-                sources.add(exportTempImage(imageFile, "xxxhdpi", toXXXHDPI, targetWidth, targetHeight));
-                targets.add(getTargetFile("xxxhdpi"));
+                task.addXXXHDPI(toXXXHDPI);
             }
 
-            RefactorHelper.move(project, sources, targets);
+            DumbService.getInstance(project).queueTask(task);
         } catch (Exception e) {
             Logger.getInstance(AndroidScaleImporter.class).error("doOK", e);
         }
 
         super.doOKAction();
-    }
-
-    private File getTargetFile(String resolution) {
-        return new File(resRoot.getText().trim() + "/drawable-" + resolution + "/" + resExportName.getText().trim());
-    }
-
-    private File exportTempImage(File imageFile,
-                                 String resolution,
-                                 float scaleFactor,
-                                 int targetWidth,
-                                 int targetHeight) throws IOException {
-        BufferedImage resizeImageJpg;
-        String resName = resExportName.getText().trim();
-        ResizeAlgorithm algorithm = ResizeAlgorithm.from((String) algorithmSpinner.getSelectedItem());
-        Object method = algorithm.getMethod((String) methodSpinner.getSelectedItem());
-        if (isNinePatch) {
-            resizeImageJpg = ImageUtils.resizeNinePatchImage(algorithm,
-                                                             method,
-                                                             scaleFactor,
-                                                             targetWidth,
-                                                             targetHeight,
-                                                             imageFile,
-                                                             resolution,
-                                                             project,
-                                                             resName);
-        } else {
-            resizeImageJpg = ImageUtils.resizeNormalImage(algorithm,
-                                                          method,
-                                                          imageFile,
-                                                          scaleFactor,
-                                                          targetWidth,
-                                                          targetHeight);
-        }
-
-        return ImageUtils.saveImageTempFile(resolution, resizeImageJpg, project, ImageUtils.getExportName("", resName));
     }
 }

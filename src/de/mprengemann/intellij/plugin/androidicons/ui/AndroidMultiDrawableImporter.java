@@ -10,8 +10,8 @@ import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.SimpleMouseListener;
 import org.apache.commons.lang.StringUtils;
@@ -71,6 +71,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         browseButton.addBrowseFolderListener(title1, null, project, imageDescriptor);
         browseButton.addBrowseFolderListener(new TextBrowseFolderListener(imageDescriptor) {
             @Override
+            @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
                 updateImage(chosenFile.getCanonicalPath());

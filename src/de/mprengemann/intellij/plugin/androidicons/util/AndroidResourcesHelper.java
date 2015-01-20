@@ -50,6 +50,7 @@ public class AndroidResourcesHelper {
         browser.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
         browser.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
             @Override
+            @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
                 SettingsHelper.saveResRootForProject(project, chosenFile.getUrl());

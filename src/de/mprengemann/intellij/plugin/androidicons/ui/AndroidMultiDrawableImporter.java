@@ -73,8 +73,8 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         ImageFileBrowserFolderActionListener actionListener = new ImageFileBrowserFolderActionListener(title1, project, browseButton, imageDescriptor) {
                 @Override
                 @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
-                protected void onFileChosen(@NotNull VirtualFile chosenFile) {
-                    super.onFileChosen(chosenFile);
+                protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
+                    super.onFileChoosen(chosenFile);
                     fillImageInformation(chosenFile);
                 }
             };

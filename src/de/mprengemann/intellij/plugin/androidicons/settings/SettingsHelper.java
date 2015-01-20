@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 public class SettingsHelper {
     private static final String PATH = "assetPath";
     private static final String RES_ROOT = "resourcesRoot";
+    private static final String LAST_FOLDER_ROOT = "lastFolderRoot";
 
     public static VirtualFile getAssetPath() {
         String persistedFile = getAssetPathString();
@@ -49,5 +50,15 @@ public class SettingsHelper {
     public static String getResRootStringForProject(Project project) {
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
         return propertiesComponent.getValue(RES_ROOT);
+    }
+
+    public static String getLastImageFolder(Project project) {
+        PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
+        return propertiesComponent.getValue(LAST_FOLDER_ROOT);
+    }
+
+    public static void saveLastImageFolder(Project project, String fileUrl) {
+        PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
+        propertiesComponent.setValue(LAST_FOLDER_ROOT, fileUrl);
     }
 }

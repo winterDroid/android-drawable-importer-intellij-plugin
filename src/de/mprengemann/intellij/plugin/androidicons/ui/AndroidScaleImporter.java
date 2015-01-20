@@ -8,7 +8,6 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -16,6 +15,7 @@ import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.ScalingTask;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageFileBrowserFolderActionListener;
 import de.mprengemann.intellij.plugin.androidicons.util.ResizeAlgorithm;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
@@ -73,19 +73,17 @@ public class AndroidScaleImporter extends DialogWrapper {
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
 
-        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(
-            ImageFileTypeManager.getInstance().getImageFileType());
+        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
         String title1 = "Select your asset";
-        imageDescriptor.setTitle(title1);
-        assetBrowser.addBrowseFolderListener(title1, null, project, imageDescriptor);
-        assetBrowser.addBrowseFolderListener(new TextBrowseFolderListener(imageDescriptor) {
+        ImageFileBrowserFolderActionListener actionListener = new ImageFileBrowserFolderActionListener(title1, project, assetBrowser, imageDescriptor) {
             @Override
             @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
-            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChoosen(chosenFile);
+            protected void onFileChosen(@NotNull VirtualFile chosenFile) {
+                super.onFileChosen(chosenFile);
                 updateImageInformation(chosenFile);
             }
-        });
+        };
+        assetBrowser.addBrowseFolderListener(project, actionListener);
         new FileDrop(assetBrowser.getTextField(), new FileDrop.Target() {
             @Override
             public FileChooserDescriptor getDescriptor() {

@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class AndroidIconsImporter extends DialogWrapper {
+public class MaterialIconsImporter extends DialogWrapper {
 
     private VirtualFile assetRoot;
 
@@ -41,6 +41,7 @@ public class AndroidIconsImporter extends DialogWrapper {
     private TextFieldWithBrowseButton resRoot;
     private JComboBox assetSpinner;
     private JComboBox colorSpinner;
+    private JComboBox categorySpinner;
     private JTextField resExportName;
     private JCheckBox LDPICheckBox;
     private JCheckBox MDPICheckBox;
@@ -48,15 +49,17 @@ public class AndroidIconsImporter extends DialogWrapper {
     private JCheckBox XHDPICheckBox;
     private JCheckBox XXHDPICheckBox;
     private JPanel container;
+    private JComboBox sizeSpinner;
+    private JCheckBox XXXHDPICheckBox;
     private String assetColor;
     private String assetName;
     private boolean exportNameChanged = false;
 
-    public AndroidIconsImporter(@Nullable final Project project, Module module) {
+    public MaterialIconsImporter(@Nullable final Project project, Module module) {
         super(project, true);
         this.project = project;
 
-        setTitle("Android Icons Importer");
+        setTitle("Material Icons Importer");
         setResizable(false);
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);

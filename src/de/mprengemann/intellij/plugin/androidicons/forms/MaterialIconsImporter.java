@@ -218,6 +218,7 @@ public class MaterialIconsImporter extends DialogWrapper {
     }
     
     private void fillSizes() {
+        final String lastSelection = (String) sizeSpinner.getSelectedItem();
         sizeSpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
             return;
@@ -250,9 +251,13 @@ public class MaterialIconsImporter extends DialogWrapper {
         for (String size : list) {
             sizeSpinner.addItem(size);
         }
+        if (list.contains(lastSelection)) {
+            sizeSpinner.setSelectedIndex(list.indexOf(lastSelection));
+        }
     }
     
     private void fillColors() {
+        final String lastSelection = (String) colorSpinner.getSelectedItem();
         colorSpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
             return;
@@ -286,6 +291,9 @@ public class MaterialIconsImporter extends DialogWrapper {
         Collections.sort(list);
         for (String size : list) {
             colorSpinner.addItem(size);
+        }
+        if (list.contains(lastSelection)) {
+            colorSpinner.setSelectedIndex(list.indexOf(lastSelection));
         }
     }
 

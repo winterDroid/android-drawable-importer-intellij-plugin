@@ -371,12 +371,14 @@ public class MaterialIconsImporter extends DialogWrapper {
 
             String resRootText = resRoot.getText();
 
+            String assetCategory = (String) categorySpinner.getSelectedItem();
             String assetName = (String) assetSpinner.getSelectedItem();
             String assetColor = (String) colorSpinner.getSelectedItem();
-            String fromName = "ic_action_" + assetName + ".png";
+            String assetSize = (String) sizeSpinner.getSelectedItem();
+            String fromName = "ic_" + assetName + "_" + assetColor + "_" + assetSize + ".png";
             String toName = resExportName.getText();
 
-            this.source = new File(assetRoot.getCanonicalPath() + "/" + assetColor.replace(" ", "_") + "/" + resolution + "/" + fromName);
+            this.source = new File(assetRoot.getCanonicalPath(), assetCategory + "/drawable-" + resolution + "/" + fromName);
             this.target = ImageUtils.getTargetFile(resRootText, resolution, toName);
         }
     }

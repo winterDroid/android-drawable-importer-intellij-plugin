@@ -12,6 +12,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.images.ScalingTask;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class AndroidScaleImporter extends DialogWrapper {
+    public static final String CHECKBOX_TEXT = "%s (%.0f px x %.0f px)";
     private final Project project;
     private JPanel container;
     private JComboBox assetResolutionSpinner;
@@ -253,12 +255,12 @@ public class AndroidScaleImporter extends DialogWrapper {
     }
 
     private void updateNewSizes(int targetWidth, int targetHeight) {
-        LDPICheckBox.setText("LDPI (" + (int) (toLDPI * targetWidth) + "px x " + (int) (toLDPI * targetHeight) + " px)");
-        MDPICheckBox.setText("MDPI (" + (int) (toMDPI * targetWidth) + "px x " + (int) (toMDPI * targetHeight) + " px)");
-        HDPICheckBox.setText("HDPI (" + (int) (toHDPI * targetWidth) + "px x " + (int) (toHDPI * targetHeight) + " px)");
-        XHDPICheckBox.setText("XHDPI (" + (int) (toXHDPI * targetWidth) + "px x " + (int) (toXHDPI * targetHeight) + " px)");
-        XXHDPICheckBox.setText("XXHDPI (" + (int) (toXXHDPI * targetWidth) + "px x " + (int) (toXXHDPI * targetHeight) + " px)");
-        XXXHDPICheckBox.setText("XXXHDPI (" + (int) (toXXXHDPI * targetWidth) + "px x " + (int) (toXXXHDPI * targetHeight) + " px)");
+        LDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.LDPI, toLDPI * targetWidth, toLDPI * targetHeight));
+        MDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.MDPI, toMDPI * targetWidth, toMDPI * targetHeight));
+        HDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.HDPI, toHDPI * targetWidth, toHDPI * targetHeight));
+        XHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XHDPI, toXHDPI * targetWidth, toXHDPI * targetHeight));
+        XXHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XXHDPI, toXXHDPI * targetWidth, toXXHDPI * targetHeight));
+        XXXHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XXXHDPI, toXXXHDPI * targetWidth, toXXXHDPI * targetHeight));
     }
 
     private void updateScaleFactors() {
@@ -269,53 +271,60 @@ public class AndroidScaleImporter extends DialogWrapper {
         toXXHDPI = 0f;
         toXXXHDPI = 0f;
 
-        String targetResolution = (String) assetResolutionSpinner.getSelectedItem();
-        if (targetResolution.equalsIgnoreCase("other")) {
-            targetResolution = (String) targetResolutionSpinner.getSelectedItem();
+        Resolution targetResolution = Resolution.from((String) assetResolutionSpinner.getSelectedItem());
+        if (targetResolution == null) {
+            targetResolution = Resolution.from((String) targetResolutionSpinner.getSelectedItem());
         }
 
-        if (targetResolution.equalsIgnoreCase("mdpi")) {
-            toLDPI = 0.5f;
-            toMDPI = 1f;
-            toHDPI = 1.5f;
-            toXHDPI = 2f;
-            toXXHDPI = 3f;
-            toXXXHDPI = 4f;
-        } else if (targetResolution.equalsIgnoreCase("ldpi")) {
-            toLDPI = 2f * 0.5f;
-            toMDPI = 2f * 1f;
-            toHDPI = 2f * 1.5f;
-            toXHDPI = 2f * 2f;
-            toXXHDPI = 2f * 3f;
-            toXXXHDPI = 2f * 4f;
-        } else if (targetResolution.equalsIgnoreCase("hdpi")) {
-            toLDPI = 2f / 3f * 0.5f;
-            toMDPI = 2f / 3f * 1f;
-            toHDPI = 2f / 3f * 1.5f;
-            toXHDPI = 2f / 3f * 2f;
-            toXXHDPI = 2f / 3f * 3f;
-            toXXXHDPI = 2f / 3f * 4f;
-        } else if (targetResolution.equalsIgnoreCase("xhdpi")) {
-            toLDPI = 1f / 2f * 0.5f;
-            toMDPI = 1f / 2f * 1f;
-            toHDPI = 1f / 2f * 1.5f;
-            toXHDPI = 1f / 2f * 2f;
-            toXXHDPI = 1f / 2f * 3f;
-            toXXXHDPI = 1f / 2f * 4f;
-        } else if (targetResolution.equalsIgnoreCase("xxhdpi")) {
-            toLDPI = 1f / 3f * 0.5f;
-            toMDPI = 1f / 3f * 1f;
-            toHDPI = 1f / 3f * 1.5f;
-            toXHDPI = 1f / 3f * 2f;
-            toXXHDPI = 1f / 3f * 3f;
-            toXXXHDPI = 1f / 3f * 4f;
-        } else if (targetResolution.equalsIgnoreCase("xxxhdpi")) {
-            toLDPI = 1f / 4f * 0.5f;
-            toMDPI = 1f / 4f * 1f;
-            toHDPI = 1f / 4f * 1.5f;
-            toXHDPI = 1f / 4f * 2f;
-            toXXHDPI = 1f / 4f * 3f;
-            toXXXHDPI = 1f / 4f * 4f;
+        switch (targetResolution) {
+            case MDPI:
+                toLDPI = 0.5f;
+                toMDPI = 1f;
+                toHDPI = 1.5f;
+                toXHDPI = 2f;
+                toXXHDPI = 3f;
+                toXXXHDPI = 4f;
+                break;
+            case LDPI:
+                toLDPI = 2f * 0.5f;
+                toMDPI = 2f * 1f;
+                toHDPI = 2f * 1.5f;
+                toXHDPI = 2f * 2f;
+                toXXHDPI = 2f * 3f;
+                toXXXHDPI = 2f * 4f;
+                break;
+            case HDPI:
+                toLDPI = 2f / 3f * 0.5f;
+                toMDPI = 2f / 3f * 1f;
+                toHDPI = 2f / 3f * 1.5f;
+                toXHDPI = 2f / 3f * 2f;
+                toXXHDPI = 2f / 3f * 3f;
+                toXXXHDPI = 2f / 3f * 4f;
+                break;
+            case XHDPI:
+                toLDPI = 1f / 2f * 0.5f;
+                toMDPI = 1f / 2f * 1f;
+                toHDPI = 1f / 2f * 1.5f;
+                toXHDPI = 1f / 2f * 2f;
+                toXXHDPI = 1f / 2f * 3f;
+                toXXXHDPI = 1f / 2f * 4f;
+                break;
+            case XXHDPI:
+                toLDPI = 1f / 3f * 0.5f;
+                toMDPI = 1f / 3f * 1f;
+                toHDPI = 1f / 3f * 1.5f;
+                toXHDPI = 1f / 3f * 2f;
+                toXXHDPI = 1f / 3f * 3f;
+                toXXXHDPI = 1f / 3f * 4f;
+                break;
+            case XXXHDPI:
+                toLDPI = 1f / 4f * 0.5f;
+                toMDPI = 1f / 4f * 1f;
+                toHDPI = 1f / 4f * 1.5f;
+                toXHDPI = 1f / 4f * 2f;
+                toXXHDPI = 1f / 4f * 3f;
+                toXXXHDPI = 1f / 4f * 4f;
+                break;
         }
     }
 

@@ -7,6 +7,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
@@ -186,19 +187,19 @@ public class AndroidIconsImporter extends DialogWrapper {
     private void importIcons() {
         List<FromToPath> paths = new ArrayList<FromToPath>();
         if (LDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("ldpi"));
+            paths.add(new FromToPath(Resolution.LDPI));
         }
         if (MDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("mdpi"));
+            paths.add(new FromToPath(Resolution.MDPI));
         }
         if (HDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("hdpi"));
+            paths.add(new FromToPath(Resolution.HDPI));
         }
         if (XHDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("xhdpi"));
+            paths.add(new FromToPath(Resolution.XHDPI));
         }
         if (XXHDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("xxhdpi"));
+            paths.add(new FromToPath(Resolution.XXHDPI));
         }
 
         copyDrawables(paths);
@@ -253,9 +254,9 @@ public class AndroidIconsImporter extends DialogWrapper {
     private class FromToPath {
         public final File source;
         public final File target;
-        public final String resolution;
+        public final Resolution resolution;
 
-        private FromToPath(String resolution) {
+        private FromToPath(Resolution resolution) {
             this.resolution = resolution;
 
             String resRootText = resRoot.getText();

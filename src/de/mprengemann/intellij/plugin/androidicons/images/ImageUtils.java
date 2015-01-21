@@ -77,6 +77,17 @@ public class ImageUtils {
 
     public static BufferedImage resizeNormalImage(ResizeAlgorithm algorithm,
                                                   Object method,
+                                                  ScalingImageInformation information) throws IOException {
+        return resizeNormalImage(algorithm,
+                                 method,
+                                 information.getImageFile(),
+                                 information.getFactor(),
+                                 information.getTargetWidth(),
+                                 information.getTargetHeight());
+    }
+
+    public static BufferedImage resizeNormalImage(ResizeAlgorithm algorithm,
+                                                  Object method,
                                                   File imageFile,
                                                   float scaleFactor,
                                                   int targetWidth,
@@ -109,12 +120,27 @@ public class ImageUtils {
 
     public static BufferedImage resizeNinePatchImage(ResizeAlgorithm algorithm,
                                                      Object method,
+                                                     Project project,
+                                                     ScalingImageInformation information) throws IOException {
+        return resizeNinePatchImage(algorithm,
+                                    method,
+                                    project,
+                                    information.getFactor(),
+                                    information.getTargetWidth(),
+                                    information.getTargetHeight(),
+                                    information.getImageFile(),
+                                    information.getResolution(),
+                                    information.getExportName());
+    }
+
+    public static BufferedImage resizeNinePatchImage(ResizeAlgorithm algorithm,
+                                                     Object method,
+                                                     Project project,
                                                      float scaleFactor,
                                                      int targetWidth,
                                                      int targetHeight,
                                                      File imageFile,
-                                                     String resolution,
-                                                     Project project,
+                                                     Resolution resolution,
                                                      String name) throws IOException {
         BufferedImage image = ImageIO.read(imageFile);
         int type = BufferedImage.TYPE_INT_ARGB;
@@ -143,6 +169,10 @@ public class ImageUtils {
         borderImage.setRGB(1, 1, w, h, rgbArray, 0, w);
 
         return borderImage;
+    }
+
+    public static String getExportName(String name) {
+        return getExportName("", name);
     }
 
     public static String getExportName(String prefix, String name) {
@@ -288,7 +318,7 @@ public class ImageUtils {
         inputImage.setRGB(w - 1, 0, 0x0);
     }
 
-    public static File saveImageTempFile(String resolution,
+    public static File saveImageTempFile(Resolution resolution,
                                          BufferedImage resizeImageJpg,
                                          Project project,
                                          String exportName) throws IOException {
@@ -304,7 +334,11 @@ public class ImageUtils {
         }
     }
 
-    public static File getTargetFile(String path, String resolution, String exportName) {
+    public static File getTargetFile(String path, Resolution resolution, String exportName) {
         return new File(String.format(TARGET_FILE_PATTERN, path, resolution, exportName));
+    }
+
+    public static File getTargetFile(ScalingImageInformation information) {
+        return getTargetFile(information.getExportPath(), information.getResolution(), information.getExportName());
     }
 }

@@ -10,6 +10,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageFileBrowserFolderActionListener;
@@ -55,17 +56,17 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
 
-        initBrowser("ldpi", ldpiFile);
-        initBrowser("mdpi", mdpiFile);
-        initBrowser("hdpi", hdpiFile);
-        initBrowser("xhdpi", xhdpiFile);
-        initBrowser("xxhdpi", xxhdpiFile);
-        initBrowser("xxxhdpi", xxxhdpiFile);
+        initBrowser(Resolution.LDPI, ldpiFile);
+        initBrowser(Resolution.MDPI, mdpiFile);
+        initBrowser(Resolution.HDPI, hdpiFile);
+        initBrowser(Resolution.XHDPI, xhdpiFile);
+        initBrowser(Resolution.XXHDPI, xxhdpiFile);
+        initBrowser(Resolution.XXXHDPI, xxxhdpiFile);
 
         init();
     }
 
-    private void initBrowser(String resolution, final TextFieldWithBrowseButton browseButton) {
+    private void initBrowser(Resolution resolution, final TextFieldWithBrowseButton browseButton) {
         final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(
             ImageFileTypeManager.getInstance().getImageFileType());
         String title1 = "Select your " + resolution + " asset";
@@ -147,12 +148,12 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         List<File> sources = new ArrayList<File>();
         List<File> targets = new ArrayList<File>();
 
-        addDataIfNecessary("ldpi", ldpiFile, sources, targets);
-        addDataIfNecessary("mdpi", mdpiFile, sources, targets);
-        addDataIfNecessary("hdpi", hdpiFile, sources, targets);
-        addDataIfNecessary("xhdpi", xhdpiFile, sources, targets);
-        addDataIfNecessary("xxhdpi", xxhdpiFile, sources, targets);
-        addDataIfNecessary("xxxhdpi", xxxhdpiFile, sources, targets);
+        addDataIfNecessary(Resolution.LDPI, ldpiFile, sources, targets);
+        addDataIfNecessary(Resolution.MDPI, mdpiFile, sources, targets);
+        addDataIfNecessary(Resolution.HDPI, hdpiFile, sources, targets);
+        addDataIfNecessary(Resolution.XHDPI, xhdpiFile, sources, targets);
+        addDataIfNecessary(Resolution.XXHDPI, xxhdpiFile, sources, targets);
+        addDataIfNecessary(Resolution.XXXHDPI, xxxhdpiFile, sources, targets);
 
         try {
             RefactorHelper.copy(project, sources, targets);
@@ -162,7 +163,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         super.doOKAction();
     }
 
-    private void addDataIfNecessary(String resolution,
+    private void addDataIfNecessary(Resolution resolution,
                                     TextFieldWithBrowseButton browser,
                                     List<File> sources,
                                     List<File> targets) {

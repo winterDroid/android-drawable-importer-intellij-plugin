@@ -1,6 +1,7 @@
 package de.mprengemann.intellij.plugin.androidicons.images;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.DumbModeTask;
 import com.intellij.openapi.project.DumbService;
@@ -68,57 +69,65 @@ public class ScalingTask extends DumbModeTask {
             public void run() {
                 try {
                     scaleImages(progressIndicator);
+                } catch (ProcessCanceledException ignored) {
                 } catch (IOException ignored) {
                 }
             }
         });
     }
 
-    private void scaleImages(ProgressIndicator indicator) throws IOException {
-        indicator.setIndeterminate(true);
+    private void scaleImages(ProgressIndicator indicator) throws IOException, ProcessCanceledException {
         indicator.setText("Scale images");
+        indicator.setIndeterminate(true);
+        indicator.checkCanceled();
 
-        final List<File> sources = new ArrayList<File>();
-        final List<File> targets = new ArrayList<File>();
+        final List<ScalingImageInformation> scalingInformationList = getScalingInformation();
 
-        if (scaleToLDPI) {
-            try {
-                sources.add(exportTempImage(imageFile, "ldpi", toLDPI, targetWidth, targetHeight));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            targets.add(ImageUtils.getTargetFile(path, "ldpi", exportName));
-        }
-        if (scaleToMDPI) {
-            sources.add(exportTempImage(imageFile, "mdpi", toMDPI, targetWidth, targetHeight));
-            targets.add(ImageUtils.getTargetFile(path, "mdpi", exportName));
-        }
-        if (scaleToHDPI) {
-            sources.add(exportTempImage(imageFile, "hdpi", toHDPI, targetWidth, targetHeight));
-            targets.add(ImageUtils.getTargetFile(path, "hdpi", exportName));
-        }
-        if (scaleToXHDPI) {
-            sources.add(exportTempImage(imageFile, "xhdpi", toXHDPI, targetWidth, targetHeight));
-            targets.add(ImageUtils.getTargetFile(path, "xhdpi", exportName));
-        }
-        if (scaleToXXHDPI) {
-            sources.add(exportTempImage(imageFile, "xxhdpi", toXXHDPI, targetWidth, targetHeight));
-            targets.add(ImageUtils.getTargetFile(path, "xxhdpi", exportName));
-        }
-        if (scaleToXXXHDPI) {
-            sources.add(exportTempImage(imageFile, "xxxhdpi", toXXXHDPI, targetWidth, targetHeight));
-            targets.add(ImageUtils.getTargetFile(path, "xxxhdpi", exportName));
+        indicator.setIndeterminate(false);
+        for (int i = 0; i < scalingInformationList.size(); i++) {
+            ScalingImageInformation information = scalingInformationList.get(i);
+            scaleImage(indicator, information);
+            indicator.setFraction((i + 1)  / scalingInformationList.size());
         }
 
         DumbService.getInstance(project).runWhenSmart(new Runnable() {
             @Override
             public void run() {
                 try {
-                    RefactorHelper.move(project, sources, targets);
+                    RefactorHelper.move(project, scalingInformationList);
                 } catch (IOException ignored) {
                 }
             }
         });
+    }
+
+    private void scaleImage(ProgressIndicator indicator, ScalingImageInformation information) {
+        indicator.checkCanceled();
+        information.setTempImage(exportTempImage(information));
+        information.setTargetImage(ImageUtils.getTargetFile(information));
+    }
+
+    private List<ScalingImageInformation> getScalingInformation() {
+        List<ScalingImageInformation> scalingInformationList = new ArrayList<ScalingImageInformation>();
+        if (scaleToLDPI) {
+            scalingInformationList.add(new ScalingImageInformation(imageFile, Resolution.LDPI, toLDPI, targetWidth, targetHeight, path, exportName));
+        }
+        if (scaleToMDPI) {
+            scalingInformationList.add(new ScalingImageInformation(imageFile, Resolution.MDPI, toMDPI, targetWidth, targetHeight, path, exportName));
+        }
+        if (scaleToHDPI) {
+            scalingInformationList.add(new ScalingImageInformation(imageFile, Resolution.HDPI, toHDPI, targetWidth, targetHeight, path, exportName));
+        }
+        if (scaleToXHDPI) {
+            scalingInformationList.add(new ScalingImageInformation(imageFile, Resolution.XHDPI, toXHDPI, targetWidth, targetHeight, path, exportName));
+        }
+        if (scaleToXXHDPI) {
+            scalingInformationList.add(new ScalingImageInformation(imageFile, Resolution.XXHDPI, toXXHDPI, targetWidth, targetHeight, path, exportName));
+        }
+        if (scaleToXXXHDPI) {
+            scalingInformationList.add(new ScalingImageInformation(imageFile, Resolution.XXXHDPI, toXXXHDPI, targetWidth, targetHeight, path, exportName));
+        }
+        return scalingInformationList;
     }
 
     public void addLDPI(float toLDPI) {
@@ -151,34 +160,27 @@ public class ScalingTask extends DumbModeTask {
         this.toXXXHDPI = toXXXHDPI;
     }
 
-    private File exportTempImage(File imageFile,
-                                 String resolution,
-                                 float scaleFactor,
-                                 int targetWidth,
-                                 int targetHeight) throws IOException {
-        BufferedImage resizeImageJpg;
-        if (isNinePatch) {
-            resizeImageJpg = ImageUtils.resizeNinePatchImage(algorithm,
-                                                             method,
-                                                             scaleFactor,
-                                                             targetWidth,
-                                                             targetHeight,
-                                                             imageFile,
-                                                             resolution,
-                                                             project,
-                                                             path);
-        } else {
-            resizeImageJpg = ImageUtils.resizeNormalImage(algorithm,
-                                                          method,
-                                                          imageFile,
-                                                          scaleFactor,
-                                                          targetWidth,
-                                                          targetHeight);
-        }
+    private File exportTempImage(ScalingImageInformation information) {
+        try {
+            BufferedImage resizeImageJpg;
+            if (isNinePatch) {
+                resizeImageJpg = ImageUtils.resizeNinePatchImage(algorithm,
+                                                                 method,
+                                                                 project,
+                                                                 information);
+            } else {
+                resizeImageJpg = ImageUtils.resizeNormalImage(algorithm,
+                                                              method,
+                                                              information);
+            }
 
-        return ImageUtils.saveImageTempFile(resolution,
-                                            resizeImageJpg,
-                                            project,
-                                            ImageUtils.getExportName("", exportName));
+            return ImageUtils.saveImageTempFile(information.getResolution(),
+                                                resizeImageJpg,
+                                                project,
+                                                exportName);
+
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 }

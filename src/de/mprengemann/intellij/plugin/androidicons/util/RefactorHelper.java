@@ -7,6 +7,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.images.ScalingImageInformation;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -118,12 +120,12 @@ public class RefactorHelper {
         return false;
     }
 
-    public static File getTempImageFile(Project project, String resolution, String exportName) {
+    public static File getTempImageFile(Project project, Resolution resolution, String exportName) {
         VirtualFile workspaceFile = project.getWorkspaceFile();
         if (workspaceFile != null) {
             VirtualFile ideaDir = workspaceFile.getParent();
             if (ideaDir != null) {
-                return new File(ideaDir.getCanonicalPath() + "/plugin-images/" + resolution + "/" + exportName);
+                return new File(ideaDir.getCanonicalPath() + "/plugin-images/" + resolution.toString() + "/" + exportName);
             }
         }
         return null;
@@ -162,5 +164,17 @@ public class RefactorHelper {
                 }
             }
         });
+    }
+
+    public static void move(Project project, List<ScalingImageInformation> scalingInformationList) throws IOException {
+        List<File> tempFiles = new ArrayList<File>();
+        List<File> targets = new ArrayList<File>();
+        
+        for (ScalingImageInformation information : scalingInformationList) {
+            tempFiles.add(information.getTempImage());
+            targets.add(information.getTargetFile());
+        }
+        
+        move(project, tempFiles, targets);
     }
 }

@@ -27,7 +27,7 @@ import java.util.List;
 public class PluginSettings implements Configurable {
     private static final String ANDROID_ICONS_URL = "http://www.androidicons.com/";
     private static final String MATERIAL_ICONS_URL = "https://github.com/google/material-design-icons/releases";
-    private static final List<String> BLACKLISTED_MATERIAL_ICONS_FOLDER = Arrays.asList("sprites",
+    public static final List<String> BLACKLISTED_MATERIAL_ICONS_FOLDER = Arrays.asList("sprites",
                                                                                         "1x_ios",
                                                                                         "1x_web",
                                                                                         "2x_ios",

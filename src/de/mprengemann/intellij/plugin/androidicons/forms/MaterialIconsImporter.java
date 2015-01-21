@@ -9,10 +9,11 @@ import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.settings.PluginSettings;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
-import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,11 +30,15 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MaterialIconsImporter extends DialogWrapper {
 
+    private static final String DEFAULT_RESOLUTION = "drawable-xhdpi";
     private VirtualFile assetRoot;
 
     private Project project;
@@ -42,18 +47,25 @@ public class MaterialIconsImporter extends DialogWrapper {
     private JComboBox assetSpinner;
     private JComboBox colorSpinner;
     private JComboBox categorySpinner;
+    private JComboBox sizeSpinner;
+    
     private JTextField resExportName;
-    private JCheckBox LDPICheckBox;
     private JCheckBox MDPICheckBox;
     private JCheckBox HDPICheckBox;
     private JCheckBox XHDPICheckBox;
     private JCheckBox XXHDPICheckBox;
-    private JPanel container;
-    private JComboBox sizeSpinner;
     private JCheckBox XXXHDPICheckBox;
-    private String assetColor;
-    private String assetName;
+    private JPanel container;
     private boolean exportNameChanged = false;
+    private final Comparator<File> alphabeticalComparator = new Comparator<File>() {
+        @Override
+        public int compare(File file1, File file2) {
+            if (file1 != null && file2 != null) {
+                return file1.getName().compareTo(file2.getName());
+            }
+            return 0;
+        }
+    };
 
     public MaterialIconsImporter(@Nullable final Project project, Module module) {
         super(project, true);
@@ -63,28 +75,43 @@ public class MaterialIconsImporter extends DialogWrapper {
         setResizable(false);
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
+        assetRoot = SettingsHelper.getAssetPath(IconPack.MATERIAL_ICONS);
 
-        assetRoot = SettingsHelper.getAssetPath(IconPack.ANDROID_ICONS);
-        colorSpinner.addActionListener(new ActionListener() {
+        fillCategories();
+        fillAssets();
+        fillSizes();
+        fillColors();
+
+        categorySpinner.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent event) {
-                assetColor = (String) colorSpinner.getSelectedItem();
+            public void actionPerformed(ActionEvent actionEvent) {
+                fillAssets();
                 updateImage();
             }
         });
-
         AssetSpinnerRenderer renderer = new AssetSpinnerRenderer();
         //noinspection GtkPreferredJComboBoxRenderer
         assetSpinner.setRenderer(renderer);
         assetSpinner.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                assetName = (String) assetSpinner.getSelectedItem();
+                fillSizes();
                 updateImage();
             }
         });
-
-        fillComboBoxes();
+        sizeSpinner.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                fillColors();
+                updateImage();
+            }
+        });
+        colorSpinner.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                updateImage();
+            }
+        });
 
         resExportName.addKeyListener(new KeyAdapter() {
             @Override
@@ -120,66 +147,146 @@ public class MaterialIconsImporter extends DialogWrapper {
         if (imageContainer == null) {
             return;
         }
-        String path = "/" + assetColor.replace(" ", "_") + "/xxhdpi/ic_action_" + assetName + ".png";
-        File imageFile = new File(assetRoot.getCanonicalPath() + path);
+        String assetColor = (String) colorSpinner.getSelectedItem();
+        String assetName = (String) assetSpinner.getSelectedItem();
+        String assetCategory = (String) categorySpinner.getSelectedItem();
+        String assetSize = (String) sizeSpinner.getSelectedItem();
+
+        if (assetColor == null ||
+            assetName == null ||
+            assetCategory == null ||
+            assetSize == null) {
+            return;
+        }
+
+        String path = assetCategory + "/" + DEFAULT_RESOLUTION + "/ic_" + assetName + "_" + assetColor + "_" + assetSize + ".png";
+        File imageFile = new File(assetRoot.getCanonicalPath(), path);
         ImageUtils.updateImage(imageContainer, imageFile);
         if (!exportNameChanged) {
             resExportName.setText("ic_action_" + assetName);
         }
     }
-
-    private void fillComboBoxes() {
+    
+    private void fillCategories() {
+        categorySpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
             return;
         }
         File assetRoot = new File(this.assetRoot.getCanonicalPath());
-        final FilenameFilter systemFileNameFiler = new FilenameFilter() {
+        final FilenameFilter folderFileNameFiler = new FilenameFilter() {
             @Override
             public boolean accept(File file, String s) {
-                return !s.startsWith(".");
+                return !s.startsWith(".") &&
+                       new File(file, s).isDirectory() &&
+                       !PluginSettings.BLACKLISTED_MATERIAL_ICONS_FOLDER
+                           .contains(FilenameUtils.removeExtension(s));
             }
         };
-        File[] colorDirs = assetRoot.listFiles(systemFileNameFiler);
-        Comparator<File> alphabeticalComparator = new Comparator<File>() {
+        File[] categories = assetRoot.listFiles(folderFileNameFiler);
+        Arrays.sort(categories, alphabeticalComparator);
+        for (File file : categories) {
+            categorySpinner.addItem(file.getName());
+        }
+    }
+    
+    private void fillAssets() {
+        assetSpinner.removeAllItems();
+        if (this.assetRoot.getCanonicalPath() == null) {
+            return;
+        }
+        File assetRoot = new File(this.assetRoot.getCanonicalPath());
+        assetRoot = new File(assetRoot, (String) categorySpinner.getSelectedItem());
+        assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
+        final FilenameFilter drawableFileNameFiler = new FilenameFilter() {
             @Override
-            public int compare(File file1, File file2) {
-                if (file1 != null && file2 != null) {
-                    return file1.getName().compareTo(file2.getName());
+            public boolean accept(File file, String s) {
+                if (!FilenameUtils.isExtension(s, "png")) {
+                    return false;
                 }
-                return 0;
+                String filename = FilenameUtils.removeExtension(s);
+                return filename.startsWith("ic_") &&
+                       filename.endsWith("_black_48dp");
             }
         };
-        Arrays.sort(colorDirs, alphabeticalComparator);
-        for (File file : colorDirs) {
-            if (!file.isDirectory()) {
-                continue;
-            }
-            colorSpinner.addItem(file.getName().replace("_", " "));
-        }
-
-        if (colorDirs.length < 1) {
-            return;
-        }
-        File exColorDir = colorDirs[0];
-        File[] densities = exColorDir.listFiles(systemFileNameFiler);
-        if (densities == null || densities.length < 1) {
-            return;
-        }
-        File exDensity = densities[0];
-        File[] assets = exDensity.listFiles(systemFileNameFiler);
-        Arrays.sort(assets, alphabeticalComparator);
+        File[] assets = assetRoot.listFiles(drawableFileNameFiler);
         for (File asset : assets) {
-            if (asset.isDirectory()) {
-                continue;
-            }
-            String extension = asset.getName().substring(asset.getName().lastIndexOf(".") + 1);
-            if (!extension.equalsIgnoreCase("png")) {
-                continue;
-            }
-            assetSpinner.addItem(ExportNameUtils.getExportNameFromFilename(asset.getName()).replace("ic_action_", ""));
+            String assetName = FilenameUtils.removeExtension(asset.getName());
+            assetName = assetName.replace("_black_48dp", "");
+            assetName = assetName.replace("ic_", "");
+            assetSpinner.addItem(assetName);
         }
-        assetColor = (String) colorSpinner.getSelectedItem();
-        assetName = (String) assetSpinner.getSelectedItem();
+    }
+    
+    private void fillSizes() {
+        sizeSpinner.removeAllItems();
+        if (this.assetRoot.getCanonicalPath() == null) {
+            return;
+        }
+        File assetRoot = new File(this.assetRoot.getCanonicalPath());
+        assetRoot = new File(assetRoot, (String) categorySpinner.getSelectedItem());
+        assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
+        final String assetName = (String) assetSpinner.getSelectedItem();
+        final FilenameFilter drawableFileNameFiler = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                if (!FilenameUtils.isExtension(s, "png")) {
+                    return false;
+                }
+                String filename = FilenameUtils.removeExtension(s);
+                return filename.startsWith("ic_" + assetName + "_");
+            }
+        };
+        File[] assets = assetRoot.listFiles(drawableFileNameFiler);
+        Set<String> sizes = new HashSet<String>();
+        for (File asset : assets) {
+            String drawableName = FilenameUtils.removeExtension(asset.getName());
+            String[] numbers = drawableName.replaceAll("[^-?0-9]+", " ").trim().split(" ");
+            drawableName = numbers[numbers.length - 1].trim() + "dp";
+            sizes.add(drawableName);
+        }
+        List<String> list = new ArrayList<String>();
+        list.addAll(sizes);
+        Collections.sort(list);
+        for (String size : list) {
+            sizeSpinner.addItem(size);
+        }
+    }
+    
+    private void fillColors() {
+        colorSpinner.removeAllItems();
+        if (this.assetRoot.getCanonicalPath() == null) {
+            return;
+        }
+        File assetRoot = new File(this.assetRoot.getCanonicalPath());
+        assetRoot = new File(assetRoot, (String) categorySpinner.getSelectedItem());
+        assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
+        final String assetName = (String) assetSpinner.getSelectedItem();
+        final String assetSize = (String) sizeSpinner.getSelectedItem();
+        final FilenameFilter drawableFileNameFiler = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                if (!FilenameUtils.isExtension(s, "png")) {
+                    return false;
+                }
+                String filename = FilenameUtils.removeExtension(s);
+                return filename.startsWith("ic_" + assetName + "_") &&
+                       filename.endsWith("_" + assetSize);
+            }
+        };
+        File[] assets = assetRoot.listFiles(drawableFileNameFiler);
+        Set<String> colors = new HashSet<String>();
+        for (File asset : assets) {
+            String drawableName = FilenameUtils.removeExtension(asset.getName());
+            String[] color = drawableName.split("_");
+            drawableName = color[color.length - 2].trim();
+            colors.add(drawableName);
+        }
+        List<String> list = new ArrayList<String>();
+        list.addAll(colors);
+        Collections.sort(list);
+        for (String size : list) {
+            colorSpinner.addItem(size);
+        }
     }
 
     @Override
@@ -190,9 +297,6 @@ public class MaterialIconsImporter extends DialogWrapper {
 
     private void importIcons() {
         List<FromToPath> paths = new ArrayList<FromToPath>();
-        if (LDPICheckBox.isSelected()) {
-            paths.add(new FromToPath(Resolution.LDPI));
-        }
         if (MDPICheckBox.isSelected()) {
             paths.add(new FromToPath(Resolution.MDPI));
         }
@@ -205,7 +309,9 @@ public class MaterialIconsImporter extends DialogWrapper {
         if (XXHDPICheckBox.isSelected()) {
             paths.add(new FromToPath(Resolution.XXHDPI));
         }
-
+        if (XXXHDPICheckBox.isSelected()) {
+            paths.add(new FromToPath(Resolution.XXXHDPI));
+        }
         copyDrawables(paths);
     }
 
@@ -265,6 +371,8 @@ public class MaterialIconsImporter extends DialogWrapper {
 
             String resRootText = resRoot.getText();
 
+            String assetName = (String) assetSpinner.getSelectedItem();
+            String assetColor = (String) colorSpinner.getSelectedItem();
             String fromName = "ic_action_" + assetName + ".png";
             String toName = resExportName.getText();
 
@@ -278,9 +386,9 @@ public class MaterialIconsImporter extends DialogWrapper {
         public Component getListCellRendererComponent(JList jList, Object o, int i, boolean b, boolean b2) {
             JLabel label = (JLabel) super.getListCellRendererComponent(jList, o, i, b, b2);
             if (label != null) {
-                String item = (String) assetSpinner.getItemAt(i);
-                String path = "/black/mdpi/ic_action_" + item + ".png";
-                File imageFile = new File(assetRoot.getCanonicalPath() + path);
+                String name = (String) assetSpinner.getItemAt(i);
+                String path = categorySpinner.getSelectedItem() + "/" + DEFAULT_RESOLUTION + "/ic_" + name + "_black_24dp.png";
+                File imageFile = new File(assetRoot.getCanonicalPath(), path);
                 if (imageFile.exists()) {
                     label.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
                 }

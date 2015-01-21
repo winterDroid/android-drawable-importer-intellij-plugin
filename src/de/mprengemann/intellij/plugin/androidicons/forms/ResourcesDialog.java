@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.ui;
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -18,7 +18,7 @@ public class ResourcesDialog extends DialogWrapper {
 
     public ResourcesDialog(Project project, final List<VirtualFile> items, ResourceSelectionListener listener) {
         super(project, true);
-
+        setResizable(false);
         this.listener = listener;
 
         list.setItems(items, new Function<VirtualFile, String>() {

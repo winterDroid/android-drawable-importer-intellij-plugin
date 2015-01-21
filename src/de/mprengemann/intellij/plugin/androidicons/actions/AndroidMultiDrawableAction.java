@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import de.mprengemann.intellij.plugin.androidicons.ui.AndroidMultiDrawableImporter;
+import de.mprengemann.intellij.plugin.androidicons.forms.AndroidMultiDrawableImporter;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import icons.AndroidIcons;
 import org.jetbrains.annotations.NotNull;

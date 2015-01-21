@@ -7,8 +7,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.forms.ResourcesDialog;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
-import de.mprengemann.intellij.plugin.androidicons.ui.ResourcesDialog;
 import org.jetbrains.android.facet.AndroidFacet;
 import org.jetbrains.annotations.NotNull;
 

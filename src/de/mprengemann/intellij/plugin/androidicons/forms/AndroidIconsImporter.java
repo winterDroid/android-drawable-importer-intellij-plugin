@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.ui;
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;

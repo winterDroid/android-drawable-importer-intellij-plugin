@@ -87,7 +87,7 @@ public class ScalingTask extends DumbModeTask {
         for (int i = 0; i < scalingInformationList.size(); i++) {
             ScalingImageInformation information = scalingInformationList.get(i);
             scaleImage(indicator, information);
-            indicator.setFraction((i + 1)  / scalingInformationList.size());
+            indicator.setFraction((float) (i + 1)  / (float) scalingInformationList.size());
         }
 
         DumbService.getInstance(project).runWhenSmart(new Runnable() {

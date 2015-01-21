@@ -3,7 +3,7 @@ package de.mprengemann.intellij.plugin.androidicons.images;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
-import de.mprengemann.intellij.plugin.androidicons.ui.Wrong9PatchException;
+import de.mprengemann.intellij.plugin.androidicons.forms.Wrong9PatchException;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ResizeAlgorithm;
 import net.coobird.thumbnailator.Thumbnails;

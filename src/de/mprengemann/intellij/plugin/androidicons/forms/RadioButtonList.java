@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.ui;
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.ui.ClickListener;
 import com.intellij.ui.components.JBList;
@@ -66,18 +66,8 @@ public class RadioButtonList<T> extends JBList {
 
                     if (index != -1) {
                         JRadioButton radioButton = (JRadioButton) getModel().getElementAt(index);
-                        int iconArea;
-                        try {
-                            iconArea = radioButton.getMargin().left +
-                                       ((BasicRadioButtonUI) radioButton.getUI()).getDefaultIcon().getIconWidth() +
-                                       radioButton.getIconTextGap();
-                        } catch (ClassCastException c) {
-                            iconArea = DEFAULT_RADIO_WIDTH;
-                        }
-                        if (e.getX() < iconArea) {
-                            setSelected(radioButton, index);
-                            return true;
-                        }
+                        setSelected(radioButton, index);
+                        return true;
                     }
                 }
                 return false;

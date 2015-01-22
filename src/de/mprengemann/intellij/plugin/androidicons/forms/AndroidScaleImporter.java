@@ -11,13 +11,14 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
-import de.mprengemann.intellij.plugin.androidicons.images.ScalingTask;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageFileBrowserFolderActionListener;
-import de.mprengemann.intellij.plugin.androidicons.util.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
@@ -39,8 +40,8 @@ public class AndroidScaleImporter extends DialogWrapper {
     private JPanel container;
     private JComboBox assetResolutionSpinner;
     private JComboBox targetResolutionSpinner;
-    private JTextField targetHeight;
-    private JTextField targetWidth;
+    private JTextField imageHeight;
+    private JTextField imageWidth;
     private TextFieldWithBrowseButton resRoot;
     private TextFieldWithBrowseButton assetBrowser;
     private JTextField resExportName;
@@ -62,7 +63,6 @@ public class AndroidScaleImporter extends DialogWrapper {
     private float toXHDPI;
     private float toXXHDPI;
     private float toXXXHDPI;
-    private boolean isNinePatch = false;
     private int originalImageWidth = -1;
     private int originalImageHeight = -1;
 
@@ -116,14 +116,14 @@ public class AndroidScaleImporter extends DialogWrapper {
                 String selectedItem = (String) assetResolutionSpinner.getSelectedItem();
                 boolean setEnabled = selectedItem.equalsIgnoreCase("other");
                 targetResolutionSpinner.setEnabled(setEnabled);
-                targetWidth.setEnabled(setEnabled);
-                targetHeight.setEnabled(setEnabled);
+                imageWidth.setEnabled(setEnabled);
+                imageHeight.setEnabled(setEnabled);
                 aspectRatioLock.setEnabled(setEnabled);
 
                 if (!setEnabled) {
                     aspectRatioLock.setSelected(true);
-                    targetHeight.setText(originalImageHeight == -1 ? "" : Integer.toString(originalImageHeight));
-                    targetWidth.setText(originalImageWidth == -1 ? "" : Integer.toString(originalImageWidth));
+                    imageHeight.setText(originalImageHeight == -1 ? "" : Integer.toString(originalImageHeight));
+                    imageWidth.setText(originalImageWidth == -1 ? "" : Integer.toString(originalImageWidth));
                     updateScaleFactors();
                     updateNewSizes();
                 }
@@ -140,7 +140,7 @@ public class AndroidScaleImporter extends DialogWrapper {
                 updateNewSizes();
             }
         });
-        targetHeight.addKeyListener(new KeyAdapter() {
+        imageHeight.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 super.keyReleased(keyEvent);
@@ -148,7 +148,7 @@ public class AndroidScaleImporter extends DialogWrapper {
                 updateNewSizes();
             }
         });
-        targetWidth.addKeyListener(new KeyAdapter() {
+        imageWidth.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 super.keyReleased(keyEvent);
@@ -186,9 +186,9 @@ public class AndroidScaleImporter extends DialogWrapper {
             return;
         }
         try {
-            int targetHeight = Integer.parseInt(this.targetHeight.getText());
+            int targetHeight = Integer.parseInt(this.imageHeight.getText());
             int newTargetWidth = (int) ((float) (originalImageWidth * targetHeight) / (float) originalImageHeight);
-            targetWidth.setText(Integer.toString(newTargetWidth));
+            imageWidth.setText(Integer.toString(newTargetWidth));
         } catch (Exception ignored) {
         }
     }
@@ -198,16 +198,15 @@ public class AndroidScaleImporter extends DialogWrapper {
             return;
         }
         try {
-            int targetWidth = Integer.parseInt(this.targetWidth.getText());
+            int targetWidth = Integer.parseInt(this.imageWidth.getText());
             int newTargetHeight = (int) ((float) (originalImageHeight * targetWidth) / (float) originalImageWidth);
-            targetHeight.setText(Integer.toString(newTargetHeight));
+            imageHeight.setText(Integer.toString(newTargetHeight));
         } catch (Exception ignored) {
         }
     }
 
     private void updateImageInformation(VirtualFile chosenFile) {
         selectedImage = chosenFile;
-        isNinePatch = chosenFile.getName().endsWith(".9.png");
         updateImage();
         fillImageInformation();
     }
@@ -229,13 +228,13 @@ public class AndroidScaleImporter extends DialogWrapper {
             originalImageWidth = image.getWidth();
             originalImageHeight = image.getHeight();
 
-            if (isNinePatch) {
+            if (selectedImage.getName().endsWith(".9.png")) {
                 originalImageHeight -= 2;
                 originalImageWidth -= 2;
             }
 
-            targetHeight.setText(String.valueOf(originalImageHeight));
-            targetWidth.setText(String.valueOf(originalImageWidth));
+            imageHeight.setText(String.valueOf(originalImageHeight));
+            imageWidth.setText(String.valueOf(originalImageWidth));
 
             resExportName.setText(ExportNameUtils.getExportNameFromFilename(selectedImage.getName()));
 
@@ -247,85 +246,34 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     private void updateNewSizes() {
         try {
-            int targetWidth = Integer.parseInt(this.targetWidth.getText());
-            int targetHeight = Integer.parseInt(this.targetHeight.getText());
+            int targetWidth = Integer.parseInt(this.imageWidth.getText());
+            int targetHeight = Integer.parseInt(this.imageHeight.getText());
             updateNewSizes(targetWidth, targetHeight);
         } catch (Exception ignored) {
         }
     }
 
     private void updateNewSizes(int targetWidth, int targetHeight) {
-        LDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.LDPI, toLDPI * targetWidth, toLDPI * targetHeight));
-        MDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.MDPI, toMDPI * targetWidth, toMDPI * targetHeight));
-        HDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.HDPI, toHDPI * targetWidth, toHDPI * targetHeight));
-        XHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XHDPI, toXHDPI * targetWidth, toXHDPI * targetHeight));
-        XXHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XXHDPI, toXXHDPI * targetWidth, toXXHDPI * targetHeight));
-        XXXHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XXXHDPI, toXXXHDPI * targetWidth, toXXXHDPI * targetHeight));
+        LDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.LDPI.getName(), toLDPI * targetWidth, toLDPI * targetHeight));
+        MDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.MDPI.getName(), toMDPI * targetWidth, toMDPI * targetHeight));
+        HDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.HDPI.getName(), toHDPI * targetWidth, toHDPI * targetHeight));
+        XHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XHDPI.getName(), toXHDPI * targetWidth, toXHDPI * targetHeight));
+        XXHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XXHDPI.getName(), toXXHDPI * targetWidth, toXXHDPI * targetHeight));
+        XXXHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XXXHDPI.getName(), toXXXHDPI * targetWidth, toXXXHDPI * targetHeight));
     }
 
     private void updateScaleFactors() {
-        toLDPI = 0f;
-        toMDPI = 0f;
-        toHDPI = 0f;
-        toXHDPI = 0f;
-        toXXHDPI = 0f;
-        toXXXHDPI = 0f;
-
         Resolution targetResolution = Resolution.from((String) assetResolutionSpinner.getSelectedItem());
         if (targetResolution == null) {
             targetResolution = Resolution.from((String) targetResolutionSpinner.getSelectedItem());
         }
-
-        switch (targetResolution) {
-            case MDPI:
-                toLDPI = 0.5f;
-                toMDPI = 1f;
-                toHDPI = 1.5f;
-                toXHDPI = 2f;
-                toXXHDPI = 3f;
-                toXXXHDPI = 4f;
-                break;
-            case LDPI:
-                toLDPI = 2f * 0.5f;
-                toMDPI = 2f * 1f;
-                toHDPI = 2f * 1.5f;
-                toXHDPI = 2f * 2f;
-                toXXHDPI = 2f * 3f;
-                toXXXHDPI = 2f * 4f;
-                break;
-            case HDPI:
-                toLDPI = 2f / 3f * 0.5f;
-                toMDPI = 2f / 3f * 1f;
-                toHDPI = 2f / 3f * 1.5f;
-                toXHDPI = 2f / 3f * 2f;
-                toXXHDPI = 2f / 3f * 3f;
-                toXXXHDPI = 2f / 3f * 4f;
-                break;
-            case XHDPI:
-                toLDPI = 1f / 2f * 0.5f;
-                toMDPI = 1f / 2f * 1f;
-                toHDPI = 1f / 2f * 1.5f;
-                toXHDPI = 1f / 2f * 2f;
-                toXXHDPI = 1f / 2f * 3f;
-                toXXXHDPI = 1f / 2f * 4f;
-                break;
-            case XXHDPI:
-                toLDPI = 1f / 3f * 0.5f;
-                toMDPI = 1f / 3f * 1f;
-                toHDPI = 1f / 3f * 1.5f;
-                toXHDPI = 1f / 3f * 2f;
-                toXXHDPI = 1f / 3f * 3f;
-                toXXXHDPI = 1f / 3f * 4f;
-                break;
-            case XXXHDPI:
-                toLDPI = 1f / 4f * 0.5f;
-                toMDPI = 1f / 4f * 1f;
-                toHDPI = 1f / 4f * 1.5f;
-                toXHDPI = 1f / 4f * 2f;
-                toXXHDPI = 1f / 4f * 3f;
-                toXXXHDPI = 1f / 4f * 4f;
-                break;
-        }
+        
+        toLDPI = RefactorHelper.getScaleFactor(Resolution.LDPI, targetResolution);
+        toMDPI = RefactorHelper.getScaleFactor(Resolution.MDPI, targetResolution);
+        toHDPI = RefactorHelper.getScaleFactor(Resolution.HDPI, targetResolution);
+        toXHDPI = RefactorHelper.getScaleFactor(Resolution.XHDPI, targetResolution);
+        toXXHDPI = RefactorHelper.getScaleFactor(Resolution.XXHDPI, targetResolution);
+        toXXXHDPI = RefactorHelper.getScaleFactor(Resolution.XXXHDPI, targetResolution);
     }
 
     private void updateImage() {
@@ -363,11 +311,11 @@ public class AndroidScaleImporter extends DialogWrapper {
             return new ValidationInfo("Please select an image.", assetBrowser);
         }
 
-        if (StringUtils.isEmpty(targetHeight.getText().trim()) || StringUtils.isEmpty(targetWidth.getText().trim())) {
-            if (!targetHeight.getText().matches("[0-9.]*") || !targetWidth.getText().matches("[0-9.]*")) {
-                return new ValidationInfo("Target height and/or width is not a valid number.", targetWidth);
+        if (StringUtils.isEmpty(imageHeight.getText().trim()) || StringUtils.isEmpty(imageWidth.getText().trim())) {
+            if (!imageHeight.getText().matches("[0-9.]*") || !imageWidth.getText().matches("[0-9.]*")) {
+                return new ValidationInfo("Target height and/or width is not a valid number.", imageWidth);
             }
-            return new ValidationInfo("Target height and/or width is not valid.", targetWidth);
+            return new ValidationInfo("Target height and/or width is not valid.", imageWidth);
         }
 
         return super.doValidate();
@@ -381,36 +329,29 @@ public class AndroidScaleImporter extends DialogWrapper {
         }
 
         try {
-            final int targetWidth = Integer.parseInt(this.targetWidth.getText());
-            final int targetHeight = Integer.parseInt(this.targetHeight.getText());
+            final int targetWidth = Integer.parseInt(this.imageWidth.getText());
+            final int targetHeight = Integer.parseInt(this.imageHeight.getText());
             final File imageFile = this.imageFile;
 
             ResizeAlgorithm algorithm = ResizeAlgorithm.from((String) algorithmSpinner.getSelectedItem());
-            ScalingTask task = new ScalingTask(project, imageFile, targetWidth, targetHeight,
-                                               resRoot.getText().trim(),
-                                               resExportName.getText().trim(),
-                                               algorithm,
-                                               algorithm.getMethod((String) methodSpinner.getSelectedItem()),
-                                               isNinePatch);
-
-            if (LDPICheckBox.isSelected()) {
-                task.addLDPI(toLDPI);
-            }
-            if (MDPICheckBox.isSelected()) {
-                task.addMDPI(toMDPI);
-            }
-            if (HDPICheckBox.isSelected()) {
-                task.addHDPI(toHDPI);
-            }
-            if (XHDPICheckBox.isSelected()) {
-                task.addXHDPI(toXHDPI);
-            }
-            if (XXHDPICheckBox.isSelected()) {
-                task.addXXHDPI(toXXHDPI);
-            }
-            if (XXXHDPICheckBox.isSelected()) {
-                task.addXXXHDPI(toXXXHDPI);
-            }
+            RefactoringTask task = new RefactoringTask(project);
+            ImageInformation baseInformation = ImageInformation.newBuilder()
+                                                           .setImageFile(imageFile)
+                                                           .setAlgorithm(algorithm)
+                                                           .setMethod(algorithm.getMethod((String) methodSpinner.getSelectedItem()))
+                                                           .setNinePatch(selectedImage.getName().endsWith(".9.png"))
+                                                           .setExportName(resExportName.getText().trim())
+                                                           .setExportPath(resRoot.getText().trim())
+                                                           .setTargetWidth(targetWidth)
+                                                           .setTargetHeight(targetHeight)
+                                                           .build(project);
+            
+            task.addImage(getImageInformation(baseInformation, Resolution.LDPI, toLDPI, LDPICheckBox));
+            task.addImage(getImageInformation(baseInformation, Resolution.MDPI, toMDPI, MDPICheckBox));
+            task.addImage(getImageInformation(baseInformation, Resolution.HDPI, toHDPI, HDPICheckBox));
+            task.addImage(getImageInformation(baseInformation, Resolution.XHDPI, toXHDPI, XHDPICheckBox));
+            task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, toXXHDPI, XXHDPICheckBox));
+            task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, toXXXHDPI, XXXHDPICheckBox));
 
             DumbService.getInstance(project).queueTask(task);
         } catch (Exception e) {
@@ -418,5 +359,19 @@ public class AndroidScaleImporter extends DialogWrapper {
         }
 
         super.doOKAction();
+    }
+    
+    private ImageInformation getImageInformation(ImageInformation baseInformation,
+                                                 Resolution resolution,
+                                                 float factor,
+                                                 JCheckBox checkbox) {
+        if (!checkbox.isSelected()) {
+            return null;
+        }
+
+        return ImageInformation.newBuilder(baseInformation)
+                               .setResolution(resolution)
+                               .setFactor(factor)
+                               .build(project);
     }
 }

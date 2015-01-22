@@ -2,9 +2,6 @@ package de.mprengemann.intellij.plugin.androidicons.util;
 
 import org.apache.commons.io.FilenameUtils;
 
-/**
- * Created by marcprengemann on 20/01/15.
- */
 public class ExportNameUtils {
     
     public static String getExportNameFromFilename(String filename) {

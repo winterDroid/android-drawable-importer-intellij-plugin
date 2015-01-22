@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.util;
+package de.mprengemann.intellij.plugin.androidicons.images;
 
 import org.imgscalr.Scalr;
 

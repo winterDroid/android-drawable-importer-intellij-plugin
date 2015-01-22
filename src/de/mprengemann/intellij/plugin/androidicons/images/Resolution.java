@@ -1,5 +1,7 @@
 package de.mprengemann.intellij.plugin.androidicons.images;
 
+import java.util.Locale;
+
 public enum Resolution {
     LDPI("ldpi"),
     MDPI("mdpi"),
@@ -14,6 +16,10 @@ public enum Resolution {
         this.resolution = resolution;
     }
 
+    public String getName() {
+        return resolution.toUpperCase(Locale.US);
+    }
+    
     @Override
     public String toString() {
         return resolution;

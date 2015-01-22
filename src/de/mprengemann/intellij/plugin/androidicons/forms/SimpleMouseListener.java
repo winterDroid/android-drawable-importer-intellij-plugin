@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.util;
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

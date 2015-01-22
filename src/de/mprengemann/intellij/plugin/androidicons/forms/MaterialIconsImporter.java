@@ -2,6 +2,7 @@ package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
@@ -9,12 +10,13 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.settings.PluginSettings;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
-import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +53,7 @@ public class MaterialIconsImporter extends DialogWrapper {
     private JComboBox colorSpinner;
     private JComboBox categorySpinner;
     private JComboBox sizeSpinner;
-    
+
     private JTextField resExportName;
     private JCheckBox MDPICheckBox;
     private JCheckBox HDPICheckBox;
@@ -73,13 +75,13 @@ public class MaterialIconsImporter extends DialogWrapper {
     public MaterialIconsImporter(@Nullable final Project project, Module module) {
         super(project, true);
         this.project = project;
-        
+
         setTitle("Material Icons Importer");
         setResizable(false);
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
         assetRoot = SettingsHelper.getAssetPath(IconPack.MATERIAL_ICONS);
-        
+
         getHelpAction().setEnabled(true);
 
         fillCategories();
@@ -147,7 +149,7 @@ public class MaterialIconsImporter extends DialogWrapper {
 
         init();
     }
-    
+
     @NotNull
     @Override
     public Action[] createActions() {
@@ -178,7 +180,7 @@ public class MaterialIconsImporter extends DialogWrapper {
             resExportName.setText("ic_action_" + assetName);
         }
     }
-    
+
     private void fillCategories() {
         categorySpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
@@ -200,7 +202,7 @@ public class MaterialIconsImporter extends DialogWrapper {
             categorySpinner.addItem(file.getName());
         }
     }
-    
+
     private void fillAssets() {
         assetSpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
@@ -228,7 +230,7 @@ public class MaterialIconsImporter extends DialogWrapper {
             assetSpinner.addItem(assetName);
         }
     }
-    
+
     private void fillSizes() {
         final String lastSelection = (String) sizeSpinner.getSelectedItem();
         sizeSpinner.removeAllItems();
@@ -267,7 +269,7 @@ public class MaterialIconsImporter extends DialogWrapper {
             sizeSpinner.setSelectedIndex(list.indexOf(lastSelection));
         }
     }
-    
+
     private void fillColors() {
         final String lastSelection = (String) colorSpinner.getSelectedItem();
         colorSpinner.removeAllItems();
@@ -324,45 +326,40 @@ public class MaterialIconsImporter extends DialogWrapper {
     }
 
     private void importIcons() {
-        List<FromToPath> paths = new ArrayList<FromToPath>();
-        if (MDPICheckBox.isSelected()) {
-            paths.add(new FromToPath(Resolution.MDPI));
-        }
-        if (HDPICheckBox.isSelected()) {
-            paths.add(new FromToPath(Resolution.HDPI));
-        }
-        if (XHDPICheckBox.isSelected()) {
-            paths.add(new FromToPath(Resolution.XHDPI));
-        }
-        if (XXHDPICheckBox.isSelected()) {
-            paths.add(new FromToPath(Resolution.XXHDPI));
-        }
-        if (XXXHDPICheckBox.isSelected()) {
-            paths.add(new FromToPath(Resolution.XXXHDPI));
-        }
-        copyDrawables(paths);
+        RefactoringTask task = new RefactoringTask(project);
+        ImageInformation baseInformation = ImageInformation.newBuilder()
+                                                           .setExportName(resExportName.getText())
+                                                           .setExportPath(resRoot.getText())
+                                                           .build(project);
+
+        task.addImage(getImageInformation(baseInformation, Resolution.MDPI, MDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.HDPI, HDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XHDPI, XHDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, XXHDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, XXXHDPICheckBox));
+
+        DumbService.getInstance(project).queueTask(task);
     }
 
-    private boolean copyDrawables(List<FromToPath> paths) {
-        try {
-            if (paths != null && paths.size() > 0) {
-                List<File> sources = new ArrayList<File>();
-                List<File> targets = new ArrayList<File>();
-                for (FromToPath path : paths) {
-                    if (path.source.exists()) {
-                        sources.add(path.source);
-                        targets.add(path.target);
-                    }
-                }
-                RefactorHelper.copy(project, sources, targets);
-            } else {
-                return false;
-            }
-        } catch (IOException e) {
-            return false;
+    private ImageInformation getImageInformation(ImageInformation baseInformation,
+                                                 Resolution resolution,
+                                                 JCheckBox checkBox) {
+        if (!checkBox.isSelected()) {
+            return null;
         }
 
-        return true;
+        String assetCategory = (String) categorySpinner.getSelectedItem();
+        String assetName = (String) assetSpinner.getSelectedItem();
+        String assetColor = (String) colorSpinner.getSelectedItem();
+        String assetSize = (String) sizeSpinner.getSelectedItem();
+        String fromName = "ic_" + assetName + "_" + assetColor + "_" + assetSize + ".png";
+
+        File source = new File(assetRoot.getCanonicalPath(),
+                               assetCategory + "/drawable-" + resolution.toString() + "/" + fromName);
+
+        return ImageInformation.newBuilder(baseInformation)
+                               .setImageFile(source)
+                               .build(project);
     }
 
     @Nullable
@@ -387,28 +384,6 @@ public class MaterialIconsImporter extends DialogWrapper {
     @Override
     protected JComponent createCenterPanel() {
         return container;
-    }
-
-    private class FromToPath {
-        public final File source;
-        public final File target;
-        public final Resolution resolution;
-
-        private FromToPath(Resolution resolution) {
-            this.resolution = resolution;
-
-            String resRootText = resRoot.getText();
-
-            String assetCategory = (String) categorySpinner.getSelectedItem();
-            String assetName = (String) assetSpinner.getSelectedItem();
-            String assetColor = (String) colorSpinner.getSelectedItem();
-            String assetSize = (String) sizeSpinner.getSelectedItem();
-            String fromName = "ic_" + assetName + "_" + assetColor + "_" + assetSize + ".png";
-            String toName = resExportName.getText();
-
-            this.source = new File(assetRoot.getCanonicalPath(), assetCategory + "/drawable-" + resolution + "/" + fromName);
-            this.target = ImageUtils.getTargetFile(resRootText, resolution, toName);
-        }
     }
 
     private class AssetSpinnerRenderer extends DefaultListCellRenderer {

@@ -7,12 +7,14 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
-import de.mprengemann.intellij.plugin.androidicons.images.ScalingImageInformation;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.activation.MimetypesFileTypeMap;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -120,15 +122,8 @@ public class RefactorHelper {
         return false;
     }
 
-    public static File getTempImageFile(Project project, Resolution resolution, String exportName) {
-        VirtualFile workspaceFile = project.getWorkspaceFile();
-        if (workspaceFile != null) {
-            VirtualFile ideaDir = workspaceFile.getParent();
-            if (ideaDir != null) {
-                return new File(ideaDir.getCanonicalPath() + "/plugin-images/" + resolution.toString() + "/" + exportName);
-            }
-        }
-        return null;
+    public static File getTempImageFile(String tempDir, Resolution resolution, String exportName) {
+        return new File(tempDir + "/plugin-images/" + resolution.toString() + "/" + exportName);
     }
 
     public static void move(Project project, final List<File> sources, final List<File> targets) throws IOException {
@@ -166,15 +161,131 @@ public class RefactorHelper {
         });
     }
 
-    public static void move(Project project, List<ScalingImageInformation> scalingInformationList) throws IOException {
+    public static void move(Project project, List<ImageInformation> scalingInformationList) throws IOException {
         List<File> tempFiles = new ArrayList<File>();
         List<File> targets = new ArrayList<File>();
-        
-        for (ScalingImageInformation information : scalingInformationList) {
+
+        for (ImageInformation information : scalingInformationList) {
             tempFiles.add(information.getTempImage());
             targets.add(information.getTargetFile());
         }
-        
+
         move(project, tempFiles, targets);
+    }
+
+    public static float getScaleFactor(Resolution target, Resolution baseLine) {
+        switch (baseLine) {
+            case MDPI:
+                switch (target) {
+                    case LDPI:
+                        return 0.5f;
+                    case MDPI:
+                        return 1f;
+                    case HDPI:
+                        return 1.5f;
+                    case XHDPI:
+                        return 2f;
+                    case XXHDPI:
+                        return 3f;
+                    case XXXHDPI:
+                        return 4f;
+                }
+                break;
+            case LDPI:
+                switch (target) {
+                    case LDPI:
+                        return 2f * 0.5f;
+                    case MDPI:
+                        return 2f * 1f;
+                    case HDPI:
+                        return 2f * 1.5f;
+                    case XHDPI:
+                        return 2f * 2f;
+                    case XXHDPI:
+                        return 2f * 3f;
+                    case XXXHDPI:
+                        return 2f * 4f;
+                }
+                break;
+            case HDPI:
+                switch (target) {
+                    case LDPI:
+                        return 2f / 3f * 0.5f;
+                    case MDPI:
+                        return 2f / 3f * 1f;
+                    case HDPI:
+                        return 2f / 3f * 1.5f;
+                    case XHDPI:
+                        return 2f / 3f * 2f;
+                    case XXHDPI:
+                        return 2f / 3f * 3f;
+                    case XXXHDPI:
+                        return 2f / 3f * 4f;
+                }
+                break;
+            case XHDPI:
+                switch (target) {
+                    case LDPI:
+                        return 1f / 2f * 0.5f;
+                    case MDPI:
+                        return 1f / 2f * 1f;
+                    case HDPI:
+                        return 1f / 2f * 1.5f;
+                    case XHDPI:
+                        return 1f / 2f * 2f;
+                    case XXHDPI:
+                        return 1f / 2f * 3f;
+                    case XXXHDPI:
+                        return 1f / 2f * 4f;
+                }
+                break;
+            case XXHDPI:
+                switch (target) {
+                    case LDPI:
+                        return 1f / 3f * 0.5f;
+                    case MDPI:
+                        return 1f / 3f * 1f;
+                    case HDPI:
+                        return 1f / 3f * 1.5f;
+                    case XHDPI:
+                        return 1f / 3f * 2f;
+                    case XXHDPI:
+                        return 1f / 3f * 3f;
+                    case XXXHDPI:
+                        return 1f / 3f * 4f;
+                }
+                break;
+            case XXXHDPI:
+                switch (target) {
+                    case LDPI:
+                        return 1f / 4f * 0.5f;
+                    case MDPI:
+                        return 1f / 4f * 1f;
+                    case HDPI:
+                        return 1f / 4f * 1.5f;
+                    case XHDPI:
+                        return 1f / 4f * 2f;
+                    case XXHDPI:
+                        return 1f / 4f * 3f;
+                    case XXXHDPI:
+                        return 1f / 4f * 4f;
+                }
+                break;
+        }
+        throw new IllegalArgumentException();
+    }
+
+    public static void exportTempImage(Project project, ImageInformation information) {
+        try {
+            BufferedImage resizeImageJpg;
+            if (information.isNinePatch()) {
+                resizeImageJpg = ImageUtils.resizeNinePatchImage(project, information);
+            } else {
+                resizeImageJpg = ImageUtils.resizeNormalImage(information);
+            }
+            ImageUtils.saveImageTempFile(resizeImageJpg, information);
+
+        } catch (Exception ignored) {
+        }
     }
 }

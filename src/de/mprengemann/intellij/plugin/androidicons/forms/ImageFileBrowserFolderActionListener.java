@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.util;
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;

@@ -31,7 +31,7 @@
     </change-notes>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="123.72"/>
+    <idea-version since-build="123.72" />
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
          on how to target different products -->
@@ -43,7 +43,8 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <applicationConfigurable instance="de.mprengemann.intellij.plugin.androidicons.settings.AndroidIconsSettings" displayName="Android Icons"/>
+        <applicationConfigurable instance="de.mprengemann.intellij.plugin.androidicons.settings.PluginSettings"
+                                 displayName="Android Drawable Importer" />
     </extensions>
 
     <application-components>
@@ -60,25 +61,17 @@
                popup="false"
                class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidAssetUtilsGroup"
                icon="/icons/android.png">
-            <add-to-group
-                    group-id="NewGroup"
-                    anchor="after"
-                    relative-to-action="NewAndroidAssetImage"
-                    />
-            <separator/>
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewAndroidAssetImage" />
+            <separator />
             <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsAction"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsAction"
-                    >
-            </action>
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsAction" />
+            <action id="de.mprengemann.intellij.plugin.androidicons.actions.MaterialIconsAction"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.MaterialIconsAction" />
             <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction"
-                    >
-            </action>
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction" />
             <action id="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableImporter"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidMultiDrawableAction"
-                    >
-            </action>
-            <separator/>
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidMultiDrawableAction" />
+            <separator />
         </group>
     </actions>
 

@@ -1,10 +1,12 @@
 package de.mprengemann.intellij.plugin.androidicons.forms;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
@@ -15,6 +17,7 @@ import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -70,12 +73,14 @@ public class MaterialIconsImporter extends DialogWrapper {
     public MaterialIconsImporter(@Nullable final Project project, Module module) {
         super(project, true);
         this.project = project;
-
+        
         setTitle("Material Icons Importer");
         setResizable(false);
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
         assetRoot = SettingsHelper.getAssetPath(IconPack.MATERIAL_ICONS);
+        
+        getHelpAction().setEnabled(true);
 
         fillCategories();
         fillAssets();
@@ -141,6 +146,13 @@ public class MaterialIconsImporter extends DialogWrapper {
         });
 
         init();
+    }
+    
+    @NotNull
+    @Override
+    public Action[] createActions() {
+        return SystemInfo.isMac ? new Action[] {this.getHelpAction(), this.getCancelAction(), this.getOKAction()}
+                                : new Action[] {this.getOKAction(), this.getCancelAction(), this.getHelpAction()};
     }
 
     private void updateImage() {
@@ -294,6 +306,14 @@ public class MaterialIconsImporter extends DialogWrapper {
         }
         if (list.contains(lastSelection)) {
             colorSpinner.setSelectedIndex(list.indexOf(lastSelection));
+        }
+    }
+
+    @Override
+    protected void doHelpAction() {
+        try {
+            BrowserUtil.browse("file://" + new File(assetRoot.getCanonicalPath(), "index.html").getCanonicalPath());
+        } catch (IOException ignored) {
         }
     }
 

@@ -359,6 +359,7 @@ public class MaterialIconsImporter extends DialogWrapper {
 
         return ImageInformation.newBuilder(baseInformation)
                                .setImageFile(source)
+                               .setResolution(resolution)
                                .build(project);
     }
 

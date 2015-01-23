@@ -6,8 +6,8 @@ import com.intellij.openapi.project.Project;
 
 public class RunnableHelper {
 
-    public static void runWriteCommand(Project project, Runnable cmd) {
-        CommandProcessor.getInstance().executeCommand(project, new WriteAction(cmd), "Import drawables", project.getName());
+    public static void runWriteCommand(Project project, Runnable cmd, String description) {
+        CommandProcessor.getInstance().executeCommand(project, new WriteAction(cmd), description, project.getName());
     }
 
     public static class WriteAction implements Runnable {

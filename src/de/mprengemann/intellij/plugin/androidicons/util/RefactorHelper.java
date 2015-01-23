@@ -25,7 +25,7 @@ public class RefactorHelper {
 
     private static int selection;
 
-    public static void copy(Project project, List<File> sources, List<File> targets) throws IOException {
+    public static void copy(Project project, String description, List<File> sources, List<File> targets) throws IOException {
         final PsiManager instance = PsiManager.getInstance(project);
         final List<PsiFile> files = new ArrayList<PsiFile>();
         final List<PsiDirectory> dirs = new ArrayList<PsiDirectory>();
@@ -75,7 +75,7 @@ public class RefactorHelper {
                         dir.copyFileFrom(name, file);
                     }
                 }
-            });
+            }, description);
             return;
         }
 
@@ -126,8 +126,8 @@ public class RefactorHelper {
         return new File(tempDir + "/plugin-images/" + resolution.toString() + "/" + exportName);
     }
 
-    public static void move(Project project, final List<File> sources, final List<File> targets) throws IOException {
-        copy(project, sources, targets);
+    public static void move(Project project, final String description, final List<File> sources, final List<File> targets) throws IOException {
+        copy(project, description, sources, targets);
         RunnableHelper.runWriteCommand(project, new Runnable() {
             @Override
             public void run() {
@@ -158,7 +158,7 @@ public class RefactorHelper {
                 } catch (IOException ignored) {
                 }
             }
-        });
+        }, description);
     }
 
     public static void move(Project project, List<ImageInformation> scalingInformationList) throws IOException {
@@ -169,8 +169,10 @@ public class RefactorHelper {
             tempFiles.add(information.getTempImage());
             targets.add(information.getTargetFile());
         }
+        
+        String description = ExportNameUtils.getExportDescription(scalingInformationList);
 
-        move(project, tempFiles, targets);
+        move(project, description, tempFiles, targets);
     }
 
     public static float getScaleFactor(Resolution target, Resolution baseLine) {

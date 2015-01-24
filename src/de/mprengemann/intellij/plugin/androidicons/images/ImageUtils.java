@@ -1,14 +1,27 @@
+/*
+ * Copyright 2015 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * 			http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+ * the specific language governing permissions and limitations under the License.
+ */
+
 package de.mprengemann.intellij.plugin.androidicons.images;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.forms.Wrong9PatchException;
-import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
-import de.mprengemann.intellij.plugin.androidicons.util.ResizeAlgorithm;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.imgscalr.Scalr;
 
 import javax.imageio.ImageIO;
@@ -17,6 +30,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImageUtils {
 
@@ -75,39 +90,39 @@ public class ImageUtils {
         return dScale;
     }
 
-    public static BufferedImage resizeNormalImage(ResizeAlgorithm algorithm,
-                                                  Object method,
-                                                  ScalingImageInformation information) throws IOException {
-        return resizeNormalImage(algorithm,
-                                 method,
-                                 information.getImageFile(),
-                                 information.getFactor(),
-                                 information.getTargetWidth(),
-                                 information.getTargetHeight());
+    public static BufferedImage resizeNormalImage(ImageInformation information) throws IOException {
+        BufferedImage image = ImageIO.read(information.getImageFile());
+        return resizeNormalImage(image, information);
     }
 
-    public static BufferedImage resizeNormalImage(ResizeAlgorithm algorithm,
-                                                  Object method,
-                                                  File imageFile,
-                                                  float scaleFactor,
-                                                  int targetWidth,
-                                                  int targetHeight) throws IOException {
-        BufferedImage image = ImageIO.read(imageFile);
-        return resizeNormalImage(algorithm, method, image, scaleFactor, targetWidth, targetHeight);
+    private static BufferedImage resizeNormalImage(BufferedImage image,
+                                                   ImageInformation information) throws IOException {
+        int newWidth = information.getImageWidth();
+        int newHeight = information.getImageHeight();
+        if (newWidth <= 0 || newHeight <= 0) {
+            newWidth = image.getWidth();
+            newHeight = image.getHeight();
+        }
+
+        if (information.getFactor() >= 0) {
+            newWidth = (int) (newWidth * information.getFactor());
+            newHeight = (int) (newHeight * information.getFactor());
+        }
+
+        return resizeNormalImage(image, newWidth, newHeight, information);
     }
 
-    public static BufferedImage resizeNormalImage(ResizeAlgorithm algorithm,
-                                                  Object method,
-                                                  BufferedImage image,
-                                                  float scaleFactor,
-                                                  int targetWidth,
-                                                  int targetHeight) throws IOException {
-        int newWidth = (int) (scaleFactor * targetWidth);
-        int newHeight = (int) (scaleFactor * targetHeight);
+    private static BufferedImage resizeNormalImage(BufferedImage image,
+                                                   int newWidth,
+                                                   int newHeight,
+                                                   ImageInformation information) throws IOException {
+        if (information.getFactor() == 1f) {
+            return image;
+        }
         BufferedImage resizedImage = null;
-        switch (algorithm) {
+        switch (information.getAlgorithm()) {
             case SCALR:
-                Scalr.Method scalrMethod = (Scalr.Method) method;
+                Scalr.Method scalrMethod = (Scalr.Method) information.getMethod();
                 resizedImage = Scalr.resize(image, scalrMethod, newWidth, newHeight, Scalr.OP_ANTIALIAS);
                 break;
             case THUMBNAILATOR:
@@ -118,61 +133,51 @@ public class ImageUtils {
         return resizedImage;
     }
 
-    public static BufferedImage resizeNinePatchImage(ResizeAlgorithm algorithm,
-                                                     Object method,
-                                                     Project project,
-                                                     ScalingImageInformation information) throws IOException {
-        return resizeNinePatchImage(algorithm,
-                                    method,
-                                    project,
-                                    information.getFactor(),
-                                    information.getTargetWidth(),
-                                    information.getTargetHeight(),
-                                    information.getImageFile(),
-                                    information.getResolution(),
-                                    information.getExportName());
-    }
+    public static BufferedImage resizeNinePatchImage(Project project,
+                                                     ImageInformation information) throws IOException {
+        BufferedImage image = ImageIO.read(information.getImageFile());
+        if (information.getFactor() == 1f) {
+            return image;
+        }
 
-    public static BufferedImage resizeNinePatchImage(ResizeAlgorithm algorithm,
-                                                     Object method,
-                                                     Project project,
-                                                     float scaleFactor,
-                                                     int targetWidth,
-                                                     int targetHeight,
-                                                     File imageFile,
-                                                     Resolution resolution,
-                                                     String name) throws IOException {
-        BufferedImage image = ImageIO.read(imageFile);
-        int type = BufferedImage.TYPE_INT_ARGB;
+        int newWidth = information.getImageWidth();
+        int newHeight = information.getImageHeight();
+        if (newWidth <= 0 || newHeight <= 0) {
+            newWidth = image.getWidth();
+            newHeight = image.getHeight();
+        }
 
-        int newWidth = (int) (scaleFactor * (targetWidth + 2));
-        int newHeight = (int) (scaleFactor * (targetHeight + 2));
+        if (information.getFactor() >= 0) {
+            newWidth = (int) (newWidth * information.getFactor());
+            newHeight = (int) (newHeight * information.getFactor());
+        }
 
-        BufferedImage trimedImage = trim9PBorder(image, type);
-        saveImageTempFile(resolution, trimedImage, project, getExportName("trimmed", name));
-        trimedImage = resizeNormalImage(algorithm, method, trimedImage, 1f, newWidth, newHeight);
-        saveImageTempFile(resolution, trimedImage, project, getExportName("trimmedResized", name));
+        BufferedImage trimmedImage = trim9PBorder(image);
+        ImageInformation trimmedImageInformation = ImageInformation.newBuilder(information)
+                                                                  .setExportName(getExportName("trimmed", information.getExportName()))
+                                                                  .build(project);
+        saveImageTempFile(trimmedImage, trimmedImageInformation);
+        trimmedImage = resizeNormalImage(trimmedImage, newWidth, newHeight, trimmedImageInformation);
+        saveImageTempFile(trimmedImage, ImageInformation.newBuilder(trimmedImageInformation)
+                                                        .setExportName(getExportName("trimmedResized", information.getExportName()))
+                                                        .build(project));
 
         BufferedImage borderImage;
 
-        int w = trimedImage.getWidth();
-        int h = trimedImage.getHeight();
+        int w = trimmedImage.getWidth();
+        int h = trimmedImage.getHeight();
 
         try {
-            borderImage = generateBordersImage(image, w, h, type);
+            borderImage = generateBordersImage(image, w, h);
         } catch (Exception e) {
             return null;
         }
 
         int[] rgbArray = new int[w * h];
-        trimedImage.getRGB(0, 0, w, h, rgbArray, 0, w);
+        trimmedImage.getRGB(0, 0, w, h, rgbArray, 0, w);
         borderImage.setRGB(1, 1, w, h, rgbArray, 0, w);
 
         return borderImage;
-    }
-
-    public static String getExportName(String name) {
-        return getExportName("", name);
     }
 
     public static String getExportName(String prefix, String name) {
@@ -185,8 +190,10 @@ public class ImageUtils {
         return exportName;
     }
 
-    public static BufferedImage trim9PBorder(BufferedImage inputImage, int type) {
-        BufferedImage trimedImage = UIUtil.createImage(inputImage.getWidth() - 2, inputImage.getHeight() - 2, type);
+    private static BufferedImage trim9PBorder(BufferedImage inputImage) {
+        BufferedImage trimedImage = UIUtil.createImage(
+            inputImage.getWidth() - 2, inputImage.getHeight() - 2,
+            BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = trimedImage.createGraphics();
         g.drawImage(inputImage, 0, 0, trimedImage.getWidth(),
                     trimedImage.getHeight(), 1, 1, inputImage.getWidth() - 1,
@@ -195,66 +202,79 @@ public class ImageUtils {
         return trimedImage;
     }
 
-    public static BufferedImage generateBordersImage(BufferedImage source,
-                                                     int trimedWidth,
-                                                     int trimedHeight,
-                                                     int type) throws Wrong9PatchException {
-        BufferedImage finalBorder = UIUtil.createImage(trimedWidth + 2, trimedHeight + 2, type);
+    private static void enforceBorderColors(BufferedImage inputImage) {
+        Graphics2D g = inputImage.createGraphics();
+        g.setBackground(new Color(0, 0, 0, 0));
+        g.clearRect(1, 1, inputImage.getWidth() - 2, inputImage.getHeight() - 2);
+        g.dispose();
+        int w = inputImage.getWidth();
+        int h = inputImage.getHeight();
+        int[] rgb = new int[w * h];
+
+        inputImage.getRGB(0, 0, w, h, rgb, 0, w);
+
+        for (int i = 0; i < rgb.length; i++) {
+            if ((0xff000000 & rgb[i]) != 0) {
+                rgb[i] = 0xff000000;
+            }
+        }
+        inputImage.setRGB(0, 0, w, h, rgb, 0, w);
+    }
+
+    private static BufferedImage generateBordersImage(BufferedImage source,
+                                                      int trimmedWidth,
+                                                      int trimmedHeight) throws Wrong9PatchException, IOException {
+        BufferedImage finalBorder = UIUtil.createImage(trimmedWidth + 2, trimmedHeight + 2, BufferedImage.TYPE_INT_ARGB);
         int cutW = source.getWidth() - 2;
         int cutH = source.getHeight() - 2;
 
         // left border
-        BufferedImage leftBorder = UIUtil.createImage(1, cutH, type);
-        leftBorder.setRGB(0, 0, 1, cutH, source.getRGB(0, 1, 1, cutH, null, 0, 1), 0, 1);
+        BufferedImage leftBorder = UIUtil.createImage(1, cutH, BufferedImage.TYPE_INT_ARGB);
+        leftBorder.setRGB(0, 0, 1, cutH,
+                          source.getRGB(0, 1, 1, cutH, null, 0, 1), 0, 1);
         verifyBorderImage(leftBorder);
-        leftBorder = resizeBorder(leftBorder, 1, trimedHeight, type);
-        finalBorder.setRGB(0, 1, 1, trimedHeight, leftBorder.getRGB(0, 0, 1, trimedHeight, null, 0, 1), 0, 1);
+        leftBorder = resizeBorder(leftBorder, 1, trimmedHeight);
+        finalBorder.setRGB(0, 1, 1, trimmedHeight,
+                           leftBorder.getRGB(0, 0, 1, trimmedHeight, null, 0, 1), 0, 1);
 
         // right border
-        BufferedImage rightBorder = UIUtil.createImage(1, cutH, type);
-        rightBorder.setRGB(0, 0, 1, cutH, source.getRGB(cutW + 1, 1, 1, cutH, null, 0, 1), 0, 1);
+        BufferedImage rightBorder = UIUtil.createImage(1, cutH, BufferedImage.TYPE_INT_ARGB);
+        rightBorder.setRGB(0, 0, 1, cutH,
+                           source.getRGB(cutW + 1, 1, 1, cutH, null, 0, 1), 0, 1);
         verifyBorderImage(rightBorder);
-        rightBorder = resizeBorder(rightBorder, 1, trimedHeight, type);
-        finalBorder.setRGB(trimedWidth + 1,
-                           1,
-                           1,
-                           trimedHeight,
-                           rightBorder.getRGB(0, 0, 1, trimedHeight, null, 0, 1),
-                           0,
-                           1);
+        rightBorder = resizeBorder(rightBorder, 1, trimmedHeight);
+        finalBorder.setRGB(trimmedWidth + 1, 1, 1, trimmedHeight, rightBorder
+            .getRGB(0, 0, 1, trimmedHeight, null, 0, 1), 0, 1);
 
         // top border
-        BufferedImage topBorder = UIUtil.createImage(cutW, 1, type);
-        topBorder.setRGB(0, 0, cutW, 1, source.getRGB(1, 0, cutW, 1, null, 0, cutW), 0, cutW);
+        BufferedImage topBorder = UIUtil.createImage(cutW, 1, BufferedImage.TYPE_INT_ARGB);
+        topBorder.setRGB(0, 0, cutW, 1,
+                         source.getRGB(1, 0, cutW, 1, null, 0, cutW), 0, cutW);
         verifyBorderImage(topBorder);
-        topBorder = resizeBorder(topBorder, trimedWidth, 1, type);
-        finalBorder.setRGB(1,
-                           0,
-                           trimedWidth,
-                           1,
-                           topBorder.getRGB(0, 0, trimedWidth, 1, null, 0, trimedWidth),
-                           0,
-                           trimedWidth);
+        topBorder = resizeBorder(topBorder, trimmedWidth, 1);
+        finalBorder.setRGB(1, 0, trimmedWidth, 1, topBorder.getRGB(0, 0,
+                                                                  trimmedWidth, 1, null, 0, trimmedWidth), 0, trimmedWidth);
 
         // bottom border
-        BufferedImage bottomBorder = UIUtil.createImage(cutW, 1, type);
-        bottomBorder.setRGB(0, 0, cutW, 1, source.getRGB(1, cutH + 1, cutW, 1, null, 0, cutW), 0, cutW);
+        BufferedImage bottomBorder = UIUtil.createImage(cutW, 1, BufferedImage.TYPE_INT_ARGB);
+        bottomBorder.setRGB(0, 0, cutW, 1,
+                            source.getRGB(1, cutH + 1, cutW, 1, null, 0, cutW),
+                            0, cutW);
         verifyBorderImage(bottomBorder);
-        bottomBorder = resizeBorder(bottomBorder, trimedWidth, 1, type);
-        finalBorder.setRGB(1,
-                           trimedHeight + 1,
-                           trimedWidth,
-                           1,
-                           bottomBorder.getRGB(0, 0, trimedWidth, 1, null, 0, trimedWidth),
-                           0,
-                           trimedWidth);
+        bottomBorder = resizeBorder(bottomBorder, trimmedWidth, 1);
+        finalBorder.setRGB(1, trimmedHeight + 1, trimmedWidth, 1,
+                           bottomBorder.getRGB(0, 0, trimmedWidth, 1, null, 0,
+                                               trimmedWidth), 0, trimmedWidth);
 
         return finalBorder;
     }
 
-    public static BufferedImage resizeBorder(final BufferedImage border, int targetWidth, int targetHeight, int type) {
-        if (targetWidth > border.getWidth() || targetHeight > border.getHeight()) {
-            BufferedImage endImage = Scalr.resize(border, targetWidth, targetHeight, Scalr.OP_ANTIALIAS);
+    private static BufferedImage resizeBorder(final BufferedImage border,
+                                              int targetWidth,
+                                              int targetHeight) throws IOException {
+        if (targetWidth > border.getWidth()
+            || targetHeight > border.getHeight()) {
+            BufferedImage endImage = rescaleBorder(border, targetWidth, targetHeight);
             enforceBorderColors(endImage);
             return endImage;
         }
@@ -272,20 +292,20 @@ public class ImageUtils {
                 if ((0xff000000 & data[y * w + x]) != 0) {
                     int newX = Math.min(Math.round(x * widthRatio), targetWidth - 1);
                     int newY = Math.min(Math.round(y * heightRatio), targetHeight - 1);
-
                     newData[newY * targetWidth + newX] = data[y * w + x];
                 }
             }
         }
 
-        BufferedImage img = UIUtil.createImage(targetWidth, targetHeight, type);
+        BufferedImage img = UIUtil.createImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
         img.setRGB(0, 0, targetWidth, targetHeight, newData, 0, targetWidth);
 
         return img;
     }
 
-    public static void verifyBorderImage(BufferedImage border) throws Wrong9PatchException {
-        int[] rgb = border.getRGB(0, 0, border.getWidth(), border.getHeight(), null, 0, border.getWidth());
+    private static void verifyBorderImage(BufferedImage border) throws Wrong9PatchException {
+        int[] rgb = border.getRGB(0, 0, border.getWidth(), border.getHeight(),
+                                  null, 0, border.getWidth());
         for (int aRgb : rgb) {
             if ((0xff000000 & aRgb) != 0) {
                 if (aRgb != 0xff000000 && aRgb != 0xffff0000) {
@@ -295,34 +315,90 @@ public class ImageUtils {
         }
     }
 
-    public static void enforceBorderColors(BufferedImage inputImage) {
-        Graphics2D g = inputImage.createGraphics();
-        g.setBackground(new JBColor(new Color(0, 0, 0, 0), null));
-        g.clearRect(1, 1, inputImage.getWidth() - 2, inputImage.getHeight() - 2);
-        g.dispose();
-        int w = inputImage.getWidth();
-        int h = inputImage.getHeight();
-        int[] rgb = new int[w * h];
+    private static BufferedImage rescaleBorder(BufferedImage image, int targetWidth, int targetHeight) {
+        if (targetWidth == 0) {
+            targetWidth = 1;
+        }
+        if (targetHeight == 0) {
+            targetHeight = 1;
+        }
+        
+        if (targetHeight > 1 && targetWidth > 1) {
+            throw new Wrong9PatchException();
+        }
 
-        inputImage.getRGB(0, 0, w, h, rgb, 0, w);
-
-        for (int i = 0; i < rgb.length; i++) {
-            if ((0xff000000 & rgb[i]) != 0) {
-                rgb[i] = 0xff000000;
+        int w = image.getWidth();
+        int h = image.getHeight();
+        int[] data = image.getRGB(0, 0, w, h, null, 0, w);
+        int[] newData = new int[targetWidth * targetHeight];
+        
+        for (int x=0; x < w; x++) {
+            for (int y=0; y < h; y++) {
+                newData[y * targetWidth + x] = 0x00;
             }
         }
-        inputImage.setRGB(0, 0, w, h, rgb, 0, w);
-        inputImage.setRGB(0, 0, 0x0);
-        inputImage.setRGB(0, h - 1, 0x0);
-        inputImage.setRGB(w - 1, h - 1, 0x0);
-        inputImage.setRGB(w - 1, 0, 0x0);
+        
+        List<Integer> startPositions = new ArrayList<Integer>();
+        List<Integer> endPositions = new ArrayList<Integer>();
+
+        boolean inBlock = false;
+        if (targetHeight == 1) {
+            for (int x = 0; x < w; x++) {
+                if ((0xff000000 & data[x]) != 0) {
+                    if (!inBlock) {
+                        inBlock = true;
+                        startPositions.add(x);
+                    }
+                } else if (inBlock) {
+                    endPositions.add(x - 1);
+                    inBlock = false;
+                }
+            }
+            if (inBlock) {
+                endPositions.add(w - 1);
+            }
+        } else {
+            for (int y = 0; y < h; y++) {
+                if ((0xff000000 & data[y]) != 0) {
+                    if (!inBlock) {
+                        inBlock = true;
+                        startPositions.add(y);
+                    }
+                } else if (inBlock) {
+                    endPositions.add(y - 1);
+                    inBlock = false;
+                }
+            }
+            if (inBlock) {
+                endPositions.add(h - 1);
+            }
+        }
+        try {
+            SplineInterpolator interpolator = new SplineInterpolator();
+            PolynomialSplineFunction function =
+                interpolator.interpolate(new double[] {0f, 1f, Math.max(w - 1, h - 1)},
+                                         new double[] {0f, 1f, Math.max(targetHeight - 1, targetWidth - 1)});
+            for (int i = 0; i < startPositions.size(); i++) {
+                int start = startPositions.get(i);
+                int end = endPositions.get(i);
+                for (int j = (int) function.value(start); j <= (int) function.value(end); j++) {
+                    newData[j] = 0xff000000;
+                }
+            }
+
+            BufferedImage img = UIUtil.createImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+            img.setRGB(0, 0, targetWidth, targetHeight, newData, 0, targetWidth);
+            return img;
+        } catch (Exception e) {
+            Logger.getInstance(ImageUtils.class).error("resizeBorder", e);
+        }
+
+        return null;
     }
 
-    public static File saveImageTempFile(Resolution resolution,
-                                         BufferedImage resizeImageJpg,
-                                         Project project,
-                                         String exportName) throws IOException {
-        File exportFile = RefactorHelper.getTempImageFile(project, resolution, exportName);
+    public static File saveImageTempFile(BufferedImage resizeImageJpg,
+                                         ImageInformation imageInformation) throws IOException {
+        File exportFile = imageInformation.getTempImage();
         if (exportFile != null) {
             if (!exportFile.getParentFile().exists()) {
                 FileUtils.forceMkdir(exportFile.getParentFile());
@@ -335,10 +411,10 @@ public class ImageUtils {
     }
 
     public static File getTargetFile(String path, Resolution resolution, String exportName) {
-        return new File(String.format(TARGET_FILE_PATTERN, path, resolution, exportName));
+        return new File(String.format(TARGET_FILE_PATTERN, path, resolution.toString(), exportName));
     }
 
-    public static File getTargetFile(ScalingImageInformation information) {
+    public static File getTargetFile(ImageInformation information) {
         return getTargetFile(information.getExportPath(), information.getResolution(), information.getExportName());
     }
 }

@@ -1,21 +1,34 @@
+/*
+ * Copyright 2015 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * 			http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+ * the specific language governing permissions and limitations under the License.
+ */
+
 package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageFileBrowserFolderActionListener;
-import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
-import de.mprengemann.intellij.plugin.androidicons.util.SimpleMouseListener;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
@@ -24,8 +37,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,7 +58,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     private JTextField resExportName;
     private JPanel container;
 
-    public AndroidMultiDrawableImporter(@Nullable final Project project, Module module) {
+    public AndroidMultiDrawableImporter(final Project project, Module module) {
         super(project, true);
         this.project = project;
 
@@ -69,7 +80,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     private void initBrowser(Resolution resolution, final TextFieldWithBrowseButton browseButton) {
         final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(
             ImageFileTypeManager.getInstance().getImageFileType());
-        String title1 = "Select your " + resolution + " asset";
+        String title1 = "Select your " + resolution.getName() + " asset";
         imageDescriptor.setTitle(title1);
         ImageFileBrowserFolderActionListener actionListener = new ImageFileBrowserFolderActionListener(title1, project, browseButton, imageDescriptor) {
                 @Override
@@ -145,41 +156,40 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        List<File> sources = new ArrayList<File>();
-        List<File> targets = new ArrayList<File>();
+        ImageInformation baseInformation = ImageInformation.newBuilder()
+            .setExportPath(resRoot.getText().trim())
+            .setExportName(resExportName.getText().trim())
+            .build(project);
 
-        addDataIfNecessary(Resolution.LDPI, ldpiFile, sources, targets);
-        addDataIfNecessary(Resolution.MDPI, mdpiFile, sources, targets);
-        addDataIfNecessary(Resolution.HDPI, hdpiFile, sources, targets);
-        addDataIfNecessary(Resolution.XHDPI, xhdpiFile, sources, targets);
-        addDataIfNecessary(Resolution.XXHDPI, xxhdpiFile, sources, targets);
-        addDataIfNecessary(Resolution.XXXHDPI, xxxhdpiFile, sources, targets);
+        final RefactoringTask task = new RefactoringTask(project);
 
-        try {
-            RefactorHelper.copy(project, sources, targets);
-        } catch (IOException ignored) {
-        }
+        task.addImage(getImageInformation(baseInformation, Resolution.LDPI, ldpiFile));
+        task.addImage(getImageInformation(baseInformation, Resolution.MDPI, mdpiFile));
+        task.addImage(getImageInformation(baseInformation, Resolution.HDPI, hdpiFile));
+        task.addImage(getImageInformation(baseInformation, Resolution.XHDPI, xhdpiFile));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, xxhdpiFile));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, xxxhdpiFile));
 
+        DumbService.getInstance(project).queueTask(task);
+        
         super.doOKAction();
     }
 
-    private void addDataIfNecessary(Resolution resolution,
-                                    TextFieldWithBrowseButton browser,
-                                    List<File> sources,
-                                    List<File> targets) {
+    private ImageInformation getImageInformation(ImageInformation baseInformation, 
+                                                 Resolution resolution,
+                                                 TextFieldWithBrowseButton browser) {
         if (browser == null) {
-            return;
+            return null;
         }
         String sourceString = browser.getText().trim();
         if (StringUtils.isEmpty(sourceString)) {
-            return;
+            return null;
         }
-        File target = ImageUtils.getTargetFile(resRoot.getText().trim(), resolution, resExportName.getText().trim());
         File source = new File(sourceString);
-        if (source.exists()) {
-            sources.add(source);
-            targets.add(target);
-        }
+        return ImageInformation.newBuilder(baseInformation)
+                               .setImageFile(source)
+                               .setResolution(resolution)
+                               .build(project);
     }
 
     @Nullable

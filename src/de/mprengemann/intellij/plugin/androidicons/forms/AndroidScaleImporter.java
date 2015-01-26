@@ -32,11 +32,13 @@ import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -45,10 +47,32 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class AndroidScaleImporter extends DialogWrapper {
     public static final String CHECKBOX_TEXT = "%s (%.0f px x %.0f px)";
+    
+    private final static String[] FILE_RESOLUTIONS = new String[] {
+        Resolution.LDPI.getName(),
+        Resolution.MDPI.getName(),
+        Resolution.HDPI.getName(),
+        Resolution.XHDPI.getName(),
+        Resolution.XXHDPI.getName(),
+        Resolution.XXXHDPI.getName(),
+        "Other"
+    };
+    private final static String[] FOLDER_RESOLUTIONS = new String[] {
+        Resolution.LDPI.getName(),
+        Resolution.MDPI.getName(),
+        Resolution.HDPI.getName(),
+        Resolution.XHDPI.getName(),
+        Resolution.XXHDPI.getName(),
+        Resolution.XXXHDPI.getName()
+    };
+    
     private final Project project;
     private JPanel container;
     private JComboBox assetResolutionSpinner;
@@ -68,8 +92,7 @@ public class AndroidScaleImporter extends DialogWrapper {
     private JCheckBox aspectRatioLock;
     private JComboBox methodSpinner;
     private JComboBox algorithmSpinner;
-    private VirtualFile selectedImage;
-    private File imageFile;
+    private VirtualFile selectedAsset;
     private float toLDPI;
     private float toMDPI;
     private float toHDPI;
@@ -88,8 +111,9 @@ public class AndroidScaleImporter extends DialogWrapper {
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
 
-        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
-        String title1 = "Select your asset";
+        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor(
+            ImageFileTypeManager.getInstance().getImageFileType());
+        String title1 = "Select your asset(s) or a folder";
         ImageFileBrowserFolderActionListener actionListener = new ImageFileBrowserFolderActionListener(title1, project, assetBrowser, imageDescriptor) {
             @Override
             @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
@@ -127,22 +151,25 @@ public class AndroidScaleImporter extends DialogWrapper {
             @Override
             public void actionPerformed(ActionEvent event) {
                 String selectedItem = (String) assetResolutionSpinner.getSelectedItem();
-                boolean setEnabled = selectedItem.equalsIgnoreCase("other");
+                boolean setEnabled = "other".equalsIgnoreCase(selectedItem);
                 targetResolutionSpinner.setEnabled(setEnabled);
                 imageWidth.setEnabled(setEnabled);
                 imageHeight.setEnabled(setEnabled);
                 aspectRatioLock.setEnabled(setEnabled);
 
-                if (!setEnabled) {
+                imageHeight.setText(originalImageHeight == -1 ? "" : Integer.toString(originalImageHeight));
+                imageWidth.setText(originalImageWidth == -1 ? "" : Integer.toString(originalImageWidth));
+                if (!setEnabled && selectedItem != null) {
                     aspectRatioLock.setSelected(true);
-                    imageHeight.setText(originalImageHeight == -1 ? "" : Integer.toString(originalImageHeight));
-                    imageWidth.setText(originalImageWidth == -1 ? "" : Integer.toString(originalImageWidth));
                     updateScaleFactors();
                     updateNewSizes();
                 }
             }
         });
 
+        for (String resolutions : FILE_RESOLUTIONS) {
+            assetResolutionSpinner.addItem(resolutions);
+        }
         assetResolutionSpinner.setSelectedIndex(3);
         targetResolutionSpinner.setSelectedIndex(3);
 
@@ -219,60 +246,118 @@ public class AndroidScaleImporter extends DialogWrapper {
     }
 
     private void updateImageInformation(VirtualFile chosenFile) {
-        selectedImage = chosenFile;
+        selectedAsset = chosenFile;
+        resExportName.setText("");
+        resExportName.setEnabled(!selectedAsset.isDirectory());
         updateImage();
         fillImageInformation();
     }
 
     private void fillImageInformation() {
-        if (selectedImage == null) {
+        if (selectedAsset == null) {
             return;
         }
-        String canonicalPath = selectedImage.getCanonicalPath();
+        String canonicalPath = selectedAsset.getCanonicalPath();
         if (canonicalPath == null) {
             return;
         }
         File file = new File(canonicalPath);
         try {
-            BufferedImage image = ImageIO.read(file);
-            if (image == null) {
-                return;
+            if (selectedAsset.isDirectory()) {
+                originalImageHeight = -1;
+                originalImageWidth = -1;
+
+                imageHeight.setText("");
+                imageWidth.setText("");
+            } else {
+                BufferedImage image = ImageIO.read(file);
+                if (image == null) {
+                    return;
+                }
+                originalImageWidth = image.getWidth();
+                originalImageHeight = image.getHeight();
+
+                if (selectedAsset.getName().endsWith(".9.png")) {
+                    originalImageHeight -= 2;
+                    originalImageWidth -= 2;
+                }
+
+                imageHeight.setText(String.valueOf(originalImageHeight));
+                imageWidth.setText(String.valueOf(originalImageWidth));
             }
-            originalImageWidth = image.getWidth();
-            originalImageHeight = image.getHeight();
 
-            if (selectedImage.getName().endsWith(".9.png")) {
-                originalImageHeight -= 2;
-                originalImageWidth -= 2;
-            }
+            resExportName.setText(ExportNameUtils.getExportNameFromFilename(selectedAsset.getName()));
 
-            imageHeight.setText(String.valueOf(originalImageHeight));
-            imageWidth.setText(String.valueOf(originalImageWidth));
-
-            resExportName.setText(ExportNameUtils.getExportNameFromFilename(selectedImage.getName()));
-
+            updateImageAssets(selectedAsset.isDirectory());
             updateScaleFactors();
             updateNewSizes();
         } catch (IOException ignored) {
         }
     }
 
+    private void updateImageAssets(boolean directory) {
+        assetResolutionSpinner.removeAllItems();
+        String res = (String) assetResolutionSpinner.getSelectedItem();
+        List<String> resolutions = Arrays.asList(directory ? FOLDER_RESOLUTIONS
+                                                           : FILE_RESOLUTIONS);
+        for (String resolution : resolutions) {
+            assetResolutionSpinner.addItem(resolution);
+        }
+        int selectedIndex = 3;
+        if (resolutions.contains(res)) {
+            selectedIndex = resolutions.indexOf(res);
+        }
+        assetResolutionSpinner.setSelectedIndex(selectedIndex);
+    }
+
     private void updateNewSizes() {
         try {
-            int targetWidth = Integer.parseInt(this.imageWidth.getText());
-            int targetHeight = Integer.parseInt(this.imageHeight.getText());
+            int targetWidth = -1;
+            int targetHeight = -1;
+            if (selectedAsset != null &&
+                !selectedAsset.isDirectory()) {
+                targetWidth = Integer.parseInt(this.imageWidth.getText());
+                targetHeight = Integer.parseInt(this.imageHeight.getText());
+            }
             updateNewSizes(targetWidth, targetHeight);
         } catch (Exception ignored) {
         }
     }
 
     private void updateNewSizes(int targetWidth, int targetHeight) {
-        LDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.LDPI.getName(), toLDPI * targetWidth, toLDPI * targetHeight));
-        MDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.MDPI.getName(), toMDPI * targetWidth, toMDPI * targetHeight));
-        HDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.HDPI.getName(), toHDPI * targetWidth, toHDPI * targetHeight));
-        XHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XHDPI.getName(), toXHDPI * targetWidth, toXHDPI * targetHeight));
-        XXHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XXHDPI.getName(), toXXHDPI * targetWidth, toXXHDPI * targetHeight));
-        XXXHDPICheckBox.setText(String.format(CHECKBOX_TEXT, Resolution.XXXHDPI.getName(), toXXXHDPI * targetWidth, toXXXHDPI * targetHeight));
+        if (targetHeight == -1 || targetWidth == -1) {
+            LDPICheckBox.setText(Resolution.LDPI.getName());
+            MDPICheckBox.setText(Resolution.MDPI.getName());
+            HDPICheckBox.setText(Resolution.HDPI.getName());
+            XHDPICheckBox.setText(Resolution.XHDPI.getName());
+            XXHDPICheckBox.setText(Resolution.XXHDPI.getName());
+            XXXHDPICheckBox.setText(Resolution.XXXHDPI.getName());
+        } else {
+            LDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                               Resolution.LDPI.getName(),
+                                               toLDPI * targetWidth,
+                                               toLDPI * targetHeight));
+            MDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                               Resolution.MDPI.getName(),
+                                               toMDPI * targetWidth,
+                                               toMDPI * targetHeight));
+            HDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                               Resolution.HDPI.getName(),
+                                               toHDPI * targetWidth,
+                                               toHDPI * targetHeight));
+            XHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                                Resolution.XHDPI.getName(),
+                                                toXHDPI * targetWidth,
+                                                toXHDPI * targetHeight));
+            XXHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                                 Resolution.XXHDPI.getName(),
+                                                 toXXHDPI * targetWidth,
+                                                 toXXHDPI * targetHeight));
+            XXXHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                                  Resolution.XXXHDPI.getName(),
+                                                  toXXXHDPI * targetWidth,
+                                                  toXXXHDPI * targetHeight));
+        }
     }
 
     private void updateScaleFactors() {
@@ -291,11 +376,12 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     private void updateImage() {
         if (imageContainer == null ||
-            selectedImage == null ||
-            selectedImage.getCanonicalPath() == null) {
+            selectedAsset == null ||
+            selectedAsset.getCanonicalPath() == null ||
+            selectedAsset.isDirectory()) {
             return;
         }
-        imageFile = new File(selectedImage.getCanonicalPath());
+        File imageFile = new File(selectedAsset.getCanonicalPath());
         ImageUtils.updateImage(imageContainer, imageFile);
     }
 
@@ -324,11 +410,13 @@ public class AndroidScaleImporter extends DialogWrapper {
             return new ValidationInfo("Please select an image.", assetBrowser);
         }
 
-        if (StringUtils.isEmpty(imageHeight.getText().trim()) || StringUtils.isEmpty(imageWidth.getText().trim())) {
-            if (!imageHeight.getText().matches("[0-9.]*") || !imageWidth.getText().matches("[0-9.]*")) {
-                return new ValidationInfo("Target height and/or width is not a valid number.", imageWidth);
+        if (selectedAsset == null || !selectedAsset.isDirectory()) {
+            if (StringUtils.isEmpty(imageHeight.getText().trim()) || StringUtils.isEmpty(imageWidth.getText().trim())) {
+                if (!imageHeight.getText().matches("[0-9.]*") || !imageWidth.getText().matches("[0-9.]*")) {
+                    return new ValidationInfo("Target height and/or width is not a valid number.", imageWidth);
+                }
+                return new ValidationInfo("Target height and/or width is not valid.", imageWidth);
             }
-            return new ValidationInfo("Target height and/or width is not valid.", imageWidth);
         }
 
         return super.doValidate();
@@ -336,36 +424,36 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        if (imageFile == null) {
+        if (selectedAsset == null || selectedAsset.getCanonicalPath() == null) {
             super.doOKAction();
             return;
         }
 
         try {
-            final int targetWidth = Integer.parseInt(this.imageWidth.getText());
-            final int targetHeight = Integer.parseInt(this.imageHeight.getText());
-            final File imageFile = this.imageFile;
-
             ResizeAlgorithm algorithm = ResizeAlgorithm.from((String) algorithmSpinner.getSelectedItem());
+            Object algorithmMethod = algorithm.getMethod((String) methodSpinner.getSelectedItem());
             RefactoringTask task = new RefactoringTask(project);
-            ImageInformation baseInformation = ImageInformation.newBuilder()
-                                                           .setImageFile(imageFile)
-                                                           .setAlgorithm(algorithm)
-                                                           .setMethod(algorithm.getMethod((String) methodSpinner.getSelectedItem()))
-                                                           .setNinePatch(selectedImage.getName().endsWith(".9.png"))
-                                                           .setExportName(resExportName.getText().trim())
-                                                           .setExportPath(resRoot.getText().trim())
-                                                           .setTargetWidth(targetWidth)
-                                                           .setTargetHeight(targetHeight)
-                                                           .build(project);
-            
-            task.addImage(getImageInformation(baseInformation, Resolution.LDPI, toLDPI, LDPICheckBox));
-            task.addImage(getImageInformation(baseInformation, Resolution.MDPI, toMDPI, MDPICheckBox));
-            task.addImage(getImageInformation(baseInformation, Resolution.HDPI, toHDPI, HDPICheckBox));
-            task.addImage(getImageInformation(baseInformation, Resolution.XHDPI, toXHDPI, XHDPICheckBox));
-            task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, toXXHDPI, XXHDPICheckBox));
-            task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, toXXXHDPI, XXXHDPICheckBox));
-
+            String exportPath = resRoot.getText().trim();
+            String exportName = resExportName.getText().trim();
+            final File file = new File(selectedAsset.getCanonicalPath());
+            if (!selectedAsset.isDirectory()) {
+                final int targetWidth = Integer.parseInt(this.imageWidth.getText());
+                final int targetHeight = Integer.parseInt(this.imageHeight.getText());
+                importSingleImage(algorithm,
+                                  algorithmMethod,
+                                  task,
+                                  exportPath,
+                                  exportName,
+                                  file,
+                                  targetWidth,
+                                  targetHeight);
+            } else {
+                importImagesFromFolder(file,
+                                       algorithm,
+                                       algorithmMethod,
+                                       task,
+                                       exportPath);
+            }
             DumbService.getInstance(project).queueTask(task);
         } catch (Exception e) {
             Logger.getInstance(AndroidScaleImporter.class).error("doOK", e);
@@ -373,7 +461,71 @@ public class AndroidScaleImporter extends DialogWrapper {
 
         super.doOKAction();
     }
-    
+
+    private void importSingleImage(ResizeAlgorithm algorithm,
+                                   Object algorithmMethod,
+                                   RefactoringTask task,
+                                   String exportPath,
+                                   String exportName,
+                                   File imageFile,
+                                   int targetWidth,
+                                   int targetHeight) {
+        ImageInformation baseInformation = ImageInformation.newBuilder()
+                                                           .setImageFile(imageFile)
+                                                           .setAlgorithm(algorithm)
+                                                           .setMethod(algorithmMethod)
+                                                           .setNinePatch(selectedAsset.getName().endsWith(".9.png"))
+                                                           .setExportName(exportName)
+                                                           .setExportPath(exportPath)
+                                                           .setTargetWidth(targetWidth)
+                                                           .setTargetHeight(targetHeight)
+                                                           .build(project);
+
+        task.addImage(getImageInformation(baseInformation, Resolution.LDPI, toLDPI, LDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.MDPI, toMDPI, MDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.HDPI, toHDPI, HDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XHDPI, toXHDPI, XHDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, toXXHDPI, XXHDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, toXXXHDPI, XXXHDPICheckBox));
+    }
+
+    private void importImagesFromFolder(File file,
+                                        ResizeAlgorithm algorithm,
+                                        Object algorithmMethod,
+                                        RefactoringTask task, 
+                                        String exportPath) {
+        File[] files = file.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                if (file.isDirectory()) {
+                    return true;
+                }
+                String mimetype = new MimetypesFileTypeMap().getContentType(file);
+                String type = mimetype.split("/")[0];
+                return type.equals("image");
+            }
+        });
+
+        for (File foundFile : files) {
+            if (foundFile.isDirectory()) {
+                importImagesFromFolder(foundFile, algorithm, algorithmMethod, task, exportPath);
+            } else {
+                try {
+                    BufferedImage image = ImageIO.read(foundFile);
+                    importSingleImage(algorithm,
+                                      algorithmMethod,
+                                      task,
+                                      exportPath,
+                                      FilenameUtils.removeExtension(foundFile.getName()),
+                                      foundFile,
+                                      image.getWidth(),
+                                      image.getHeight());
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
     private ImageInformation getImageInformation(ImageInformation baseInformation,
                                                  Resolution resolution,
                                                  float factor,

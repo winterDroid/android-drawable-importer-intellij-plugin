@@ -30,6 +30,7 @@ import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
@@ -78,6 +79,8 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     private JCheckBox XHDPICheckBox;
     private JCheckBox XXHDPICheckBox;
     private JCheckBox aspectRatioLock;
+    private JComboBox methodSpinner;
+    private JComboBox algorithmSpinner;
     private ImageTableModel tableModel;
     private VirtualFile resRoot;
 
@@ -122,6 +125,20 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                 }
             }
         });
+
+        algorithmSpinner.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ResizeAlgorithm algorithm = ResizeAlgorithm.from((String) algorithmSpinner.getSelectedItem());
+                methodSpinner.removeAllItems();
+                for (String method : algorithm.getMethods()) {
+                    methodSpinner.addItem(method);
+                }
+            }
+        });
+        for (ResizeAlgorithm algorithms : ResizeAlgorithm.values()) {
+            algorithmSpinner.addItem(algorithms.toString());
+        }
         
         initTable();
         init();
@@ -354,6 +371,9 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         for (int i = 0; i < imageInformationList.size(); i++) {
             ImageInformation information = imageInformationList.get(i);
             Resolution resolution = tableModel.resolutionList.get(i);
+            if (resolution == Resolution.OTHER) {
+                resolution = information.getResolution();
+            }
             importSingleImage(information, resolution, task);
         }
         DumbService.getInstance(project).queueTask(task);
@@ -384,7 +404,12 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
             return null;
         }
 
+        ResizeAlgorithm algorithm = ResizeAlgorithm.from((String) algorithmSpinner.getSelectedItem());
+        Object algorithmMethod = algorithm.getMethod((String) methodSpinner.getSelectedItem());
+
         return ImageInformation.newBuilder(baseInformation)
+                               .setAlgorithm(algorithm)
+                               .setMethod(algorithmMethod)
                                .setResolution(resolution)
                                .setFactor(factor)
                                .build(project);

@@ -24,6 +24,7 @@ import de.mprengemann.intellij.plugin.androidicons.forms.ResourcesDialog;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import org.jetbrains.android.facet.AndroidFacet;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -43,31 +44,37 @@ public class AndroidResourcesHelper {
         }
     }
 
-    public static void initResourceBrowser(final Project project, Module module, final String title, final TextFieldWithBrowseButton browser) {
+    public static void initResourceBrowser(final Project project, Module module, final String title, @Nullable final TextFieldWithBrowseButton browser) {
         final VirtualFile resRoot = SettingsHelper.getResRootForProject(project);
 
         if (resRoot == null) {
             getResRootFile(project, module, new ResourcesDialog.ResourceSelectionListener() {
                 @Override
                 public void onResourceSelected(VirtualFile resDir) {
-                    browser.setText(resDir.getCanonicalPath());
+                    if (browser != null) {
+                        browser.setText(resDir.getCanonicalPath());
+                    }
                     SettingsHelper.saveResRootForProject(project, resDir.getUrl());
                 }
             });
         } else {
-            browser.setText(resRoot.getCanonicalPath());
+            if (browser != null) {
+                browser.setText(resRoot.getCanonicalPath());
+            }
         }
 
-        FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
-        workingDirectoryChooserDescriptor.setTitle(title);
-        browser.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
-        browser.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
-            @Override
-            @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
-            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChoosen(chosenFile);
-                SettingsHelper.saveResRootForProject(project, chosenFile.getUrl());
-            }
-        });
+        if (browser != null) {
+            FileChooserDescriptor workingDirectoryChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
+            workingDirectoryChooserDescriptor.setTitle(title);
+            browser.addBrowseFolderListener(title, null, project, workingDirectoryChooserDescriptor);
+            browser.addBrowseFolderListener(new TextBrowseFolderListener(workingDirectoryChooserDescriptor) {
+                @Override
+                @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
+                protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
+                    super.onFileChoosen(chosenFile);
+                    SettingsHelper.saveResRootForProject(project, chosenFile.getUrl());
+                }
+            });
+        }
     }
 }

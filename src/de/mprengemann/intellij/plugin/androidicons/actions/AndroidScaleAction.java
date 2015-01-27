@@ -18,7 +18,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import de.mprengemann.intellij.plugin.androidicons.forms.AndroidScaleImporter;
+import de.mprengemann.intellij.plugin.androidicons.forms.AndroidBatchScaleImporter;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import icons.AndroidIcons;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,10 @@ public class AndroidScaleAction extends AnAction {
         Project project = getEventProject(event);
         Module module = event.getData(DataKeys.MODULE);
 
-        AndroidScaleImporter dialog = new AndroidScaleImporter(project, module);
+//        AndroidScaleImporter dialog = new AndroidScaleImporter(project, module);
+//        dialog.show();
+
+        AndroidBatchScaleImporter dialog = new AndroidBatchScaleImporter(project, module);
         dialog.show();
     }
 

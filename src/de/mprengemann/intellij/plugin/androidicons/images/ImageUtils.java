@@ -17,6 +17,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.forms.Wrong9PatchException;
+import de.mprengemann.intellij.plugin.androidicons.util.MathUtils;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -116,7 +117,7 @@ public class ImageUtils {
                                                    int newWidth,
                                                    int newHeight,
                                                    ImageInformation information) throws IOException {
-        if (information.getFactor() == 1f) {
+        if (MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
         }
         BufferedImage resizedImage = null;
@@ -136,7 +137,7 @@ public class ImageUtils {
     public static BufferedImage resizeNinePatchImage(Project project,
                                                      ImageInformation information) throws IOException {
         BufferedImage image = ImageIO.read(information.getImageFile());
-        if (information.getFactor() == 1f) {
+        if (MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
         }
 

@@ -21,7 +21,8 @@ public enum Resolution {
     HDPI("hdpi"),
     XHDPI("xhdpi"),
     XXHDPI("xxhdpi"),
-    XXXHDPI("xxxhdpi");
+    XXXHDPI("xxxhdpi"),
+    OTHER("other");
 
     private String resolution;
 
@@ -30,7 +31,11 @@ public enum Resolution {
     }
 
     public String getName() {
-        return resolution.toUpperCase(Locale.US);
+        if (this == OTHER) {
+            return "Other";
+        } else {
+            return resolution.toUpperCase(Locale.US);
+        }
     }
     
     @Override
@@ -51,6 +56,8 @@ public enum Resolution {
             return XXHDPI;
         } else if (value.equalsIgnoreCase(XXXHDPI.toString())) {
             return XXXHDPI;
+        } else if (value.equalsIgnoreCase(OTHER.toString())) {
+            return OTHER;
         }
         return null;
     }

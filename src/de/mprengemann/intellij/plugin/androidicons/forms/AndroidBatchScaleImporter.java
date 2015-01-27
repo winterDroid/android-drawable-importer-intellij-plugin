@@ -46,9 +46,12 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
@@ -175,7 +178,6 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     }
 
     private void initTable() {
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         tableModel = new ImageTableModel();
         table.setModel(tableModel);
         DefaultTableCellRenderer fileCellRenderer = new DefaultTableCellRenderer() {
@@ -246,6 +248,22 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow >= 0) {
                     updateImage(tableModel.getItem(selectedRow));
+                }
+            }
+        });
+        initColumnSizes();
+    }
+
+    private void initColumnSizes() {
+        table.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent componentEvent) {
+                super.componentResized(componentEvent);
+                Dimension tableSize = table.getSize();
+                final int[] columnSizes = new int[]{ 20, 10, 10, 10, 10, 20, 20};
+                for (int i = 0; i < table.getColumnCount(); i++) {
+                    TableColumn column = table.getColumnModel().getColumn(i);
+                    column.setPreferredWidth((int) (tableSize.width * (columnSizes[i] / 100f)));
                 }
             }
         });

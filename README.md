@@ -3,7 +3,7 @@ Android Drawable Importer Plugin
 
 ![alt text](https://github.com/winterDroid/android-drawable-importer-intellij-plugin/raw/master/images/menu.png "New menu")
 
-This plugin consists of 3 main features. You can access them by a **right-click** anywhere, but not on a file, inside an **Android module** under **New**.
+This plugin consists of 4 main features. You can access them by a **right-click** anywhere, but **not** on a file, inside an **Android module** under **New**.
 
 1. AndroidIcons Drawable Import  
    You are able to select the asset, specify your color, change the target resource name and select all the resolutions you want to import.  

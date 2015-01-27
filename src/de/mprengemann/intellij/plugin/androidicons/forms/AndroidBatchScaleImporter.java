@@ -17,6 +17,7 @@ import com.intellij.openapi.components.PathMacroManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.fileChooser.ex.FileDrop;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -147,6 +148,41 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         for (ResizeAlgorithm algorithms : ResizeAlgorithm.values()) {
             algorithmSpinner.addItem(algorithms.toString());
         }
+        new FileDrop(table, new FileDrop.Target() {
+            @Override
+            public FileChooserDescriptor getDescriptor() {
+                return imageDescriptor;
+            }
+
+            @Override
+            public boolean isHiddenShown() {
+                return false;
+            }
+
+            @Override
+            public void dropFiles(final List<VirtualFile> virtualFiles) {
+                if (virtualFiles == null) {
+                    return;
+                }
+
+                if (resRoot == null) {
+                    AndroidResourcesHelper.getResRootFile(project, module, new ResourcesDialog.ResourceSelectionListener() {
+                        @Override
+                        public void onResourceSelected(VirtualFile resDir) {
+                            resRoot = resDir;
+                            SettingsHelper.saveResRootForProject(project, resDir.getUrl());
+                            for (VirtualFile file : virtualFiles) {
+                                addImageFiles(file);
+                            }
+                        }
+                    });
+                } else {
+                    for (VirtualFile file : virtualFiles) {
+                        addImageFiles(file);
+                    }
+                }
+            }
+        });
         
         initTable();
         init();

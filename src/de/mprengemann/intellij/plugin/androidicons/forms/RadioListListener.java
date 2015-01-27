@@ -11,16 +11,13 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.actions;
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
-
-public class AndroidAssetUtilsGroup extends DefaultActionGroup {
-    @Override
-    public void update(AnActionEvent e) {
-        super.update(e);
-        AndroidFacetUtils.updateActionVisibility(e);
-    }
+/**
+ * User: marcprengemann
+ * Date: 08.04.14
+ * Time: 16:06
+ */
+public interface RadioListListener {
+    void radioSelectionChanged(int selectedIndex);
 }

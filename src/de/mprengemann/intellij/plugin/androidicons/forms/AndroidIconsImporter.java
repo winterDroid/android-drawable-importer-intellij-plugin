@@ -1,16 +1,33 @@
-package de.mprengemann.intellij.plugin.androidicons.ui;
+/*
+ * Copyright 2015 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * 			http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+ * the specific language governing permissions and limitations under the License.
+ */
+
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
-import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,11 +41,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 public class AndroidIconsImporter extends DialogWrapper {
 
@@ -59,7 +73,7 @@ public class AndroidIconsImporter extends DialogWrapper {
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
 
-        assetRoot = SettingsHelper.getAssetPath();
+        assetRoot = SettingsHelper.getAssetPath(IconPack.ANDROID_ICONS);
         colorSpinner.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -119,7 +133,7 @@ public class AndroidIconsImporter extends DialogWrapper {
         File imageFile = new File(assetRoot.getCanonicalPath() + path);
         ImageUtils.updateImage(imageContainer, imageFile);
         if (!exportNameChanged) {
-            resExportName.setText("ic_action_" + assetName + ".png");
+            resExportName.setText("ic_action_" + assetName);
         }
     }
 
@@ -171,7 +185,7 @@ public class AndroidIconsImporter extends DialogWrapper {
             if (!extension.equalsIgnoreCase("png")) {
                 continue;
             }
-            assetSpinner.addItem(asset.getName().replace("ic_action_", "").replace("." + extension, ""));
+            assetSpinner.addItem(ExportNameUtils.getExportNameFromFilename(asset.getName()).replace("ic_action_", ""));
         }
         assetColor = (String) colorSpinner.getSelectedItem();
         assetName = (String) assetSpinner.getSelectedItem();
@@ -184,48 +198,35 @@ public class AndroidIconsImporter extends DialogWrapper {
     }
 
     private void importIcons() {
-        List<FromToPath> paths = new ArrayList<FromToPath>();
-        if (LDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("ldpi"));
-        }
-        if (MDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("mdpi"));
-        }
-        if (HDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("hdpi"));
-        }
-        if (XHDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("xhdpi"));
-        }
-        if (XXHDPICheckBox.isSelected()) {
-            paths.add(new FromToPath("xxhdpi"));
-        }
+        RefactoringTask task = new RefactoringTask(project);
+        ImageInformation baseInformation = ImageInformation.newBuilder()
+                                                           .setExportName(resExportName.getText())
+                                                           .setExportPath(resRoot.getText())
+                                                           .build(project);
 
-        copyDrawables(paths);
+        task.addImage(getImageInformation(baseInformation, Resolution.LDPI, LDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.MDPI, MDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.HDPI, HDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XHDPI, XHDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, XXHDPICheckBox));
+
+        ProgressManager.getInstance().run(task);
     }
 
-    private boolean copyDrawables(List<FromToPath> paths) {
-        try {
-            if (paths != null && paths.size() > 0) {
-                List<File> sources = new ArrayList<File>();
-                List<File> targets = new ArrayList<File>();
-                File source;
-                for (FromToPath path : paths) {
-                    source = new File(path.source);
-                    if (source.exists()) {
-                        sources.add(source);
-                        targets.add(new File(path.target));
-                    }
-                }
-                RefactorHelper.copy(project, sources, targets);
-            } else {
-                return false;
-            }
-        } catch (IOException e) {
-            return false;
+    private ImageInformation getImageInformation(ImageInformation baseInformation,
+                                                 Resolution resolution,
+                                                 JCheckBox checkBox) {
+        if (!checkBox.isSelected()) {
+            return null;
         }
 
-        return true;
+        String fromName = "ic_action_" + assetName + ".png";
+        File source = new File(assetRoot.getCanonicalPath() + "/" + assetColor.replace(" ", "_") + "/" + resolution.toString() + "/" + fromName);
+
+        return ImageInformation.newBuilder(baseInformation)
+                               .setImageFile(source)
+                               .setResolution(resolution)
+                               .build(project);
     }
 
     @Nullable
@@ -250,25 +251,6 @@ public class AndroidIconsImporter extends DialogWrapper {
     @Override
     protected JComponent createCenterPanel() {
         return container;
-    }
-
-    private class FromToPath {
-        public final String source;
-        public final String target;
-        public final String resolution;
-
-        private FromToPath(String resolution) {
-            this.resolution = resolution;
-
-            String resRootText = resRoot.getText();
-
-            String fromName = "ic_action_" + assetName + ".png";
-            String toName = resExportName.getText();
-
-            this.source = assetRoot.getCanonicalPath() + "/" + assetColor.replace(" ",
-                                                                                  "_") + "/" + resolution + "/" + fromName;
-            this.target = resRootText + "/drawable-" + resolution + "/" + toName;
-        }
     }
 
     private class AssetSpinnerRenderer extends DefaultListCellRenderer {

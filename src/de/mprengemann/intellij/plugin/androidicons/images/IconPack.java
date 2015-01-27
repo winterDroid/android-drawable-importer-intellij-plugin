@@ -11,16 +11,9 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.actions;
+package de.mprengemann.intellij.plugin.androidicons.images;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
-
-public class AndroidAssetUtilsGroup extends DefaultActionGroup {
-    @Override
-    public void update(AnActionEvent e) {
-        super.update(e);
-        AndroidFacetUtils.updateActionVisibility(e);
-    }
+public enum IconPack {
+    ANDROID_ICONS,
+    MATERIAL_ICONS
 }

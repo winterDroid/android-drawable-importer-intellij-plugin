@@ -11,16 +11,24 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.actions;
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-public class AndroidAssetUtilsGroup extends DefaultActionGroup {
+public class SimpleMouseListener implements MouseListener {
     @Override
-    public void update(AnActionEvent e) {
-        super.update(e);
-        AndroidFacetUtils.updateActionVisibility(e);
-    }
+    public void mouseClicked(MouseEvent mouseEvent) {}
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {}
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent) {}
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent) {}
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {}
 }

@@ -1,4 +1,17 @@
-package de.mprengemann.intellij.plugin.androidicons.ui;
+/*
+ * Copyright 2015 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * 			http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+ * the specific language governing permissions and limitations under the License.
+ */
+
+package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.ui.ClickListener;
 import com.intellij.ui.components.JBList;
@@ -11,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.basic.BasicRadioButtonUI;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -66,18 +78,8 @@ public class RadioButtonList<T> extends JBList {
 
                     if (index != -1) {
                         JRadioButton radioButton = (JRadioButton) getModel().getElementAt(index);
-                        int iconArea;
-                        try {
-                            iconArea = radioButton.getMargin().left +
-                                       ((BasicRadioButtonUI) radioButton.getUI()).getDefaultIcon().getIconWidth() +
-                                       radioButton.getIconTextGap();
-                        } catch (ClassCastException c) {
-                            iconArea = DEFAULT_RADIO_WIDTH;
-                        }
-                        if (e.getX() < iconArea) {
-                            setSelected(radioButton, index);
-                            return true;
-                        }
+                        setSelected(radioButton, index);
+                        return true;
                     }
                 }
                 return false;

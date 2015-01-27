@@ -69,6 +69,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AndroidBatchScaleImporter extends DialogWrapper {
+    public static final String CHECKBOX_TEXT = "%s (%.0f px x %.0f px)";
+    
     private final Project project;
     private final Module module;
     private JPanel container;
@@ -126,6 +128,8 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow >= 0) {
                     tableModel.removeItem(selectedRow);
+                    imageContainer.setIcon(null);
+                    updateTargetSizes(null);
                 }
             }
         });
@@ -217,7 +221,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         initTargetResolutions();
         initNumberValidator();
         initExportNameValidator();
-        initColumnSelection();
+        initRowSelection();
         initColumnSizes();
     }
 
@@ -284,7 +288,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         table.getColumnModel().getColumn(4).setCellEditor(new TargetSizeEditor());
     }
 
-    private void initColumnSelection() {
+    private void initRowSelection() {
         table.getColumnModel().setColumnSelectionAllowed(false);
         table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -344,7 +348,52 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         if (imageContainer == null) {
             return;
         }
+        updateTargetSizes(item);
         ImageUtils.updateImage(imageContainer, item.getImageFile());
+    }
+
+    private void updateTargetSizes(ImageInformation item) {
+        if (item == null) {
+            LDPICheckBox.setText(Resolution.LDPI.getName());
+            MDPICheckBox.setText(Resolution.MDPI.getName());
+            HDPICheckBox.setText(Resolution.HDPI.getName());
+            XHDPICheckBox.setText(Resolution.XHDPI.getName());
+            XXHDPICheckBox.setText(Resolution.XXHDPI.getName());
+            XXXHDPICheckBox.setText(Resolution.XXXHDPI.getName());
+        } else {
+            int targetHeight = item.getTargetHeight();
+            int targetWidth = item.getTargetWidth();
+            float factor = RefactorHelper.getScaleFactor(Resolution.LDPI, item.getResolution());
+            LDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                               Resolution.LDPI.getName(),
+                                               factor * targetWidth,
+                                               factor * targetHeight));
+            factor = RefactorHelper.getScaleFactor(Resolution.MDPI, item.getResolution());
+            MDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                               Resolution.MDPI.getName(),
+                                               factor * targetWidth,
+                                               factor * targetHeight));
+            factor = RefactorHelper.getScaleFactor(Resolution.HDPI, item.getResolution());
+            HDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                               Resolution.HDPI.getName(),
+                                               factor * targetWidth,
+                                               factor * targetHeight));
+            factor = RefactorHelper.getScaleFactor(Resolution.XHDPI, item.getResolution());
+            XHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                                Resolution.XHDPI.getName(),
+                                                factor * targetWidth,
+                                                factor * targetHeight));
+            factor = RefactorHelper.getScaleFactor(Resolution.XXHDPI, item.getResolution());
+            XXHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                                 Resolution.XXHDPI.getName(),
+                                                 factor * targetWidth,
+                                                 factor * targetHeight));
+            factor = RefactorHelper.getScaleFactor(Resolution.XXXHDPI, item.getResolution());
+            XXXHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
+                                                  Resolution.XXXHDPI.getName(),
+                                                  factor * targetWidth,
+                                                  factor * targetHeight));
+        }
     }
 
     protected VirtualFile getInitialFile() {
@@ -494,6 +543,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
             imageInformationList.add(item);
             resolutionList.add(Resolution.XHDPI);
             fireTableRowsInserted(imageInformationList.size() - 1, imageInformationList.size() - 1);
+            table.setRowSelectionInterval(imageInformationList.size() - 1, imageInformationList.size() - 1);
         }
 
         public void removeItem(int row) {
@@ -569,6 +619,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                     } else {
                         builder.setTargetWidth((Integer) value);
                     }
+                    updateTargetSizes(builder.build(project));
                     break;
                 //Target-Height
                 case 4:
@@ -583,6 +634,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                     } else {
                         builder.setTargetHeight((Integer) value);
                     }
+                    updateTargetSizes(builder.build(project));
                     break;
                 //Exportname
                 case 5:

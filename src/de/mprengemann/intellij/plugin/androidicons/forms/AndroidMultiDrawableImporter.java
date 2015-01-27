@@ -170,7 +170,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, xxhdpiFile));
         task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, xxxhdpiFile));
 
-        DumbService.getInstance(project).queueTask(task);
+        DumbService.getInstance(project).runWhenSmart(task);
         
         super.doOKAction();
     }

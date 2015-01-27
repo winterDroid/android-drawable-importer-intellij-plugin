@@ -16,7 +16,7 @@ package de.mprengemann.intellij.plugin.androidicons.images;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.project.DumbModeTask;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RefactoringTask extends DumbModeTask {
+public class RefactoringTask implements Runnable {
 
     private Project project;
     private List<ImageInformation> imageInformationList = new ArrayList<ImageInformation>();
@@ -36,6 +36,11 @@ public class RefactoringTask extends DumbModeTask {
     }
 
     @Override
+    public void run() {
+        ProgressIndicator updateRunnable = ProgressManager.getInstance().getProgressIndicator();
+        performInDumbMode(updateRunnable);
+    }
+
     public void performInDumbMode(@NotNull final ProgressIndicator progressIndicator) {
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override

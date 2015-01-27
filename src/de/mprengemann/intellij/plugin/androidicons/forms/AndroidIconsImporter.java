@@ -210,7 +210,7 @@ public class AndroidIconsImporter extends DialogWrapper {
         task.addImage(getImageInformation(baseInformation, Resolution.XHDPI, XHDPICheckBox));
         task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, XXHDPICheckBox));
 
-        DumbService.getInstance(project).queueTask(task);
+        DumbService.getInstance(project).runWhenSmart(task);
     }
 
     private ImageInformation getImageInformation(ImageInformation baseInformation,

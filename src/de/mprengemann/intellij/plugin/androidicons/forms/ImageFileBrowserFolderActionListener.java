@@ -83,7 +83,7 @@ public class ImageFileBrowserFolderActionListener extends ComponentWithBrowseBut
             @Override
             public void consume(VirtualFile file) {
                 SettingsHelper.saveLastImageFolder(project, file.getCanonicalPath());
-                onFileChosen(file);
+                onFileChoosen(file);
             }
         });
     }

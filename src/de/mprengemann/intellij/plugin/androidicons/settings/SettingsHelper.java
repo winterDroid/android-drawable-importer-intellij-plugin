@@ -45,7 +45,7 @@ public class SettingsHelper {
 
     public static String getAssetPathString(IconPack iconPack) {
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
-        if (propertiesComponent.getValue(LEGACY_PATH) != null) {
+        if (propertiesComponent.getValue(LEGACY_PATH) != null && iconPack == IconPack.ANDROID_ICONS) {
             // Legacy support
             String file = propertiesComponent.getValue(LEGACY_PATH);
             propertiesComponent.unsetValue(getAssetPathKey(iconPack));

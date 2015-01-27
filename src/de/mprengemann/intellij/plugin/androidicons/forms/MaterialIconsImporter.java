@@ -15,7 +15,7 @@ package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
@@ -84,6 +84,8 @@ public class MaterialIconsImporter extends DialogWrapper {
             return 0;
         }
     };
+    private String lastSelectedColor = null;
+    private String lastSelectedSize = null;
 
     public MaterialIconsImporter(@Nullable final Project project, Module module) {
         super(project, true);
@@ -122,6 +124,10 @@ public class MaterialIconsImporter extends DialogWrapper {
         sizeSpinner.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                String size = (String) sizeSpinner.getSelectedItem();
+                if (size != null) {
+                    lastSelectedSize = size;
+                }
                 fillColors();
                 updateImage();
             }
@@ -129,6 +135,10 @@ public class MaterialIconsImporter extends DialogWrapper {
         colorSpinner.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                String color = (String) colorSpinner.getSelectedItem();
+                if (color != null) {
+                    lastSelectedColor = color;
+                }
                 updateImage();
             }
         });
@@ -236,6 +246,9 @@ public class MaterialIconsImporter extends DialogWrapper {
             }
         };
         File[] assets = assetRoot.listFiles(drawableFileNameFiler);
+        if (assets == null) {
+            return;
+        }
         for (File asset : assets) {
             String assetName = FilenameUtils.removeExtension(asset.getName());
             assetName = assetName.replace("_black_48dp", "");
@@ -245,7 +258,7 @@ public class MaterialIconsImporter extends DialogWrapper {
     }
 
     private void fillSizes() {
-        final String lastSelection = (String) sizeSpinner.getSelectedItem();
+        final String lastSelectedSize = this.lastSelectedSize;
         sizeSpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
             return;
@@ -278,13 +291,13 @@ public class MaterialIconsImporter extends DialogWrapper {
         for (String size : list) {
             sizeSpinner.addItem(size);
         }
-        if (list.contains(lastSelection)) {
-            sizeSpinner.setSelectedIndex(list.indexOf(lastSelection));
+        if (list.contains(lastSelectedSize)) {
+            sizeSpinner.setSelectedIndex(list.indexOf(lastSelectedSize));
         }
     }
 
     private void fillColors() {
-        final String lastSelection = (String) colorSpinner.getSelectedItem();
+        final String lastSelectedColor = this.lastSelectedColor;
         colorSpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
             return;
@@ -319,8 +332,8 @@ public class MaterialIconsImporter extends DialogWrapper {
         for (String size : list) {
             colorSpinner.addItem(size);
         }
-        if (list.contains(lastSelection)) {
-            colorSpinner.setSelectedIndex(list.indexOf(lastSelection));
+        if (list.contains(lastSelectedColor)) {
+            colorSpinner.setSelectedIndex(list.indexOf(lastSelectedColor));
         }
     }
 
@@ -351,7 +364,7 @@ public class MaterialIconsImporter extends DialogWrapper {
         task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, XXHDPICheckBox));
         task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, XXXHDPICheckBox));
 
-        DumbService.getInstance(project).queueTask(task);
+        ProgressManager.getInstance().run(task);
     }
 
     private ImageInformation getImageInformation(ImageInformation baseInformation,

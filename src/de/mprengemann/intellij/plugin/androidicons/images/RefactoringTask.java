@@ -16,9 +16,11 @@ package de.mprengemann.intellij.plugin.androidicons.images;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.project.DumbModeTask;
-import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.DumbAwareRunnable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,27 +28,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RefactoringTask extends DumbModeTask {
+public class RefactoringTask extends Task.Backgroundable {
 
     private Project project;
     private List<ImageInformation> imageInformationList = new ArrayList<ImageInformation>();
 
     public RefactoringTask(Project project) {
+        super(project, "Import images", false);
         this.project = project;
-    }
-
-    @Override
-    public void performInDumbMode(@NotNull final ProgressIndicator progressIndicator) {
-        ApplicationManager.getApplication().runReadAction(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    refactor(progressIndicator);
-                } catch (ProcessCanceledException ignored) {
-                } catch (IOException ignored) {
-                }
-            }
-        });
     }
 
     private void refactor(ProgressIndicator indicator) throws IOException, ProcessCanceledException {
@@ -60,11 +49,11 @@ public class RefactoringTask extends DumbModeTask {
             indicator.setFraction((float) (i + 1) / (float) imageInformationList.size());
         }
 
-        DumbService.getInstance(project).runWhenSmart(new Runnable() {
-            @Override
+        UIUtil.invokeLaterIfNeeded(new DumbAwareRunnable() {
             public void run() {
                 try {
                     RefactorHelper.move(project, imageInformationList);
+                    LocalFileSystem.getInstance().refresh(true);
                 } catch (IOException ignored) {
                 }
             }
@@ -76,5 +65,19 @@ public class RefactoringTask extends DumbModeTask {
             return;
         }
         imageInformationList.add(imageInformation);
+    }
+
+    @Override
+    public void run(@NotNull final ProgressIndicator progressIndicator) {
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    refactor(progressIndicator);
+                } catch (ProcessCanceledException ignored) {
+                } catch (IOException ignored) {
+                }
+            }
+        });
     }
 }

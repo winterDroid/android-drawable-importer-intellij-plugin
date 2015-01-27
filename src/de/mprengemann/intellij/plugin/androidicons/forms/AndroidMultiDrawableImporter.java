@@ -17,7 +17,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
@@ -170,7 +170,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, xxhdpiFile));
         task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, xxxhdpiFile));
 
-        DumbService.getInstance(project).queueTask(task);
+        ProgressManager.getInstance().run(task);
         
         super.doOKAction();
     }

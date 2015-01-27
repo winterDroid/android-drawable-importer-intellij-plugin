@@ -16,10 +16,10 @@ package de.mprengemann.intellij.plugin.androidicons.forms;
 import com.intellij.openapi.components.PathMacroManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -99,7 +99,21 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         setTitle("Android Scale Importer");
         setResizable(false);
 
-        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
+        final FileType imageFileType = ImageFileTypeManager.getInstance().getImageFileType();
+        final FileChooserDescriptor imageDescriptor = new FileChooserDescriptor(true, true, false, false, false, false)  {
+            public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
+                return file.isDirectory() || file.getFileType() == imageFileType;
+            }
+
+            public boolean isFileSelectable(VirtualFile file) {
+                return super.isFileSelectable(file) && file.getFileType() == imageFileType;
+            }
+        };
+//            .withFileFilter(new Condition<VirtualFile>() {
+//                public boolean value(VirtualFile file) {
+//                    return file.getFileType().equals(imageFileType);
+//                }
+//            });
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -435,7 +449,11 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     protected VirtualFile getInitialFile() {
         String directoryName = SettingsHelper.getLastImageFolder(project);
         VirtualFile path;
-        for (path = LocalFileSystem.getInstance().findFileByPath(expandPath(directoryName));
+        String expandPath = expandPath(directoryName);
+        if (expandPath == null) {
+            return null;
+        }
+        for (path = LocalFileSystem.getInstance().findFileByPath(expandPath);
              path == null && directoryName.length() > 0;
              path = LocalFileSystem.getInstance().findFileByPath(directoryName)) {
             int pos = directoryName.lastIndexOf(47);
@@ -493,7 +511,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
             }
             importSingleImage(information, resolution, task);
         }
-        DumbService.getInstance(project).queueTask(task);
+        ProgressManager.getInstance().run(task);
         super.doOKAction();
     }
 

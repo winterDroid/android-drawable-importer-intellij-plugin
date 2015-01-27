@@ -19,7 +19,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.DumbServiceImpl;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -511,7 +511,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
             }
             importSingleImage(information, resolution, task);
         }
-        DumbServiceImpl.getInstance(project).runWhenSmart(task);
+        ProgressManager.getInstance().run(task);
         super.doOKAction();
     }
 

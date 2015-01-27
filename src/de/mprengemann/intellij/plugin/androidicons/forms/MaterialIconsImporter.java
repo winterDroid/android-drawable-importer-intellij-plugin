@@ -15,7 +15,7 @@ package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
@@ -362,7 +362,7 @@ public class MaterialIconsImporter extends DialogWrapper {
         task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, XXHDPICheckBox));
         task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, XXXHDPICheckBox));
 
-        DumbService.getInstance(project).runWhenSmart(task);
+        ProgressManager.getInstance().run(task);
     }
 
     private ImageInformation getImageInformation(ImageInformation baseInformation,

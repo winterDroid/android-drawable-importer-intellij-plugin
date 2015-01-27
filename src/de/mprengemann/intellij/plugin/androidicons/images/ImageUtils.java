@@ -98,8 +98,8 @@ public class ImageUtils {
 
     private static BufferedImage resizeNormalImage(BufferedImage image,
                                                    ImageInformation information) throws IOException {
-        int newWidth = information.getImageWidth();
-        int newHeight = information.getImageHeight();
+        int newWidth = information.getTargetWidth();
+        int newHeight = information.getTargetHeight();
         if (newWidth <= 0 || newHeight <= 0) {
             newWidth = image.getWidth();
             newHeight = image.getHeight();
@@ -141,8 +141,8 @@ public class ImageUtils {
             return image;
         }
 
-        int newWidth = information.getImageWidth();
-        int newHeight = information.getImageHeight();
+        int newWidth = information.getTargetWidth();
+        int newHeight = information.getTargetHeight();
         if (newWidth <= 0 || newHeight <= 0) {
             newWidth = image.getWidth();
             newHeight = image.getHeight();

@@ -18,6 +18,7 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -28,10 +29,12 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.io.FilenameUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
@@ -68,6 +71,13 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     private JLabel imageContainer;
     private JButton addButton;
     private JButton deleteButton;
+    private JCheckBox XXXHDPICheckBox;
+    private JCheckBox LDPICheckBox;
+    private JCheckBox MDPICheckBox;
+    private JCheckBox HDPICheckBox;
+    private JCheckBox XHDPICheckBox;
+    private JCheckBox XXHDPICheckBox;
+    private JCheckBox aspectRatioLock;
     private ImageTableModel tableModel;
     private VirtualFile resRoot;
 
@@ -77,10 +87,9 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         this.module = module;
 
         setTitle("Android Scale Importer");
-//        setResizable(false);
+        setResizable(false);
 
-        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor(
-            ImageFileTypeManager.getInstance().getImageFileType());
+        final FileChooserDescriptor imageDescriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor(ImageFileTypeManager.getInstance().getImageFileType());
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -115,7 +124,6 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         });
         
         initTable();
-
         init();
     }
 
@@ -168,6 +176,8 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                                    .setExportPath(resRoot.getCanonicalPath())
                                    .setImageFile(imageFile)
                                    .setNinePatch(imageFile.getName().endsWith(".9.png"))
+                                   .setImageWidth(image.getWidth())
+                                   .setImageHeight(image.getHeight())
                                    .setTargetWidth(image.getWidth())
                                    .setTargetHeight(image.getHeight())
                                    .build(project);
@@ -332,8 +342,55 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         };
     }
 
-    class ImageTableModel extends AbstractTableModel {
+    @Override
+    protected void doOKAction() {
+        if (table.getModel().getRowCount() == 0) {
+            super.doOKAction();
+            return;
+        }
+        
+        RefactoringTask task = new RefactoringTask(project);
+        List<ImageInformation> imageInformationList = tableModel.imageInformationList;
+        for (int i = 0; i < imageInformationList.size(); i++) {
+            ImageInformation information = imageInformationList.get(i);
+            Resolution resolution = tableModel.resolutionList.get(i);
+            importSingleImage(information, resolution, task);
+        }
+        DumbService.getInstance(project).queueTask(task);
+        super.doOKAction();
+    }
 
+    private void importSingleImage(ImageInformation baseInformation, Resolution targetResolution, RefactoringTask task) {
+        float toLDPI = RefactorHelper.getScaleFactor(Resolution.LDPI, targetResolution);
+        float toMDPI = RefactorHelper.getScaleFactor(Resolution.MDPI, targetResolution);
+        float toHDPI = RefactorHelper.getScaleFactor(Resolution.HDPI, targetResolution);
+        float toXHDPI = RefactorHelper.getScaleFactor(Resolution.XHDPI, targetResolution);
+        float toXXHDPI = RefactorHelper.getScaleFactor(Resolution.XXHDPI, targetResolution);
+        float toXXXHDPI = RefactorHelper.getScaleFactor(Resolution.XXXHDPI, targetResolution);
+
+        task.addImage(getImageInformation(baseInformation, Resolution.LDPI, toLDPI, LDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.MDPI, toMDPI, MDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.HDPI, toHDPI, HDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XHDPI, toXHDPI, XHDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXHDPI, toXXHDPI, XXHDPICheckBox));
+        task.addImage(getImageInformation(baseInformation, Resolution.XXXHDPI, toXXXHDPI, XXXHDPICheckBox));
+    }
+
+    private ImageInformation getImageInformation(ImageInformation baseInformation,
+                                                 Resolution resolution,
+                                                 float factor,
+                                                 JCheckBox checkbox) {
+        if (!checkbox.isSelected()) {
+            return null;
+        }
+
+        return ImageInformation.newBuilder(baseInformation)
+                               .setResolution(resolution)
+                               .setFactor(factor)
+                               .build(project);
+    }
+
+    class ImageTableModel extends AbstractTableModel {
         List<String> columnNames = Arrays.asList("Asset",
                                                  "Resolution",
                                                  "Target-Resolution",
@@ -391,10 +448,10 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                     return information.getResolution();
                 //Target-Width
                 case 3:
-                    return information.getImageWidth();
+                    return information.getTargetWidth();
                 //Target-Height
                 case 4:
-                    return information.getImageHeight();
+                    return information.getTargetHeight();
                 //Exportname
                 case 5:
                     return information.getExportName();
@@ -419,7 +476,8 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         
         @Override
         public void setValueAt(Object value, int row, int col) {
-            ImageInformation.Builder information = ImageInformation.newBuilder(imageInformationList.get(row));
+            ImageInformation imageInformation = imageInformationList.get(row);
+            ImageInformation.Builder builder = ImageInformation.newBuilder(imageInformation);
             switch (col) {
                 //Resolution
                 case 1:
@@ -427,27 +485,47 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                     break;
                 //Target-Resolution
                 case 2:
-                    information.setResolution(Resolution.from((String) value));
+                    builder.setResolution(Resolution.from((String) value));
                     break;
                 //Target-Width
                 case 3:
-                    information.setTargetWidth((Integer) value);
+                    if (aspectRatioLock.isSelected()) {
+                        try {
+                            int targetWidth = (Integer) value;
+                            int targetHeight = (int) ((float) (imageInformation.getImageHeight() * targetWidth) / (float) imageInformation.getImageWidth());
+                            builder.setTargetHeight(targetHeight)
+                                   .setTargetWidth(targetWidth);
+                        } catch (Exception ignored) {
+                        }
+                    } else {
+                        builder.setTargetWidth((Integer) value);
+                    }
                     break;
                 //Target-Height
                 case 4:
-                    information.setTargetHeight((Integer) value);
+                    if (aspectRatioLock.isSelected()) {
+                        try {
+                            int targetHeight = (Integer) value;
+                            int targetWidth = (int) ((float) (imageInformation.getImageWidth() * targetHeight) / (float) imageInformation.getImageHeight());
+                            builder.setTargetHeight(targetHeight)
+                                   .setTargetWidth(targetWidth);
+                        } catch (Exception ignored) {
+                        }
+                    } else {
+                        builder.setTargetHeight((Integer) value);
+                    }
                     break;
                 //Exportname
                 case 5:
-                    information.setExportName((String) value);
+                    builder.setExportName((String) value);
                     break;
                 //Exportpath
                 case 6:
-                    information.setExportPath((String) value);
+                    builder.setExportPath((String) value);
                     break;
             }
-            imageInformationList.set(row, information.build(project));
-            fireTableCellUpdated(row, col);
+            imageInformationList.set(row, builder.build(project));
+            fireTableRowsUpdated(row, row);
         }
 
 

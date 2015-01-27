@@ -30,6 +30,8 @@ public class ImageInformation {
     private final float factor;
     private final int imageWidth;
     private final int imageHeight;
+    private final int targetWidth;
+    private final int targetHeight;
     private final String exportPath;
     private final String exportName;
     private final boolean ninePatch;
@@ -42,6 +44,8 @@ public class ImageInformation {
                              float factor,
                              int imageWidth,
                              int imageHeight,
+                             int targetWidth,
+                             int targetHeight,
                              String exportPath,
                              String exportName,
                              boolean isNinePatch,
@@ -53,6 +57,8 @@ public class ImageInformation {
         this.factor = factor;
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
+        this.targetWidth = targetWidth;
+        this.targetHeight = targetHeight;
         this.exportPath = exportPath;
         this.exportName = exportName;
         this.ninePatch = isNinePatch;
@@ -89,12 +95,12 @@ public class ImageInformation {
         return factor;
     }
 
-    public int getImageWidth() {
-        return imageWidth;
+    public int getTargetWidth() {
+        return targetWidth;
     }
 
-    public int getImageHeight() {
-        return imageHeight;
+    public int getTargetHeight() {
+        return targetHeight;
     }
 
     public String getExportPath() {
@@ -117,6 +123,14 @@ public class ImageInformation {
         return method;
     }
 
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    public int getImageHeight() {
+        return imageHeight;
+    }
+
     public static class Builder {
 
         private File imageFile = null;
@@ -131,6 +145,8 @@ public class ImageInformation {
         private boolean ninePatch = false;
         private ResizeAlgorithm algorithm = ResizeAlgorithm.SCALR;
         private Object method = Scalr.Method.AUTOMATIC;
+        private int imageWidth = 0;
+        private int imageHeight = 0;
 
         private Builder() {
         }
@@ -139,8 +155,10 @@ public class ImageInformation {
             this.imageFile = imageInformation.imageFile;
             this.resolution = imageInformation.resolution;
             this.factor = imageInformation.factor;
-            this.targetWidth = imageInformation.imageWidth;
-            this.targetHeight = imageInformation.imageHeight;
+            this.imageWidth = imageInformation.imageWidth;
+            this.imageHeight = imageInformation.imageHeight;
+            this.targetWidth = imageInformation.targetWidth;
+            this.targetHeight = imageInformation.targetHeight;
             this.exportPath = imageInformation.exportPath;
             this.exportName = imageInformation.exportName;
             this.ninePatch = imageInformation.ninePatch;
@@ -178,6 +196,16 @@ public class ImageInformation {
             return this;
         }
 
+        public Builder setImageWidth(int imageWidth) {
+            this.imageWidth = imageWidth;
+            return this;
+        }
+
+        public Builder setImageHeight(int imageHeight) {
+            this.imageHeight = imageHeight;
+            return this;
+        }
+
         public Builder setNinePatch(boolean ninePatch) {
             this.ninePatch = ninePatch;
             return this;
@@ -208,6 +236,8 @@ public class ImageInformation {
             return new ImageInformation(this.imageFile,
                                         this.resolution,
                                         this.factor,
+                                        this.imageWidth,
+                                        this.imageHeight,
                                         this.targetWidth,
                                         this.targetHeight,
                                         this.exportPath,

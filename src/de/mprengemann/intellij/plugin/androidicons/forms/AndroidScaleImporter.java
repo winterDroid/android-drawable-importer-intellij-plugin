@@ -362,7 +362,7 @@ public class AndroidScaleImporter extends DialogWrapper {
 
     private void updateScaleFactors() {
         Resolution targetResolution = Resolution.from((String) assetResolutionSpinner.getSelectedItem());
-        if (targetResolution == null) {
+        if (targetResolution == Resolution.OTHER) {
             targetResolution = Resolution.from((String) targetResolutionSpinner.getSelectedItem());
         }
         

@@ -52,7 +52,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="811d" class="javax.swing.JTable" binding="table">
+          <component id="811d" class="javax.swing.JTable" binding="table" custom-create="true">
             <constraints/>
             <properties>
               <autoCreateRowSorter value="false"/>

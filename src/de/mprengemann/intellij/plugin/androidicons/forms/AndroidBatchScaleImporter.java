@@ -21,8 +21,10 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.table.JBTable;
 import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
@@ -42,6 +44,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -227,6 +232,8 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         defaultTableCellRenderer.setHorizontalTextPosition(SwingConstants.RIGHT);
         table.getColumnModel().getColumn(5).setCellRenderer(defaultTableCellRenderer);
         
+        table.getColumnModel().getColumn(6).setCellEditor(new TextBrowserEditor());
+        
         table.getColumnModel().setColumnSelectionAllowed(false);
         table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -281,6 +288,30 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     @Override
     protected JComponent createCenterPanel() {
         return container;
+    }
+
+    private void createUIComponents() {
+        table = new JBTable() {
+            @NotNull
+            @Override
+            public Component prepareRenderer(@NotNull TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+                if (isCellSelected(row, column)) {
+                    if (!isCellEditable(row, column)) {
+                        c.setBackground(getSelectionBackground().darker());
+                    } else {
+                        c.setBackground(getSelectionBackground());
+                    }
+                } else {
+                    if (!isCellEditable(row, column)) {
+                        c.setBackground(getBackground().darker());
+                    } else {
+                        c.setBackground(getBackground());
+                    }
+                }
+                return c;
+            }
+        };
     }
 
     class ImageTableModel extends AbstractTableModel {
@@ -409,6 +440,30 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
 
         public ImageInformation getItem(int row) {
             return imageInformationList.get(row);
+        }
+    }
+
+    public class TextBrowserEditor extends AbstractCellEditor implements TableCellEditor {
+        TextFieldWithBrowseButton button;
+
+        public TextBrowserEditor() {
+            button = new TextFieldWithBrowseButton();
+            AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", button);
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return button.getText();
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table,
+                                                     Object value,
+                                                     boolean isSelected,
+                                                     int row,
+                                                     int column) {
+            button.setText((String) value);
+            return button;
         }
     }
 }

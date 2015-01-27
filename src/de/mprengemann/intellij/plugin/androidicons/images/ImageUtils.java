@@ -17,7 +17,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.forms.Wrong9PatchException;
-import de.mprengemann.intellij.plugin.androidicons.util.MathUtils;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -98,11 +97,18 @@ public class ImageUtils {
 
     private static BufferedImage resizeNormalImage(BufferedImage image,
                                                    ImageInformation information) throws IOException {
+        int originalWidth = image.getWidth();
+        int originalHeight = image.getHeight();
+        if (originalHeight == information.getTargetHeight() &&
+            originalWidth == information.getTargetWidth()) {
+            return image;
+        }
+        
         int newWidth = information.getTargetWidth();
         int newHeight = information.getTargetHeight();
         if (newWidth <= 0 || newHeight <= 0) {
-            newWidth = image.getWidth();
-            newHeight = image.getHeight();
+            newWidth = originalWidth;
+            newHeight = originalHeight;
         }
 
         if (information.getFactor() >= 0) {
@@ -117,7 +123,8 @@ public class ImageUtils {
                                                    int newWidth,
                                                    int newHeight,
                                                    ImageInformation information) throws IOException {
-        if (MathUtils.floatEquals(information.getFactor(), 1f)) {
+        if (newWidth == information.getImageWidth() &&
+            newHeight == information.getImageHeight()) {
             return image;
         }
         BufferedImage resizedImage = null;
@@ -137,15 +144,18 @@ public class ImageUtils {
     public static BufferedImage resizeNinePatchImage(Project project,
                                                      ImageInformation information) throws IOException {
         BufferedImage image = ImageIO.read(information.getImageFile());
-        if (MathUtils.floatEquals(information.getFactor(), 1f)) {
+        int originalWidth = image.getWidth();
+        int originalHeight = image.getHeight();
+        if (originalWidth - 2 == information.getTargetWidth() &&
+            originalHeight - 2 == information.getTargetHeight()) {
             return image;
         }
 
         int newWidth = information.getTargetWidth();
         int newHeight = information.getTargetHeight();
         if (newWidth <= 0 || newHeight <= 0) {
-            newWidth = image.getWidth();
-            newHeight = image.getHeight();
+            newWidth = originalWidth;
+            newHeight = originalHeight;
         }
 
         if (information.getFactor() >= 0) {

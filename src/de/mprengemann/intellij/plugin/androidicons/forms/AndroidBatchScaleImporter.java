@@ -25,6 +25,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
@@ -37,6 +38,7 @@ import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.activation.MimetypesFileTypeMap;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -60,6 +63,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -207,22 +211,33 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     private void initTable() {
         tableModel = new ImageTableModel();
         table.setModel(tableModel);
-        DefaultTableCellRenderer fileCellRenderer = new DefaultTableCellRenderer() {
-            @Override
-            protected void setValue(Object o) {
-                File file = (File) o;
-                if (file == null) {
-                    setText("");
-                    return;
-                }
-                if (file.isDirectory()) {
-                    setText(file.getAbsolutePath());
-                } else {
-                    setText(FilenameUtils.removeExtension(file.getName()));
-                }
+        
+        initRenderers();
+        initAssetResolutions();
+        initTargetResolutions();
+        initNumberValidator();
+        initExportNameValidator();
+        initColumnSelection();
+        initColumnSizes();
+    }
 
+    private void initRenderers() {
+        DefaultTableCellRenderer fileCellRenderer = new DefaultTableCellRenderer() {
+        @Override
+        protected void setValue(Object o) {
+            File file = (File) o;
+            if (file == null) {
+                setText("");
+                return;
             }
-        };
+            if (file.isDirectory()) {
+                setText(file.getAbsolutePath());
+            } else {
+                setText(FilenameUtils.removeExtension(file.getName()));
+            }
+
+        }
+    };
         fileCellRenderer.setHorizontalTextPosition(DefaultTableCellRenderer.RIGHT);
         table.setDefaultRenderer(File.class, fileCellRenderer);
         table.setDefaultRenderer(Resolution.class, new DefaultTableCellRenderer() {
@@ -235,34 +250,41 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                 }
             }
         });
-        
-        ComboBox assetResolutionComboBox = new ComboBox();
-        assetResolutionComboBox.addItem(Resolution.LDPI.getName());
-        assetResolutionComboBox.addItem(Resolution.MDPI.getName());
-        assetResolutionComboBox.addItem(Resolution.HDPI.getName());
-        assetResolutionComboBox.addItem(Resolution.XHDPI.getName());
-        assetResolutionComboBox.addItem(Resolution.XXHDPI.getName());
-        assetResolutionComboBox.addItem(Resolution.XXXHDPI.getName());
-        assetResolutionComboBox.addItem(Resolution.OTHER.getName());
-        assetResolutionComboBox.setSelectedIndex(3);
-        table.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(assetResolutionComboBox));
-
-        ComboBox targetResolutionComboBox = new ComboBox();
-        targetResolutionComboBox.addItem(Resolution.LDPI.getName());
-        targetResolutionComboBox.addItem(Resolution.MDPI.getName());
-        targetResolutionComboBox.addItem(Resolution.HDPI.getName());
-        targetResolutionComboBox.addItem(Resolution.XHDPI.getName());
-        targetResolutionComboBox.addItem(Resolution.XXHDPI.getName());
-        targetResolutionComboBox.addItem(Resolution.XXXHDPI.getName());
-        targetResolutionComboBox.setSelectedIndex(3);
-        table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(targetResolutionComboBox));
-
-        DefaultTableCellRenderer defaultTableCellRenderer = new DefaultTableCellRenderer();
-        defaultTableCellRenderer.setHorizontalTextPosition(SwingConstants.RIGHT);
-        table.getColumnModel().getColumn(5).setCellRenderer(defaultTableCellRenderer);
-        
         table.getColumnModel().getColumn(6).setCellEditor(new TextBrowserEditor());
-        
+    }
+
+    private void initExportNameValidator() {
+        table.getColumnModel().getColumn(5).setCellEditor(new DefaultCellEditor(new JTextField()) {
+            @Override
+            public boolean stopCellEditing() {
+                boolean result = super.stopCellEditing();
+                if (!result) {
+                    return false;
+                }
+                String value = (String) getCellEditorValue();
+                value = value.trim();
+                if ((StringUtils.isNotEmpty(value) && value.matches("[a-z0-9_.]*"))) {
+                    return super.stopCellEditing();
+                }
+                ((JComponent) this.getComponent()).setBorder(new LineBorder(JBColor.RED));
+                return false;
+            }
+
+            @Override
+            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                ((JComponent) this.getComponent()).setBorder(table.getBorder());
+                return super.getTableCellEditorComponent(
+                    table, value, isSelected, row, column);
+            }
+        });
+    }
+
+    private void initNumberValidator() {
+        table.getColumnModel().getColumn(3).setCellEditor(new TargetSizeEditor());
+        table.getColumnModel().getColumn(4).setCellEditor(new TargetSizeEditor());
+    }
+
+    private void initColumnSelection() {
         table.getColumnModel().setColumnSelectionAllowed(false);
         table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -278,7 +300,29 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                 }
             }
         });
-        initColumnSizes();
+    }
+
+    private void initTargetResolutions() {ComboBox targetResolutionComboBox = new ComboBox();
+        targetResolutionComboBox.addItem(Resolution.LDPI.getName());
+        targetResolutionComboBox.addItem(Resolution.MDPI.getName());
+        targetResolutionComboBox.addItem(Resolution.HDPI.getName());
+        targetResolutionComboBox.addItem(Resolution.XHDPI.getName());
+        targetResolutionComboBox.addItem(Resolution.XXHDPI.getName());
+        targetResolutionComboBox.addItem(Resolution.XXXHDPI.getName());
+        targetResolutionComboBox.setSelectedIndex(3);
+        table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(targetResolutionComboBox));
+    }
+
+    private void initAssetResolutions() {ComboBox assetResolutionComboBox = new ComboBox();
+        assetResolutionComboBox.addItem(Resolution.LDPI.getName());
+        assetResolutionComboBox.addItem(Resolution.MDPI.getName());
+        assetResolutionComboBox.addItem(Resolution.HDPI.getName());
+        assetResolutionComboBox.addItem(Resolution.XHDPI.getName());
+        assetResolutionComboBox.addItem(Resolution.XXHDPI.getName());
+        assetResolutionComboBox.addItem(Resolution.XXXHDPI.getName());
+        assetResolutionComboBox.addItem(Resolution.OTHER.getName());
+        assetResolutionComboBox.setSelectedIndex(3);
+        table.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(assetResolutionComboBox));
     }
 
     private void initColumnSizes() {
@@ -585,6 +629,73 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                                                      int column) {
             button.setText((String) value);
             return button;
+        }
+    }
+    
+    class TargetSizeEditor extends DefaultCellEditor {
+        Class<?>[] argTypes;
+        Constructor<?> constructor;
+        Object value;
+
+        public TargetSizeEditor() {
+            this(new JTextField());
+        }
+
+        public TargetSizeEditor(JTextField textField) {
+            super(textField);
+            ((JTextField) this.getComponent()).setHorizontalAlignment(4);
+            this.argTypes = new Class[] {String.class};
+            this.getComponent().setName("Table.editor");
+        }
+
+        public boolean stopCellEditing() {
+            String s = (String) super.getCellEditorValue();
+            if ("".equals(s)) {
+                if (this.constructor.getDeclaringClass() == String.class) {
+                    this.value = s;
+                }
+
+                super.stopCellEditing();
+            }
+
+            try {
+                this.value = this.constructor.newInstance(new Object[] {s});
+                Integer value = (Integer) getCellEditorValue();
+                if (value > 0) {
+                    return super.stopCellEditing();
+                } else {
+                    throw new IllegalArgumentException();
+                }
+            } catch (Exception var3) {
+                ((JComponent) this.getComponent()).setBorder(new LineBorder(JBColor.RED));
+                return false;
+            }
+        }
+
+        public Component getTableCellEditorComponent(JTable table,
+                                                     Object value,
+                                                     boolean isSelected,
+                                                     int row,
+                                                     int column) {
+            this.value = null;
+            ((JComponent) this.getComponent()).setBorder(new LineBorder(JBColor.BLACK));
+
+            try {
+                Class e = table.getColumnClass(column);
+                if (e == Object.class) {
+                    e = String.class;
+                }
+
+                this.constructor = e.getConstructor(this.argTypes);
+            } catch (Exception var7) {
+                return null;
+            }
+
+            return super.getTableCellEditorComponent(table, value, isSelected, row, column);
+        }
+
+        public Object getCellEditorValue() {
+            return this.value;
         }
     }
 }

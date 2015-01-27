@@ -80,6 +80,7 @@ public class ImageFileBrowserFolderActionListener extends ComponentWithBrowseBut
         }
 
         FileChooser.chooseFile(fileChooserDescriptor, this.getProject(), this.getInitialFile(), new Consumer<VirtualFile>() {
+            @SuppressWarnings("deprecation")
             @Override
             public void consume(VirtualFile file) {
                 SettingsHelper.saveLastImageFolder(project, file.getCanonicalPath());

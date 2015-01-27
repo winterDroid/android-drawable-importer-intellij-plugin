@@ -258,6 +258,7 @@ public class MaterialIconsImporter extends DialogWrapper {
     }
 
     private void fillSizes() {
+        final String lastSelectedSize = this.lastSelectedSize;
         sizeSpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
             return;
@@ -296,6 +297,7 @@ public class MaterialIconsImporter extends DialogWrapper {
     }
 
     private void fillColors() {
+        final String lastSelectedColor = this.lastSelectedColor;
         colorSpinner.removeAllItems();
         if (this.assetRoot.getCanonicalPath() == null) {
             return;

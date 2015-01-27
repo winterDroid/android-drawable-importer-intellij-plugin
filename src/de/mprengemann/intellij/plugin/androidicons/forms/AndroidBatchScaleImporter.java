@@ -470,19 +470,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
             @Override
             public Component prepareRenderer(@NotNull TableCellRenderer renderer, int row, int column) {
                 Component c = super.prepareRenderer(renderer, row, column);
-                if (isCellSelected(row, column)) {
-                    if (!isCellEditable(row, column)) {
-                        c.setBackground(getSelectionBackground().darker());
-                    } else {
-                        c.setBackground(getSelectionBackground());
-                    }
-                } else {
-                    if (!isCellEditable(row, column)) {
-                        c.setBackground(getBackground().darker());
-                    } else {
-                        c.setBackground(getBackground());
-                    }
-                }
+                c.setEnabled(isCellEditable(row, column));
                 return c;
             }
         };

@@ -23,11 +23,6 @@ import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import icons.AndroidIcons;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * User: marcprengemann
- * Date: 07.04.14
- * Time: 11:09
- */
 public class AndroidScaleAction extends AnAction {
 
     public AndroidScaleAction() {
@@ -38,9 +33,6 @@ public class AndroidScaleAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = getEventProject(event);
         Module module = event.getData(DataKeys.MODULE);
-
-//        AndroidScaleImporter dialog = new AndroidScaleImporter(project, module);
-//        dialog.show();
 
         AndroidBatchScaleImporter dialog = new AndroidBatchScaleImporter(project, module);
         dialog.show();

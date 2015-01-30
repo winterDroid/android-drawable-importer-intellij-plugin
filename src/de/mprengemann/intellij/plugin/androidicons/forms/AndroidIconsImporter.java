@@ -176,6 +176,9 @@ public class AndroidIconsImporter extends DialogWrapper {
         }
         File exDensity = densities[0];
         File[] assets = exDensity.listFiles(systemFileNameFiler);
+        if (assets == null || assets.length < 1) {
+            return;
+        }
         Arrays.sort(assets, alphabeticalComparator);
         for (File asset : assets) {
             if (asset.isDirectory()) {

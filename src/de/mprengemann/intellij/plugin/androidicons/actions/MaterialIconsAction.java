@@ -38,7 +38,7 @@ public class MaterialIconsAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = getEventProject(event);
-        VirtualFile assetRoot = SettingsHelper.getAssetPath(IconPack.ANDROID_ICONS);
+        VirtualFile assetRoot = SettingsHelper.getAssetPath(IconPack.MATERIAL_ICONS);
         if (assetRoot == null) {
             Messages.showMessageDialog(
                 project,

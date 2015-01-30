@@ -99,6 +99,9 @@ public class RadioButtonList<T> extends JBList {
         JRadioButton checkBox = new JRadioButton(text, selected);
         if (myItemMap.isEmpty()) {
             checkBox.setSelected(true);
+            if (radioListListener != null) {
+                radioListListener.radioSelectionChanged(0);
+            }
         }
         myItemMap.put(item, checkBox);
         buttonGroup.add(checkBox);

@@ -33,17 +33,16 @@ public class ResourcesDialog extends DialogWrapper {
         super(project, true);
         setResizable(false);
         this.listener = listener;
-
-        list.setItems(items, new Function<VirtualFile, String>() {
-            @Override
-            public String fun(VirtualFile virtualFile) {
-                return virtualFile.getCanonicalPath();
-            }
-        });
         list.setRadioListListener(new RadioListListener() {
             @Override
             public void radioSelectionChanged(int selectedIndex) {
                 selectedDir = items.get(selectedIndex);
+            }
+        });
+        list.setItems(items, new Function<VirtualFile, String>() {
+            @Override
+            public String fun(VirtualFile virtualFile) {
+                return virtualFile.getCanonicalPath();
             }
         });
 

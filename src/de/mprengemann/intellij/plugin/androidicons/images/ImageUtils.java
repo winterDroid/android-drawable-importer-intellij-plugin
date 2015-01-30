@@ -17,6 +17,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.forms.Wrong9PatchException;
+import de.mprengemann.intellij.plugin.androidicons.util.MathUtils;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -100,7 +101,8 @@ public class ImageUtils {
         int originalWidth = image.getWidth();
         int originalHeight = image.getHeight();
         if (originalHeight == information.getTargetHeight() &&
-            originalWidth == information.getTargetWidth()) {
+            originalWidth == information.getTargetWidth() &&
+            MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
         }
         
@@ -124,7 +126,8 @@ public class ImageUtils {
                                                    int newHeight,
                                                    ImageInformation information) throws IOException {
         if (newWidth == information.getImageWidth() &&
-            newHeight == information.getImageHeight()) {
+            newHeight == information.getImageHeight() &&
+            MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
         }
         BufferedImage resizedImage = null;
@@ -147,7 +150,8 @@ public class ImageUtils {
         int originalWidth = image.getWidth();
         int originalHeight = image.getHeight();
         if (originalWidth - 2 == information.getTargetWidth() &&
-            originalHeight - 2 == information.getTargetHeight()) {
+            originalHeight - 2 == information.getTargetHeight() &&
+            MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
         }
 

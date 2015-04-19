@@ -109,11 +109,6 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                 return super.isFileSelectable(file) && file.getFileType() == imageFileType;
             }
         };
-//            .withFileFilter(new Condition<VirtualFile>() {
-//                public boolean value(VirtualFile file) {
-//                    return file.getFileType().equals(imageFileType);
-//                }
-//            });
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {

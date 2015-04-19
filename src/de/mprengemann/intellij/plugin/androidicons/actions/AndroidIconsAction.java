@@ -48,7 +48,7 @@ public class AndroidIconsAction extends AnAction {
             if (project == null) {
                 project = ProjectManager.getInstance().getDefaultProject();
             }
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Android Icons");
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Android Drawable Importer");
         } else {
             Module module = event.getData(DataKeys.MODULE);
             AndroidIconsImporter dialog = new AndroidIconsImporter(project, module);

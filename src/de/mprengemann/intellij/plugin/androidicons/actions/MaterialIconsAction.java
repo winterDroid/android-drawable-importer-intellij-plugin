@@ -48,7 +48,7 @@ public class MaterialIconsAction extends AnAction {
             if (project == null) {
                 project = ProjectManager.getInstance().getDefaultProject();
             }
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Android Drawable Import");
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Android Drawable Importer");
         } else {
             Module module = event.getData(DataKeys.MODULE);
             MaterialIconsImporter dialog = new MaterialIconsImporter(project, module);

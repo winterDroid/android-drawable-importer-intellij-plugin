@@ -63,3 +63,4 @@ hs_err_pid*
 
 ### Specific ###
 *.zip
+!libs/*

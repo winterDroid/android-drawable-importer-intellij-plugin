@@ -31,7 +31,7 @@ import java.util.List;
 public class AndroidResourcesHelper {
 
     public static void getResRootFile(Project project, Module module, ResourcesDialog.ResourceSelectionListener listener) {
-        AndroidFacet currentFacet = AndroidFacetUtils.getInstance(project, module);
+        AndroidFacet currentFacet = AndroidFacetUtils.getCurrentFacet(project, module);
 
         if (currentFacet != null) {
             List<VirtualFile> allResourceDirectories = currentFacet.getAllResourceDirectories();

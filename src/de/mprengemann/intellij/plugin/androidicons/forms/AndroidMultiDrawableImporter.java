@@ -13,6 +13,7 @@
 
 package de.mprengemann.intellij.plugin.androidicons.forms;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
@@ -23,6 +24,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
@@ -39,14 +41,10 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
 
-/**
- * User: marcprengemann
- * Date: 08.04.14
- * Time: 14:23
- */
 public class AndroidMultiDrawableImporter extends DialogWrapper {
 
     private final Project project;
+    private final IconApplication container;
     private TextFieldWithBrowseButton resRoot;
     private TextFieldWithBrowseButton ldpiFile;
     private TextFieldWithBrowseButton mdpiFile;
@@ -56,16 +54,21 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     private TextFieldWithBrowseButton xxxhdpiFile;
     private JLabel imageContainer;
     private JTextField resExportName;
-    private JPanel container;
+    private JPanel uiContainer;
 
     public AndroidMultiDrawableImporter(final Project project, Module module) {
         super(project, true);
         this.project = project;
+        this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
 
         setTitle("Android Multi Drawable Importer");
         setResizable(false);
 
-        AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", resRoot);
+        AndroidResourcesHelper.initResourceBrowser(project,
+                                                   module,
+                                                   "Select res root",
+                                                   resRoot,
+                                                   container.getControllerFactory().getSettingsController());
 
         initBrowser(Resolution.LDPI, ldpiFile);
         initBrowser(Resolution.MDPI, mdpiFile);
@@ -195,6 +198,6 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
-        return container;
+        return uiContainer;
     }
 }

@@ -14,6 +14,7 @@
 package de.mprengemann.intellij.plugin.androidicons.settings;
 
 import com.intellij.ide.BrowserUtil;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.options.Configurable;
@@ -22,6 +23,7 @@ import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -62,12 +64,15 @@ public class PluginSettings implements Configurable {
     private String persistedAndroidIconsFile;
     private String persistedMaterialIconsFile;
     private boolean selectionPerformed = false;
+    private IconApplication container;
 
     @Nullable
     @Override
     public JComponent createComponent() {
-        persistedAndroidIconsFile = SettingsHelper.getAssetPathString(IconPack.ANDROID_ICONS);
-        persistedMaterialIconsFile = SettingsHelper.getAssetPathString(IconPack.MATERIAL_ICONS);
+        this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
+        persistedAndroidIconsFile = container.getControllerFactory().getSettingsController().getAssetPathString(IconPack.ANDROID_ICONS);
+        persistedMaterialIconsFile = container.getControllerFactory().getSettingsController().getAssetPathString(
+            IconPack.MATERIAL_ICONS);
         initAndroidIconsSettings();
         initMaterialIconsSettings();
         return panel;
@@ -200,13 +205,15 @@ public class PluginSettings implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
-        SettingsHelper.saveAssetPath(IconPack.ANDROID_ICONS, selectedAndroidIconsFile);
+        container.getControllerFactory().getSettingsController().saveAssetPath(IconPack.ANDROID_ICONS,
+                                                                               selectedAndroidIconsFile);
         if (selectedAndroidIconsFile != null) {
             persistedAndroidIconsFile = selectedAndroidIconsFile.getUrl();
             selectionPerformed = false;
         }
 
-        SettingsHelper.saveAssetPath(IconPack.MATERIAL_ICONS, selectedMaterialIconsFile);
+        container.getControllerFactory().getSettingsController().saveAssetPath(IconPack.MATERIAL_ICONS,
+                                                                               selectedMaterialIconsFile);
         if (selectedMaterialIconsFile != null) {
             persistedMaterialIconsFile = selectedMaterialIconsFile.getUrl();
             selectionPerformed = false;
@@ -266,8 +273,8 @@ public class PluginSettings implements Configurable {
         selectedMaterialIconsFile = null;
         persistedAndroidIconsFile = null;
         persistedMaterialIconsFile = null;
-        SettingsHelper.clearAssetPath(IconPack.ANDROID_ICONS);
-        SettingsHelper.clearAssetPath(IconPack.MATERIAL_ICONS);
+        container.getControllerFactory().getSettingsController().clearAssetPath(IconPack.ANDROID_ICONS);
+        container.getControllerFactory().getSettingsController().clearAssetPath(IconPack.MATERIAL_ICONS);
         androidIconsAssetHome.setText("");
         materialIconsAssetHome.setText("");
         scanForAndroidIconsAssets();

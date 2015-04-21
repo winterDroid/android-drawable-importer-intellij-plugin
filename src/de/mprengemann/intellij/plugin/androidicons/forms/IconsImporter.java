@@ -14,6 +14,7 @@
 package de.mprengemann.intellij.plugin.androidicons.forms;
 
 import com.intellij.ide.BrowserUtil;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
@@ -22,13 +23,13 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.settings.PluginSettings;
-import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -54,9 +55,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MaterialIconsImporter extends DialogWrapper {
+public class IconsImporter extends DialogWrapper {
 
     private static final String DEFAULT_RESOLUTION = "drawable-xhdpi";
+    private IconApplication container;
     private VirtualFile assetRoot;
 
     private Project project;
@@ -73,7 +75,10 @@ public class MaterialIconsImporter extends DialogWrapper {
     private JCheckBox XHDPICheckBox;
     private JCheckBox XXHDPICheckBox;
     private JCheckBox XXXHDPICheckBox;
-    private JPanel container;
+    private JPanel uiContainer;
+    private JComboBox iconPackSpinner;
+    private JTextField searchField;
+    private JCheckBox LDPICheckBox;
     private boolean exportNameChanged = false;
     private final Comparator<File> alphabeticalComparator = new Comparator<File>() {
         @Override
@@ -87,15 +92,20 @@ public class MaterialIconsImporter extends DialogWrapper {
     private String lastSelectedColor = null;
     private String lastSelectedSize = null;
 
-    public MaterialIconsImporter(@Nullable final Project project, Module module) {
+    public IconsImporter(final Project project, Module module) {
         super(project, true);
         this.project = project;
+        this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
 
         setTitle("Material Icons Importer");
         setResizable(false);
 
-        AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot);
-        assetRoot = SettingsHelper.getAssetPath(IconPack.MATERIAL_ICONS);
+        AndroidResourcesHelper.initResourceBrowser(project,
+                                                   module,
+                                                   "Select res root",
+                                                   this.resRoot,
+                                                   container.getControllerFactory().getSettingsController());
+        assetRoot = container.getControllerFactory().getSettingsController().getAssetPath(IconPack.MATERIAL_ICONS);
 
         getHelpAction().setEnabled(true);
 
@@ -410,7 +420,7 @@ public class MaterialIconsImporter extends DialogWrapper {
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
-        return container;
+        return uiContainer;
     }
 
     private class AssetSpinnerRenderer extends DefaultListCellRenderer {

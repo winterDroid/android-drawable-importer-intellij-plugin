@@ -13,6 +13,7 @@
 
 package de.mprengemann.intellij.plugin.androidicons.forms;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
@@ -23,7 +24,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
-import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
+import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -33,6 +34,7 @@ public class ImageFileBrowserFolderActionListener extends ComponentWithBrowseBut
 
     private final String title;
     private final Project project;
+    private final IconApplication container;
 
     public ImageFileBrowserFolderActionListener(String title,
                                                 Project project,
@@ -41,6 +43,7 @@ public class ImageFileBrowserFolderActionListener extends ComponentWithBrowseBut
         super(title, null, componentWithBrowseButton, project, fileChooserDescriptor, TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
         this.title = title;
         this.project = project;
+        this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
     }
 
     @Nullable
@@ -51,7 +54,9 @@ public class ImageFileBrowserFolderActionListener extends ComponentWithBrowseBut
             return null;
         } else {
             if (project != null) {
-                directoryName = SettingsHelper.getLastImageFolder(project);
+                directoryName = container.getControllerFactory()
+                                         .getSettingsController()
+                                         .getLastImageFolder(project);
             } else {
                 directoryName = FileUtil.toSystemIndependentName(directoryName);
             }
@@ -83,7 +88,9 @@ public class ImageFileBrowserFolderActionListener extends ComponentWithBrowseBut
             @SuppressWarnings("deprecation")
             @Override
             public void consume(VirtualFile file) {
-                SettingsHelper.saveLastImageFolder(project, file.getCanonicalPath());
+                container.getControllerFactory()
+                         .getSettingsController()
+                         .saveLastImageFolder(project, file.getCanonicalPath());
                 onFileChoosen(file);
             }
         });

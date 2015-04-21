@@ -20,8 +20,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.forms.ResourcesDialog;
-import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import org.jetbrains.android.facet.AndroidFacet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,8 +44,12 @@ public class AndroidResourcesHelper {
         }
     }
 
-    public static void initResourceBrowser(final Project project, Module module, final String title, @Nullable final TextFieldWithBrowseButton browser) {
-        final VirtualFile resRoot = SettingsHelper.getResRootForProject(project);
+    public static void initResourceBrowser(final Project project,
+                                           Module module,
+                                           final String title,
+                                           @Nullable final TextFieldWithBrowseButton browser,
+                                           final ISettingsController settingsController) {
+        final VirtualFile resRoot = settingsController.getResRootForProject(project);
 
         if (resRoot == null) {
             getResRootFile(project, module, new ResourcesDialog.ResourceSelectionListener() {
@@ -54,7 +58,7 @@ public class AndroidResourcesHelper {
                     if (browser != null) {
                         browser.setText(resDir.getCanonicalPath());
                     }
-                    SettingsHelper.saveResRootForProject(project, resDir.getUrl());
+                    settingsController.saveResRootForProject(project, resDir.getUrl());
                 }
             });
         } else {
@@ -72,7 +76,7 @@ public class AndroidResourcesHelper {
                 @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
                 protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                     super.onFileChoosen(chosenFile);
-                    SettingsHelper.saveResRootForProject(project, chosenFile.getUrl());
+                    settingsController.saveResRootForProject(project, chosenFile.getUrl());
                 }
             });
         }

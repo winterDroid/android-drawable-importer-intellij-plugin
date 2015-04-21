@@ -13,6 +13,7 @@
 
 package de.mprengemann.intellij.plugin.androidicons.forms;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PathMacroManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
@@ -29,12 +30,12 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.Consumer;
+import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
-import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
@@ -74,7 +75,8 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     
     private final Project project;
     private final Module module;
-    private JPanel container;
+    private final IconApplication container;
+    private JPanel uiContainer;
     private JTable table;
     private JLabel imageContainer;
     private JButton addButton;
@@ -94,13 +96,19 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     public AndroidBatchScaleImporter(final Project project, final Module module) {
         super(project);
         this.project = project;
+        this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
         this.module = module;
 
         setTitle("Android Scale Importer");
         setResizable(false);
 
         final FileType imageFileType = ImageFileTypeManager.getInstance().getImageFileType();
-        final FileChooserDescriptor imageDescriptor = new FileChooserDescriptor(true, true, false, false, false, false)  {
+        final FileChooserDescriptor imageDescriptor = new FileChooserDescriptor(true,
+                                                                                true,
+                                                                                false,
+                                                                                false,
+                                                                                false,
+                                                                                false) {
             public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
                 return file.isDirectory() || file.getFileType() == imageFileType;
             }
@@ -115,13 +123,18 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                 FileChooser.chooseFile(imageDescriptor, project, getInitialFile(), new Consumer<VirtualFile>() {
                     @Override
                     public void consume(final VirtualFile file) {
-                        SettingsHelper.saveLastImageFolder(project, file.getCanonicalPath());
+                        container.getControllerFactory().getSettingsController().saveLastImageFolder(project,
+                                                                                                     file.getCanonicalPath());
                         if (resRoot == null) {
-                            AndroidResourcesHelper.getResRootFile(project, module, new ResourcesDialog.ResourceSelectionListener() {
+                            AndroidResourcesHelper.getResRootFile(project,
+                                                                  module,
+                                                                  new ResourcesDialog.ResourceSelectionListener() {
                                                                       @Override
                                                                       public void onResourceSelected(VirtualFile resDir) {
                                                                           resRoot = resDir;
-                                                                          SettingsHelper.saveResRootForProject(project, resDir.getUrl());
+                                                                          container.getControllerFactory().getSettingsController().saveResRootForProject(
+                                                                              project,
+                                                                              resDir.getUrl());
                                                                           addImageFiles(file);
                                                                       }
                                                                   });
@@ -179,7 +192,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                         @Override
                         public void onResourceSelected(VirtualFile resDir) {
                             resRoot = resDir;
-                            SettingsHelper.saveResRootForProject(project, resDir.getUrl());
+                            container.getControllerFactory().getSettingsController().saveResRootForProject(project, resDir.getUrl());
                             for (VirtualFile file : virtualFiles) {
                                 addImageFiles(file);
                             }
@@ -442,7 +455,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     }
 
     protected VirtualFile getInitialFile() {
-        String directoryName = SettingsHelper.getLastImageFolder(project);
+        String directoryName = container.getControllerFactory().getSettingsController().getLastImageFolder(project);
         VirtualFile path;
         String expandPath = expandPath(directoryName);
         if (expandPath == null) {
@@ -474,7 +487,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
-        return container;
+        return uiContainer;
     }
 
     private void createUIComponents() {
@@ -702,7 +715,11 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
 
         public TextBrowserEditor() {
             button = new TextFieldWithBrowseButton();
-            AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", button);
+            AndroidResourcesHelper.initResourceBrowser(project,
+                                                       module,
+                                                       "Select res root",
+                                                       button,
+                                                       container.getControllerFactory().getSettingsController());
         }
 
         @Override

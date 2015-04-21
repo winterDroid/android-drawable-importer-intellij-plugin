@@ -65,6 +65,9 @@
 
     <application-components>
         <!-- Add your application components here -->
+        <component>
+            <implementation-class>de.mprengemann.intellij.plugin.androidicons.IconApplication</implementation-class>
+        </component>
     </application-components>
 
     <project-components>
@@ -79,10 +82,8 @@
                icon="/icons/android.png">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewAndroidAssetImage" />
             <separator />
-            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsAction"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidIconsAction" />
-            <action id="de.mprengemann.intellij.plugin.androidicons.actions.MaterialIconsAction"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.MaterialIconsAction" />
+            <action id="de.mprengemann.intellij.plugin.androidicons.actions.IconsAction"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.IconsAction" />
             <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction"
                     class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction" />
             <action id="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableImporter"

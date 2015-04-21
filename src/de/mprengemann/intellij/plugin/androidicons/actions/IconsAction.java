@@ -16,30 +16,35 @@ package de.mprengemann.intellij.plugin.androidicons.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
-import de.mprengemann.intellij.plugin.androidicons.forms.MaterialIconsImporter;
+import de.mprengemann.intellij.plugin.androidicons.IconApplication;
+import de.mprengemann.intellij.plugin.androidicons.forms.IconsImporter;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
-import de.mprengemann.intellij.plugin.androidicons.settings.SettingsHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import icons.AndroidIcons;
 import org.jetbrains.annotations.NotNull;
 
-public class MaterialIconsAction extends AnAction {
+public class IconsAction extends AnAction {
 
-    public MaterialIconsAction() {
-        super("MaterialIcons Import", "Creates a new Android Asset by the use of Google's Material Icons", AndroidIcons.Android);
+    private IconApplication container;
+
+    public IconsAction() {
+        super("Icons Import", "Creates a new Android Asset by the use of Google\'s Material Icons or Android Icons", AndroidIcons.Android);
+        container = ApplicationManager.getApplication().getComponent(IconApplication.class);
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = getEventProject(event);
-        VirtualFile assetRoot = SettingsHelper.getAssetPath(IconPack.MATERIAL_ICONS);
-        if (assetRoot == null) {
+        final VirtualFile materialIconsRoot = container.getControllerFactory().getSettingsController().getAssetPath(
+            IconPack.MATERIAL_ICONS);
+        if (materialIconsRoot == null) {
             Messages.showMessageDialog(
                 project,
                 "You have to select the Material Icons root folder in the settings!",
@@ -49,11 +54,26 @@ public class MaterialIconsAction extends AnAction {
                 project = ProjectManager.getInstance().getDefaultProject();
             }
             ShowSettingsUtil.getInstance().showSettingsDialog(project, "Android Drawable Importer");
-        } else {
-            Module module = event.getData(DataKeys.MODULE);
-            MaterialIconsImporter dialog = new MaterialIconsImporter(project, module);
-            dialog.show();
+            return;
         }
+
+        final VirtualFile androidIconsRoot = container.getControllerFactory().getSettingsController().getAssetPath(IconPack.ANDROID_ICONS);
+        if (androidIconsRoot == null) {
+            Messages.showMessageDialog(
+                project,
+                "You have to select the Android Icons asset folder in the settings!",
+                "Error",
+                Messages.getErrorIcon());
+            if (project == null) {
+                project = ProjectManager.getInstance().getDefaultProject();
+            }
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Android Drawable Importer");
+            return;
+        }
+
+        Module module = event.getData(DataKeys.MODULE);
+        IconsImporter dialog = new IconsImporter(project, module);
+        dialog.show();
     }
 
     @Override

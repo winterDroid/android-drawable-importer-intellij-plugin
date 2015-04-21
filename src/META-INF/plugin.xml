@@ -59,7 +59,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <applicationConfigurable instance="de.mprengemann.intellij.plugin.androidicons.settings.PluginSettings"
+        <applicationConfigurable instance="de.mprengemann.intellij.plugin.androidicons.forms.PluginSettings"
                                  displayName="Android Drawable Importer" />
     </extensions>
 

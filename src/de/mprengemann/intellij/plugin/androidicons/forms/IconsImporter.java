@@ -24,12 +24,12 @@ import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
+import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.MaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
-import de.mprengemann.intellij.plugin.androidicons.settings.PluginSettings;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -225,7 +225,7 @@ public class IconsImporter extends DialogWrapper {
             public boolean accept(File file, String s) {
                 return !s.startsWith(".") &&
                        new File(file, s).isDirectory() &&
-                       !PluginSettings.BLACKLISTED_MATERIAL_ICONS_FOLDER
+                       !MaterialIconsController.BLACKLISTED_MATERIAL_ICONS_FOLDER
                            .contains(FilenameUtils.removeExtension(s));
             }
         };

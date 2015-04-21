@@ -6,6 +6,12 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 import java.util.List;
 
 public interface IAndroidIconsController extends IController<AndroidIconsObserver> {
+    void restorePath();
+
+    void savePath();
+
+    void reset();
+
     void setPath(VirtualFile file);
 
     String getPath();
@@ -13,4 +19,8 @@ public interface IAndroidIconsController extends IController<AndroidIconsObserve
     List<String> getColors();
 
     List<String> getAssets();
+
+    VirtualFile getRoot();
+
+    void openBrowser();
 }

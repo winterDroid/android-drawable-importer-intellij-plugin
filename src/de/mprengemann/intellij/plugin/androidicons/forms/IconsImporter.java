@@ -25,7 +25,6 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.MaterialIconsController;
-import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
@@ -105,7 +104,7 @@ public class IconsImporter extends DialogWrapper {
                                                    "Select res root",
                                                    this.resRoot,
                                                    container.getControllerFactory().getSettingsController());
-        assetRoot = container.getControllerFactory().getSettingsController().getAssetPath(IconPack.MATERIAL_ICONS);
+        assetRoot = container.getControllerFactory().getMaterialIconsController().getRoot();
 
         getHelpAction().setEnabled(true);
 

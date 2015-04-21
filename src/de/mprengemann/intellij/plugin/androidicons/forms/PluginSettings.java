@@ -13,7 +13,6 @@
 
 package de.mprengemann.intellij.plugin.androidicons.forms;
 
-import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
@@ -33,14 +32,10 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
-import java.util.List;
 
 public class PluginSettings implements Configurable,
                                        AndroidIconsObserver,
                                        MaterialIconsObserver {
-    private static final String ANDROID_ICONS_URL = "http://www.androidicons.com/";
-    private static final String MATERIAL_ICONS_URL = "https://github.com/google/material-design-icons/releases";
     private JPanel panel;
     private TextFieldWithBrowseButton androidIconsAssetHome;
     private JLabel androidIconsFoundDrawablesText;
@@ -88,7 +83,9 @@ public class PluginSettings implements Configurable,
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                BrowserUtil.browse(ANDROID_ICONS_URL);
+                container.getControllerFactory()
+                         .getAndroidIconsController()
+                         .openBrowser();
             }
         });
     }
@@ -113,7 +110,9 @@ public class PluginSettings implements Configurable,
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                BrowserUtil.browse(MATERIAL_ICONS_URL);
+                container.getControllerFactory()
+                         .getMaterialIconsController()
+                         .openBrowser();
             }
         });
     }
@@ -134,8 +133,8 @@ public class PluginSettings implements Configurable,
             return;
         }
         selectionPerformed = false;
-        container.getControllerFactory().getSettingsController().clearAssetPath(IconPack.ANDROID_ICONS);
-        container.getControllerFactory().getSettingsController().clearAssetPath(IconPack.MATERIAL_ICONS);
+        container.getControllerFactory().getAndroidIconsController().reset();
+        container.getControllerFactory().getMaterialIconsController().reset();
     }
 
     @Override
@@ -161,7 +160,7 @@ public class PluginSettings implements Configurable,
     }
 
     @Override
-    public void onInitialized(IconPack iconPack) {
+    public void updated(IconPack iconPack) {
         int assetCount;
         switch (iconPack) {
             case ANDROID_ICONS:

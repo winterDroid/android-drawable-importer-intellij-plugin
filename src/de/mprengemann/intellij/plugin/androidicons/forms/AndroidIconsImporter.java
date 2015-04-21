@@ -22,7 +22,6 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
-import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
@@ -76,7 +75,7 @@ public class AndroidIconsImporter extends DialogWrapper {
 
         AndroidResourcesHelper.initResourceBrowser(project, module, "Select res root", this.resRoot, container.getControllerFactory().getSettingsController());
 
-        assetRoot = container.getControllerFactory().getSettingsController().getAssetPath(IconPack.ANDROID_ICONS);
+        assetRoot = container.getControllerFactory().getAndroidIconsController().getRoot();
         colorSpinner.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {

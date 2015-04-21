@@ -1,6 +1,9 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.materialicons;
 
+import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import org.apache.commons.io.FilenameUtils;
 
@@ -14,6 +17,7 @@ import java.util.Set;
 
 public class MaterialIconsController implements IMaterialIconsController {
 
+    private static final String MATERIAL_ICONS_URL = "https://github.com/google/material-design-icons/releases";
     public static final List<String> BLACKLISTED_MATERIAL_ICONS_FOLDER = Arrays.asList("sprites",
                                                                                         "1x_ios",
                                                                                         "1x_web",
@@ -48,11 +52,14 @@ public class MaterialIconsController implements IMaterialIconsController {
 
     public MaterialIconsController() {
         observerSet = new HashSet<MaterialIconsObserver>();
+        restorePath();
+        load();
     }
 
     @Override
     public void addObserver(MaterialIconsObserver observer) {
         observerSet.add(observer);
+        notifyUpdated();
     }
 
     @Override
@@ -62,8 +69,40 @@ public class MaterialIconsController implements IMaterialIconsController {
 
     @Override
     public void tearDown() {
+        savePath();
         observerSet.clear();
         observerSet = null;
+    }
+
+    @Override
+    public void restorePath() {
+        PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
+        String persistedFile = propertiesComponent.getValue(getSettingsKey());
+        if (persistedFile != null) {
+            assetRoot = VirtualFileManager.getInstance().findFileByUrl(persistedFile);
+        }
+    }
+
+    private String getSettingsKey() {
+        return String.format("assetPath_%s", IconPack.MATERIAL_ICONS.toString());
+    }
+
+    @Override
+    public void savePath() {
+        PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
+        String assetUrl = assetRoot != null ? assetRoot.getUrl() : null;
+        propertiesComponent.setValue(getSettingsKey(), assetUrl);
+    }
+
+    @Override
+    public void reset() {
+        PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
+        propertiesComponent.unsetValue(getSettingsKey());
+        assetRoot = null;
+        categoryDirs.clear();
+        categories.clear();
+        assets.clear();
+        notifyUpdated();
     }
 
     @Override
@@ -75,12 +114,12 @@ public class MaterialIconsController implements IMaterialIconsController {
     private void load() {
         loadCategories();
         loadAssets();
-        notifyInitialized();
+        notifyUpdated();
     }
 
-    private void notifyInitialized() {
+    private void notifyUpdated() {
         for (MaterialIconsObserver observer : observerSet) {
-            observer.onInitialized(IconPack.MATERIAL_ICONS);
+            observer.updated(IconPack.MATERIAL_ICONS);
         }
     }
 
@@ -132,5 +171,15 @@ public class MaterialIconsController implements IMaterialIconsController {
     @Override
     public List<String> getAssets() {
         return assets;
+    }
+
+    @Override
+    public VirtualFile getRoot() {
+        return assetRoot;
+    }
+
+    @Override
+    public void openBrowser() {
+        BrowserUtil.open(MATERIAL_ICONS_URL);
     }
 }

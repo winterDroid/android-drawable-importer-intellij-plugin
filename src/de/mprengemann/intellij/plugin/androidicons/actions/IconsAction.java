@@ -22,10 +22,8 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.forms.IconsImporter;
-import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import icons.AndroidIcons;
 import org.jetbrains.annotations.NotNull;
@@ -42,8 +40,7 @@ public class IconsAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = getEventProject(event);
-        final VirtualFile materialIconsRoot = container.getControllerFactory().getSettingsController().getAssetPath(
-            IconPack.MATERIAL_ICONS);
+        final String materialIconsRoot = container.getControllerFactory().getMaterialIconsController().getPath();
         if (materialIconsRoot == null) {
             Messages.showMessageDialog(
                 project,
@@ -57,7 +54,7 @@ public class IconsAction extends AnAction {
             return;
         }
 
-        final VirtualFile androidIconsRoot = container.getControllerFactory().getSettingsController().getAssetPath(IconPack.ANDROID_ICONS);
+        final String androidIconsRoot = container.getControllerFactory().getAndroidIconsController().getPath();
         if (androidIconsRoot == null) {
             Messages.showMessageDialog(
                 project,

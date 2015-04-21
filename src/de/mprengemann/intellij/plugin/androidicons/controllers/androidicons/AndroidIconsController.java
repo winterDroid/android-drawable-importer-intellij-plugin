@@ -1,6 +1,9 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.androidicons;
 
+import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 
@@ -15,6 +18,7 @@ import java.util.Set;
 
 public class AndroidIconsController implements IAndroidIconsController {
 
+    private static final String ANDROID_ICONS_URL = "http://www.androidicons.com/";
     private Set<AndroidIconsObserver> observerSet;
     private VirtualFile assetRoot;
     private final FilenameFilter systemFileNameFiler = new FilenameFilter() {
@@ -38,11 +42,45 @@ public class AndroidIconsController implements IAndroidIconsController {
 
     public AndroidIconsController() {
         observerSet = new HashSet<AndroidIconsObserver>();
+        restorePath();
+        load();
+    }
+
+    @Override
+    public void restorePath() {
+        PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
+        String persistedFile = propertiesComponent.getValue(getSettingsKey());
+        if (persistedFile != null) {
+            assetRoot = VirtualFileManager.getInstance().findFileByUrl(persistedFile);
+        }
+    }
+
+    private String getSettingsKey() {
+        return String.format("assetPath_%s", IconPack.ANDROID_ICONS.toString());
+    }
+
+    @Override
+    public void savePath() {
+        PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
+        String assetUrl = assetRoot != null ? assetRoot.getUrl() : null;
+        propertiesComponent.setValue(getSettingsKey(), assetUrl);
+    }
+
+    @Override
+    public void reset() {
+        PropertiesComponent propertiesComponent = PropertiesComponent.getInstance();
+        propertiesComponent.unsetValue(getSettingsKey());
+        assetRoot = null;
+        colors.clear();
+        colorDirs.clear();
+        assets.clear();
+        notifyUpdated();
     }
 
     @Override
     public void addObserver(AndroidIconsObserver observer) {
         observerSet.add(observer);
+        notifyUpdated();
     }
 
     @Override
@@ -74,15 +112,25 @@ public class AndroidIconsController implements IAndroidIconsController {
         return assets;
     }
 
+    @Override
+    public VirtualFile getRoot() {
+        return assetRoot;
+    }
+
+    @Override
+    public void openBrowser() {
+        BrowserUtil.open(ANDROID_ICONS_URL);
+    }
+
     public void load() {
         loadColors();
         loadAssets();
-        notifyInitialized();
+        notifyUpdated();
     }
 
-    private void notifyInitialized() {
+    private void notifyUpdated() {
         for (AndroidIconsObserver observer : observerSet) {
-            observer.onInitialized(IconPack.ANDROID_ICONS);
+            observer.updated(IconPack.ANDROID_ICONS);
         }
     }
 
@@ -138,6 +186,7 @@ public class AndroidIconsController implements IAndroidIconsController {
 
     @Override
     public void tearDown() {
+        savePath();
         observerSet.clear();
         observerSet = null;
     }

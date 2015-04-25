@@ -21,6 +21,8 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.openapi.vfs.VirtualFileSystem;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.AndroidIconsObserver;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.MaterialIconsObserver;
@@ -30,6 +32,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -45,21 +49,31 @@ public class PluginSettings implements Configurable,
     private JLabel materialIconsFoundDrawables;
     private JLabel materialIconsFoundCategories;
     private JButton materialIconsOpenBrowser;
-    private boolean selectionPerformed = false;
     private IconApplication container;
+    private String initalAndroidIconsPath;
+    private String initalMaterialIconsPath;
 
     @Nullable
     @Override
     public JComponent createComponent() {
         this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
+        initalAndroidIconsPath = container.getControllerFactory()
+                                          .getAndroidIconsController()
+                                          .getPath();
+        initalMaterialIconsPath = container.getControllerFactory()
+                                           .getMaterialIconsController()
+                                           .getPath();
+
         container.getControllerFactory()
                  .getAndroidIconsController()
                  .addObserver(this);
         container.getControllerFactory()
                  .getMaterialIconsController()
                  .addObserver(this);
+
         initAndroidIconsSettings();
         initMaterialIconsSettings();
+
         return panel;
     }
 
@@ -76,7 +90,30 @@ public class PluginSettings implements Configurable,
                 container.getControllerFactory()
                          .getAndroidIconsController()
                          .setPath(chosenFile);
-                selectionPerformed = true;
+            }
+        });
+        androidIconsAssetHome.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent keyEvent) {
+                VirtualFileManager manager = VirtualFileManager.getInstance();
+                VirtualFileSystem fileSystem = manager.getFileSystem("file");
+                if (fileSystem == null) {
+                    return;
+                }
+                VirtualFile file = fileSystem.findFileByPath(androidIconsAssetHome.getText());
+                container.getControllerFactory()
+                         .getAndroidIconsController()
+                         .setPath(file);
+            }
+
+            @Override
+            public void keyPressed(KeyEvent keyEvent) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent keyEvent) {
+
             }
         });
         androidIconsOpenBrowser.addMouseListener(new MouseAdapter() {
@@ -100,10 +137,33 @@ public class PluginSettings implements Configurable,
             @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
-                selectionPerformed = true;
                 container.getControllerFactory()
                          .getMaterialIconsController()
                          .setPath(chosenFile);
+            }
+        });
+        materialIconsAssetHome.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent keyEvent) {
+                VirtualFileManager manager = VirtualFileManager.getInstance();
+                VirtualFileSystem fileSystem = manager.getFileSystem("file");
+                if (fileSystem == null) {
+                    return;
+                }
+                VirtualFile file = fileSystem.findFileByPath(androidIconsAssetHome.getText());
+                container.getControllerFactory()
+                         .getMaterialIconsController()
+                         .setPath(file);
+            }
+
+            @Override
+            public void keyPressed(KeyEvent keyEvent) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent keyEvent) {
+
             }
         });
         materialIconsOpenBrowser.addMouseListener(new MouseAdapter() {
@@ -119,12 +179,25 @@ public class PluginSettings implements Configurable,
 
     @Override
     public boolean isModified() {
-        return selectionPerformed;
+        return !androidIconsAssetHome.getText().equals(initalAndroidIconsPath) ||
+               !materialIconsAssetHome.getText().equals(initalMaterialIconsPath);
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        selectionPerformed = false;
+        initalAndroidIconsPath = container.getControllerFactory()
+                                          .getAndroidIconsController()
+                                          .getPath();
+        initalMaterialIconsPath = container.getControllerFactory()
+                                           .getMaterialIconsController()
+                                           .getPath();
+
+        container.getControllerFactory()
+                 .getAndroidIconsController()
+                 .savePath();
+        container.getControllerFactory()
+                 .getMaterialIconsController()
+                 .savePath();
     }
 
     @Override
@@ -132,7 +205,6 @@ public class PluginSettings implements Configurable,
         if (!isModified()) {
             return;
         }
-        selectionPerformed = false;
         container.getControllerFactory().getAndroidIconsController().reset();
         container.getControllerFactory().getMaterialIconsController().reset();
     }

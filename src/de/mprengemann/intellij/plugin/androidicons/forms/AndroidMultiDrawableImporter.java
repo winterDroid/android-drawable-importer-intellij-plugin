@@ -29,7 +29,6 @@ import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
-import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
@@ -64,11 +63,11 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         setTitle("Android Multi Drawable Importer");
         setResizable(false);
 
-        AndroidResourcesHelper.initResourceBrowser(project,
-                                                   module,
-                                                   "Select res root",
-                                                   resRoot,
-                                                   container.getControllerFactory().getSettingsController());
+//        AndroidResourcesHelper.initResourceBrowser(project,
+//                                                   module,
+//                                                   "Select res root",
+//                                                   resRoot,
+//                                                   container.getControllerFactory().getSettingsController());
 
         initBrowser(Resolution.LDPI, ldpiFile);
         initBrowser(Resolution.MDPI, mdpiFile);

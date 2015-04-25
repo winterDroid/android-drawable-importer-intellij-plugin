@@ -11,7 +11,7 @@ public class IconApplication implements ApplicationComponent {
 
     @NotNull
     public String getComponentName() {
-        return "Android Drawable Importer";
+        return getClass().getName();
     }
 
     public void initComponent() {

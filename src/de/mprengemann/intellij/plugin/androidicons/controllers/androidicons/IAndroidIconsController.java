@@ -2,7 +2,9 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.androidicons;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
+import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 
+import java.io.File;
 import java.util.List;
 
 public interface IAndroidIconsController extends IController<AndroidIconsObserver> {
@@ -23,4 +25,14 @@ public interface IAndroidIconsController extends IController<AndroidIconsObserve
     VirtualFile getRoot();
 
     void openBrowser();
+
+    List<String> getSizes();
+
+    boolean isInitialized();
+
+    File getImageFile(String asset);
+
+    File getImageFile(String color, String asset, Resolution resolution);
+
+    boolean isSupprtedResolution(Resolution resolution);
 }

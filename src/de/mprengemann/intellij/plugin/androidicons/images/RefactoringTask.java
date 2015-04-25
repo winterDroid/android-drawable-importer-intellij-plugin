@@ -69,6 +69,9 @@ public class RefactoringTask extends Task.Backgroundable {
 
     @Override
     public void run(@NotNull final ProgressIndicator progressIndicator) {
+        if (imageInformationList.size() == 0) {
+            return;
+        }
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
             public void run() {

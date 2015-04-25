@@ -4,20 +4,33 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
+import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class MaterialIconsController implements IMaterialIconsController {
 
+    public static final String DEFAULT_RESOLUTION = "drawable-xhdpi";
     private static final String MATERIAL_ICONS_URL = "https://github.com/google/material-design-icons/releases";
+    private static final EnumSet<Resolution> SUPPORTED_RESOLUTIONS = EnumSet.of(Resolution.MDPI,
+                                                                                Resolution.HDPI,
+                                                                                Resolution.XHDPI,
+                                                                                Resolution.XXHDPI,
+                                                                                Resolution.XXXHDPI);
     public static final List<String> BLACKLISTED_MATERIAL_ICONS_FOLDER = Arrays.asList("sprites",
                                                                                         "1x_ios",
                                                                                         "1x_web",
@@ -31,17 +44,6 @@ public class MaterialIconsController implements IMaterialIconsController {
             return !s.startsWith(".") &&
                    new File(file, s).isDirectory() &&
                    !BLACKLISTED_MATERIAL_ICONS_FOLDER.contains(FilenameUtils.removeExtension(s));
-        }
-    };
-    private final FilenameFilter drawableFileNameFiler = new FilenameFilter() {
-        @Override
-        public boolean accept(File file, String s) {
-            if (!FilenameUtils.isExtension(s, "png")) {
-                return false;
-            }
-            String filename = FilenameUtils.removeExtension(s);
-            return filename.startsWith("ic_") &&
-                   filename.endsWith("_black_48dp");
         }
     };
     private Set<MaterialIconsObserver> observerSet;
@@ -134,13 +136,17 @@ public class MaterialIconsController implements IMaterialIconsController {
                 continue;
             }
             File exDensity = densities[0];
-            for (File asset : exDensity.listFiles(drawableFileNameFiler)) {
-                String assetName = FilenameUtils.removeExtension(asset.getName());
-                assetName = assetName.replace("_black_48dp", "");
-                assetName = assetName.replace("ic_", "");
-                assets.add(assetName);
+            for (File asset : exDensity.listFiles(getAssetFileNameFilter())) {
+                assets.add(getAssetName(asset));
             }
         }
+    }
+
+    private String getAssetName(File asset) {
+        String assetName = FilenameUtils.removeExtension(asset.getName());
+        assetName = assetName.replace("_black_48dp", "");
+        assetName = assetName.replace("ic_", "");
+        return assetName;
     }
 
     private void loadCategories() {
@@ -164,6 +170,11 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
+    public void openBrowser() {
+        BrowserUtil.open(MATERIAL_ICONS_URL);
+    }
+
+    @Override
     public List<String> getCategories() {
         return categories;
     }
@@ -179,7 +190,143 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
-    public void openBrowser() {
-        BrowserUtil.open(MATERIAL_ICONS_URL);
+    public List<String> getAssets(IIconsImporterController iconImporterController) {
+        if (!isInitialized() ||
+            iconImporterController.getSelectedCategory() == null) {
+            return new ArrayList<String>();
+        }
+        File assetRoot = new File(getPath());
+        assetRoot = new File(assetRoot, iconImporterController.getSelectedCategory());
+        assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
+        File[] assets = assetRoot.listFiles(getAssetFileNameFilter());
+        if (assets == null) {
+            return new ArrayList<String>();
+        }
+        List<String> foundAssets = new ArrayList<String>();
+        for (File asset : assets) {
+            foundAssets.add(getAssetName(asset));
+        }
+        return foundAssets;
+    }
+
+    @Override
+    public List<String> getSizes(IIconsImporterController iconImporterController) {
+        if (!isInitialized() ||
+            iconImporterController.getSelectedCategory() == null ||
+            iconImporterController.getSelectedAsset() == null) {
+            return new ArrayList<String>();
+        }
+        File assetRoot = new File(getPath());
+        assetRoot = new File(assetRoot, iconImporterController.getSelectedCategory());
+        assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
+        final String assetName = iconImporterController.getSelectedAsset();
+        final FilenameFilter drawableFileNameFiler = getAssetFileNameFilter(assetName);
+        File[] assets = assetRoot.listFiles(drawableFileNameFiler);
+        Set<String> sizes = new HashSet<String>();
+        for (File asset : assets) {
+            String drawableName = FilenameUtils.removeExtension(asset.getName());
+            String[] numbers = drawableName.replaceAll("[^-?0-9]+", " ").trim().split(" ");
+            drawableName = numbers[numbers.length - 1].trim() + "dp";
+            sizes.add(drawableName);
+        }
+        List<String> list = new ArrayList<String>();
+        list.addAll(sizes);
+        Collections.sort(list);
+        return list;
+    }
+
+    @NotNull
+    private FilenameFilter getAssetFileNameFilter() {
+        return getAssetFileNameFilter(null);
+    }
+
+    @NotNull
+    private FilenameFilter getAssetFileNameFilter(final String assetName) {
+        return getAssetFileNameFilter(assetName, null);
+    }
+
+    @NotNull
+    private FilenameFilter getAssetFileNameFilter(final String assetName, final String size) {
+        return new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                if (!FilenameUtils.isExtension(s, "png")) {
+                    return false;
+                }
+                String filename = FilenameUtils.removeExtension(s);
+                if (assetName == null) {
+                    return filename.startsWith("ic_") &&
+                           filename.endsWith("_black_48dp");
+                } else {
+                    if (size == null) {
+                        return filename.startsWith("ic_" + assetName + "_");
+                    } else {
+                        return filename.startsWith("ic_" + assetName + "_") &&
+                               filename.endsWith("_" + size);
+                    }
+                }
+            }
+        };
+    }
+
+    @Override
+    public List<String> getColors(IIconsImporterController iconImporterController) {
+        if (!isInitialized() ||
+            iconImporterController.getSelectedCategory() == null ||
+            iconImporterController.getSelectedAsset() == null ||
+            iconImporterController.getSelectedSize() == null) {
+            return new ArrayList<String>();
+        }
+        File assetRoot = new File(getPath());
+        assetRoot = new File(assetRoot, iconImporterController.getSelectedCategory());
+        assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
+        final String assetName = iconImporterController.getSelectedAsset();
+        final String assetSize = iconImporterController.getSelectedSize();
+        File[] assets = assetRoot.listFiles(getAssetFileNameFilter(assetName, assetSize));
+        Set<String> colors = new HashSet<String>();
+        for (File asset : assets) {
+            String drawableName = FilenameUtils.removeExtension(asset.getName());
+            String[] color = drawableName.split("_");
+            drawableName = color[color.length - 2].trim();
+            colors.add(drawableName);
+        }
+        List<String> list = new ArrayList<String>();
+        list.addAll(colors);
+        Collections.sort(list);
+        return list;
+    }
+
+    @Override
+    public boolean isSupportedResolution(Resolution resolution) {
+        return SUPPORTED_RESOLUTIONS.contains(resolution);
+    }
+
+    @Override
+    public File getImageFile(String category, String asset, String color, String size, Resolution resolution) {
+        return new File(getPath(),
+                        String.format("%s/drawable-%s/ic_%s_%s_%s.png",
+                                      category,
+                                      resolution.getName(),
+                                      asset,
+                                      color,
+                                      size));
+    }
+
+    @Override
+    public File getImageFile(String category, String asset) {
+        return getImageFile(category, asset, "black", "24dp", Resolution.MDPI);
+    }
+
+    @Override
+    public void openHelp() {
+        try {
+            BrowserUtil.browse("file://" + new File(getPath(), "index.html").getCanonicalPath());
+        } catch (IOException ignored) {
+        }
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return !TextUtils.isEmpty(getPath());
     }
 }

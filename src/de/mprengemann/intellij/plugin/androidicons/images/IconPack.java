@@ -14,6 +14,25 @@
 package de.mprengemann.intellij.plugin.androidicons.images;
 
 public enum IconPack {
-    ANDROID_ICONS,
-    MATERIAL_ICONS
+    ANDROID_ICONS("Android Icons"),
+    MATERIAL_ICONS("Material Icons");
+
+    private final String name;
+
+    IconPack(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public static IconPack from(String name) {
+        for (IconPack iconPack : values()) {
+            if (iconPack.getName().equals(name)) {
+                return iconPack;
+            }
+        }
+        return null;
+    }
 }

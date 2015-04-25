@@ -36,7 +36,6 @@ import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
-import de.mprengemann.intellij.plugin.androidicons.util.AndroidResourcesHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.apache.commons.io.FilenameUtils;
@@ -126,18 +125,18 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                         container.getControllerFactory().getSettingsController().saveLastImageFolder(project,
                                                                                                      file.getCanonicalPath());
                         if (resRoot == null) {
-                            AndroidResourcesHelper.getResRootFile(project,
-                                                                  module,
-                                                                  new ResourcesDialog.ResourceSelectionListener() {
-                                                                      @Override
-                                                                      public void onResourceSelected(VirtualFile resDir) {
-                                                                          resRoot = resDir;
-                                                                          container.getControllerFactory().getSettingsController().saveResRootForProject(
-                                                                              project,
-                                                                              resDir.getUrl());
-                                                                          addImageFiles(file);
-                                                                      }
-                                                                  });
+//                            AndroidResourcesHelper.getResRootFile(project,
+//                                                                  module,
+//                                                                  new ResourcesDialog.ResourceSelectionListener() {
+//                                                                      @Override
+//                                                                      public void onResourceSelected(VirtualFile resDir) {
+//                                                                          resRoot = resDir;
+//                                                                          container.getControllerFactory().getSettingsController().saveResRootForProject(
+//                                                                              project,
+//                                                                              resDir.getUrl());
+//                                                                          addImageFiles(file);
+//                                                                      }
+//                                                                  });
                         } else {
                             addImageFiles(file);
                         }
@@ -188,16 +187,16 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
                 }
 
                 if (resRoot == null) {
-                    AndroidResourcesHelper.getResRootFile(project, module, new ResourcesDialog.ResourceSelectionListener() {
-                        @Override
-                        public void onResourceSelected(VirtualFile resDir) {
-                            resRoot = resDir;
-                            container.getControllerFactory().getSettingsController().saveResRootForProject(project, resDir.getUrl());
-                            for (VirtualFile file : virtualFiles) {
-                                addImageFiles(file);
-                            }
-                        }
-                    });
+//                    AndroidResourcesHelper.getResRootFile(project, module, new ResourcesDialog.ResourceSelectionListener() {
+//                        @Override
+//                        public void onResourceSelected(VirtualFile resDir) {
+//                            resRoot = resDir;
+//                            container.getControllerFactory().getSettingsController().saveResRootForProject(project, resDir.getUrl());
+//                            for (VirtualFile file : virtualFiles) {
+//                                addImageFiles(file);
+//                            }
+//                        }
+//                    });
                 } else {
                     for (VirtualFile file : virtualFiles) {
                         addImageFiles(file);
@@ -715,11 +714,11 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
 
         public TextBrowserEditor() {
             button = new TextFieldWithBrowseButton();
-            AndroidResourcesHelper.initResourceBrowser(project,
-                                                       module,
-                                                       "Select res root",
-                                                       button,
-                                                       container.getControllerFactory().getSettingsController());
+//            AndroidResourcesHelper.initResourceBrowser(project,
+//                                                       module,
+//                                                       "Select res root",
+//                                                       button,
+//                                                       container.getControllerFactory().getSettingsController());
         }
 
         @Override

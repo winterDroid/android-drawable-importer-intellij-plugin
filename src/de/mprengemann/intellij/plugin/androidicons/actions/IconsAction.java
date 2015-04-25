@@ -33,32 +33,20 @@ public class IconsAction extends AnAction {
     private IconApplication container;
 
     public IconsAction() {
-        super("Icons Import", "Creates a new Android Asset by the use of Google\'s Material Icons or Android Icons", AndroidIcons.Android);
+        super("Icons Import",
+              "Creates a new Android Asset by the use of Google\'s Material Icons or Android Icons",
+              AndroidIcons.Android);
         container = ApplicationManager.getApplication().getComponent(IconApplication.class);
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = getEventProject(event);
-        final String materialIconsRoot = container.getControllerFactory().getMaterialIconsController().getPath();
-        if (materialIconsRoot == null) {
+        if (!container.getControllerFactory().getMaterialIconsController().isInitialized() &&
+            !container.getControllerFactory().getAndroidIconsController().isInitialized()) {
             Messages.showMessageDialog(
                 project,
-                "You have to select the Material Icons root folder in the settings!",
-                "Error",
-                Messages.getErrorIcon());
-            if (project == null) {
-                project = ProjectManager.getInstance().getDefaultProject();
-            }
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Android Drawable Importer");
-            return;
-        }
-
-        final String androidIconsRoot = container.getControllerFactory().getAndroidIconsController().getPath();
-        if (androidIconsRoot == null) {
-            Messages.showMessageDialog(
-                project,
-                "You have to select the Android Icons asset folder in the settings!",
+                "You have to select the at least on of the Android Icons or Material Icons asset folder in the settings!",
                 "Error",
                 Messages.getErrorIcon());
             if (project == null) {
@@ -71,6 +59,9 @@ public class IconsAction extends AnAction {
         Module module = event.getData(DataKeys.MODULE);
         IconsImporter dialog = new IconsImporter(project, module);
         dialog.show();
+        container.getControllerFactory()
+                 .getIconImporterController()
+                 .removeObserver(dialog);
     }
 
     @Override

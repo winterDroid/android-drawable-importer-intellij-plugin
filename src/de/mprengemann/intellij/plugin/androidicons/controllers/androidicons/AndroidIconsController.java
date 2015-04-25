@@ -5,13 +5,16 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
+import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +22,11 @@ import java.util.Set;
 public class AndroidIconsController implements IAndroidIconsController {
 
     private static final String ANDROID_ICONS_URL = "http://www.androidicons.com/";
+    private static final EnumSet<Resolution> SUPPORTED_RESOLUTIONS = EnumSet.of(Resolution.LDPI,
+                                                                                Resolution.MDPI,
+                                                                                Resolution.HDPI,
+                                                                                Resolution.XHDPI,
+                                                                                Resolution.XXHDPI);
     private Set<AndroidIconsObserver> observerSet;
     private VirtualFile assetRoot;
     private final FilenameFilter systemFileNameFiler = new FilenameFilter() {
@@ -122,6 +130,35 @@ public class AndroidIconsController implements IAndroidIconsController {
         BrowserUtil.open(ANDROID_ICONS_URL);
     }
 
+    @Override
+    public List<String> getSizes() {
+        return Arrays.asList("18dp");
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return !TextUtils.isEmpty(getPath());
+    }
+
+    @Override
+    public File getImageFile(String asset) {
+        return getImageFile("black", asset, Resolution.LDPI);
+    }
+
+    @Override
+    public boolean isSupprtedResolution(Resolution resolution) {
+        return SUPPORTED_RESOLUTIONS.contains(resolution);
+    }
+
+    @Override
+    public File getImageFile(String color, String asset, Resolution resolution) {
+        return new File(getPath(),
+                        String.format("%s/%s/ic_action_%s.png",
+                                      color != null ? color.replace(" ", "_") : "",
+                                      resolution.getName(),
+                                      asset));
+    }
+
     public void load() {
         loadColors();
         loadAssets();
@@ -169,10 +206,10 @@ public class AndroidIconsController implements IAndroidIconsController {
     }
 
     private void loadColors() {
-        if (this.assetRoot.getCanonicalPath() == null) {
+        if (!isInitialized()) {
             return;
         }
-        final File assetRoot = new File(this.assetRoot.getCanonicalPath());
+        final File assetRoot = new File(getPath());
         File[] colorDirs = assetRoot.listFiles(systemFileNameFiler);
         Arrays.sort(colorDirs, alphabeticalComparator);
         for (File file : colorDirs) {

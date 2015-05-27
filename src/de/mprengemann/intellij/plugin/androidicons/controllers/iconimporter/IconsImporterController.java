@@ -9,6 +9,7 @@ import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 import org.imgscalr.Scalr;
 
 import javax.imageio.ImageIO;
@@ -95,6 +96,10 @@ public class IconsImporterController implements IIconsImporterController {
         }
         this.asset = asset;
         notifyAssetChanged();
+        if (this.asset == null) {
+            setExportName("");
+            return;
+        }
         setExportName(String.format("ic_action_%s", asset));
     }
 
@@ -124,8 +129,20 @@ public class IconsImporterController implements IIconsImporterController {
             this.exportName.equals(exportName)) {
             return;
         }
+        if (isCustomExport()) {
+            return;
+        }
         this.exportName = exportName;
         notifyExportNameChanged();
+    }
+
+    private boolean isCustomExport() {
+        if (TextUtils.isEmpty(exportName)) {
+            return false;
+        }
+        final String assetName = exportName.replace("ic_action_", "");
+        return !(materialIconsController.getAssets().contains(assetName) ||
+                 androidIconsController.getAssets().contains(assetName));
     }
 
     @Override

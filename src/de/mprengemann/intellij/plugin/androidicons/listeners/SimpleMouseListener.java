@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.forms;
+package de.mprengemann.intellij.plugin.androidicons.listeners;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

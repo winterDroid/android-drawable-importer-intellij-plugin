@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.forms;
+package de.mprengemann.intellij.plugin.androidicons.listeners;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooser;

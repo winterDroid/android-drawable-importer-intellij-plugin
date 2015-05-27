@@ -40,8 +40,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,24 +151,19 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         });
         fillColors();
 
-        resExportName.addKeyListener(new KeyAdapter() {
+        resExportName.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent keyEvent) {
-                super.keyTyped(keyEvent);
                 container.getControllerFactory()
                          .getIconImporterController()
                          .setExportName(resExportName.getText());
             }
 
             @Override
-            public void keyPressed(KeyEvent keyEvent) {
-                super.keyPressed(keyEvent);
-            }
+            public void keyPressed(KeyEvent keyEvent) {}
 
             @Override
-            public void keyReleased(KeyEvent keyEvent) {
-                super.keyReleased(keyEvent);
-            }
+            public void keyReleased(KeyEvent keyEvent) {}
         });
         imageContainer.addComponentListener(new ComponentAdapter() {
             @Override

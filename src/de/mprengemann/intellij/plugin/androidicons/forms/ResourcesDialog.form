@@ -8,7 +8,7 @@
     <properties/>
     <border type="none"/>
     <children>
-      <component id="d76be" class="de.mprengemann.intellij.plugin.androidicons.forms.RadioButtonList" binding="list">
+      <component id="d76be" class="de.mprengemann.intellij.plugin.androidicons.widgets.RadioButtonList" binding="list">
         <constraints>
           <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>

@@ -16,7 +16,7 @@ package de.mprengemann.intellij.plugin.androidicons.images;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.UIUtil;
-import de.mprengemann.intellij.plugin.androidicons.forms.Wrong9PatchException;
+import de.mprengemann.intellij.plugin.androidicons.exceptions.Wrong9PatchException;
 import de.mprengemann.intellij.plugin.androidicons.util.MathUtils;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;

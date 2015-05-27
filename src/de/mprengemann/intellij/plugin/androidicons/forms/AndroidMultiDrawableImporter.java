@@ -29,6 +29,8 @@ import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.listeners.ImageFileBrowserFolderActionListener;
+import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleMouseListener;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;

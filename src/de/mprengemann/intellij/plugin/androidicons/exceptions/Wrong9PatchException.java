@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.forms;
+package de.mprengemann.intellij.plugin.androidicons.exceptions;
 
 public class Wrong9PatchException extends RuntimeException {
 }

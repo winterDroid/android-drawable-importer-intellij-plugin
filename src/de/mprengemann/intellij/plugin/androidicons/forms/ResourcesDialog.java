@@ -18,6 +18,8 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Function;
+import de.mprengemann.intellij.plugin.androidicons.listeners.RadioListListener;
+import de.mprengemann.intellij.plugin.androidicons.widgets.RadioButtonList;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;

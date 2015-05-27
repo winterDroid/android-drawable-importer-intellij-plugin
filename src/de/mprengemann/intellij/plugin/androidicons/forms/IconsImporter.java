@@ -179,8 +179,13 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         initCheckBox(Resolution.XHDPI, XHDPICheckBox);
         initCheckBox(Resolution.XXHDPI, XXHDPICheckBox);
         initCheckBox(Resolution.XXXHDPI, XXXHDPICheckBox);
+        initSearch(searchField);
 
         init();
+    }
+
+    private void initSearch(JTextField searchField) {
+
     }
 
     private void initCheckBox(final Resolution resolution, final JCheckBox checkBox) {

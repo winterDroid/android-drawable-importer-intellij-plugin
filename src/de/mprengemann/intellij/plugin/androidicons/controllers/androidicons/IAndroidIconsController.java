@@ -2,7 +2,8 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.androidicons;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
-import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.model.Asset;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
 import java.io.File;
 import java.util.List;
@@ -20,7 +21,7 @@ public interface IAndroidIconsController extends IController<AndroidIconsObserve
 
     List<String> getColors();
 
-    List<String> getAssets();
+    List<Asset> getAssets();
 
     VirtualFile getRoot();
 
@@ -30,9 +31,9 @@ public interface IAndroidIconsController extends IController<AndroidIconsObserve
 
     boolean isInitialized();
 
-    File getImageFile(String asset);
+    File getImageFile(Asset asset);
 
-    File getImageFile(String color, String asset, Resolution resolution);
+    File getImageFile(Asset asset, String color, Resolution resolution);
 
     boolean isSupprtedResolution(Resolution resolution);
 }

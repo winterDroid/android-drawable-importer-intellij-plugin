@@ -13,7 +13,7 @@
 
 package de.mprengemann.intellij.plugin.androidicons.util;
 
-import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.HashSet;

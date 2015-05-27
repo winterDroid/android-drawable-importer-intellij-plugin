@@ -5,8 +5,9 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
-import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
-import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.model.Asset;
+import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +50,7 @@ public class MaterialIconsController implements IMaterialIconsController {
     private Set<MaterialIconsObserver> observerSet;
     private List<File> categoryDirs = new ArrayList<File>();
     private List<String> categories = new ArrayList<String>();
-    private List<String> assets = new ArrayList<String>();
+    private List<Asset> assets = new ArrayList<Asset>();
     private VirtualFile assetRoot;
 
     public MaterialIconsController() {
@@ -137,7 +138,7 @@ public class MaterialIconsController implements IMaterialIconsController {
             }
             File exDensity = densities[0];
             for (File asset : exDensity.listFiles(getAssetFileNameFilter())) {
-                assets.add(getAssetName(asset));
+                assets.add(new Asset(IconPack.MATERIAL_ICONS, getAssetName(asset), category.getName(), Resolution.XHDPI));
             }
         }
     }
@@ -180,7 +181,7 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
-    public List<String> getAssets() {
+    public List<Asset> getAssets() {
         return assets;
     }
 
@@ -190,21 +191,22 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
-    public List<String> getAssets(IIconsImporterController iconImporterController) {
+    public List<Asset> getAssets(IIconsImporterController iconImporterController) {
+        final String selectedCategory = iconImporterController.getSelectedCategory();
         if (!isInitialized() ||
-            iconImporterController.getSelectedCategory() == null) {
-            return new ArrayList<String>();
+            selectedCategory == null) {
+            return new ArrayList<Asset>();
         }
         File assetRoot = new File(getPath());
-        assetRoot = new File(assetRoot, iconImporterController.getSelectedCategory());
+        assetRoot = new File(assetRoot, selectedCategory);
         assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
         File[] assets = assetRoot.listFiles(getAssetFileNameFilter());
         if (assets == null) {
-            return new ArrayList<String>();
+            return new ArrayList<Asset>();
         }
-        List<String> foundAssets = new ArrayList<String>();
+        List<Asset> foundAssets = new ArrayList<Asset>();
         for (File asset : assets) {
-            foundAssets.add(getAssetName(asset));
+            foundAssets.add(new Asset(IconPack.MATERIAL_ICONS, getAssetName(asset), selectedCategory, Resolution.XHDPI));
         }
         return foundAssets;
     }
@@ -219,7 +221,7 @@ public class MaterialIconsController implements IMaterialIconsController {
         File assetRoot = new File(getPath());
         assetRoot = new File(assetRoot, iconImporterController.getSelectedCategory());
         assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
-        final String assetName = iconImporterController.getSelectedAsset();
+        final String assetName = iconImporterController.getSelectedAsset().getName();
         final FilenameFilter drawableFileNameFiler = getAssetFileNameFilter(assetName);
         File[] assets = assetRoot.listFiles(drawableFileNameFiler);
         Set<String> sizes = new HashSet<String>();
@@ -280,7 +282,7 @@ public class MaterialIconsController implements IMaterialIconsController {
         File assetRoot = new File(getPath());
         assetRoot = new File(assetRoot, iconImporterController.getSelectedCategory());
         assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
-        final String assetName = iconImporterController.getSelectedAsset();
+        final String assetName = iconImporterController.getSelectedAsset().getName();
         final String assetSize = iconImporterController.getSelectedSize();
         File[] assets = assetRoot.listFiles(getAssetFileNameFilter(assetName, assetSize));
         Set<String> colors = new HashSet<String>();
@@ -302,19 +304,19 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
-    public File getImageFile(String category, String asset, String color, String size, Resolution resolution) {
+    public File getImageFile(Asset asset, String color, String size, Resolution resolution) {
         return new File(getPath(),
                         String.format("%s/drawable-%s/ic_%s_%s_%s.png",
-                                      category,
+                                      asset.getCategory(),
                                       resolution.getName(),
-                                      asset,
+                                      asset.getName(),
                                       color,
                                       size));
     }
 
     @Override
-    public File getImageFile(String category, String asset) {
-        return getImageFile(category, asset, "black", "24dp", Resolution.MDPI);
+    public File getImageFile(Asset asset) {
+        return getImageFile(asset, "black", "24dp", Resolution.MDPI);
     }
 
     @Override

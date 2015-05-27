@@ -3,11 +3,12 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter;
 import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
-import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
-import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
+import de.mprengemann.intellij.plugin.androidicons.model.Asset;
+import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
-import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 import org.imgscalr.Scalr;
@@ -28,7 +29,7 @@ public class IconsImporterController implements IIconsImporterController {
     private Set<IconsImporterObserver> observerSet;
     private IconPack iconPack;
     private String category;
-    private String asset;
+    private Asset asset = Asset.NONE;
     private String size;
     private String color;
     private String exportName;
@@ -89,12 +90,15 @@ public class IconsImporterController implements IIconsImporterController {
     }
 
     @Override
-    public void setSelectedAsset(String asset) {
+    public void setSelectedAsset(Asset asset) {
         if (this.asset != null &&
             this.asset.equals(asset)) {
             return;
         }
         this.asset = asset;
+        if (this.asset == null) {
+            this.asset = Asset.NONE;
+        }
         notifyAssetChanged();
         if (this.asset == null) {
             setExportName("");
@@ -161,12 +165,12 @@ public class IconsImporterController implements IIconsImporterController {
     }
 
     @Override
-    public File getImageFile(String asset) {
-        switch (iconPack) {
+    public File getImageFile(Asset asset) {
+        switch (asset.getIconPack()) {
             case ANDROID_ICONS:
                 return androidIconsController.getImageFile(asset);
             case MATERIAL_ICONS:
-                return materialIconsController.getImageFile(category, asset);
+                return materialIconsController.getImageFile(asset);
         }
         return null;
     }
@@ -175,9 +179,9 @@ public class IconsImporterController implements IIconsImporterController {
     public File getSelectedImageFile() {
         switch (iconPack) {
             case ANDROID_ICONS:
-                return androidIconsController.getImageFile(color, asset, Resolution.XHDPI);
+                return androidIconsController.getImageFile(asset, color, Resolution.XHDPI);
             case MATERIAL_ICONS:
-                return materialIconsController.getImageFile(category, asset, color, size, Resolution.XHDPI);
+                return materialIconsController.getImageFile(asset, color, size, Resolution.XHDPI);
         }
         return null;
     }
@@ -188,7 +192,7 @@ public class IconsImporterController implements IIconsImporterController {
     }
 
     @Override
-    public String getSelectedAsset() {
+    public Asset getSelectedAsset() {
         return asset;
     }
 
@@ -206,7 +210,7 @@ public class IconsImporterController implements IIconsImporterController {
     public void reset() {
         iconPack = null;
         category = null;
-        asset = null;
+        asset = Asset.NONE;
         size = null;
         color = null;
         exportName = null;
@@ -227,9 +231,9 @@ public class IconsImporterController implements IIconsImporterController {
             switch (iconPack) {
                 case ANDROID_ICONS:
                     if (androidIconsController.isSupprtedResolution(resolution)) {
-                        imageFile = androidIconsController.getImageFile(color, asset, resolution);
+                        imageFile = androidIconsController.getImageFile(asset, color, resolution);
                     } else {
-                        imageFile = androidIconsController.getImageFile(color, asset, Resolution.XXHDPI);
+                        imageFile = androidIconsController.getImageFile(asset, color, Resolution.XXHDPI);
                         BufferedImage image;
                         try {
                             image = ImageIO.read(imageFile);
@@ -247,10 +251,9 @@ public class IconsImporterController implements IIconsImporterController {
                     break;
                 case MATERIAL_ICONS:
                     if (materialIconsController.isSupportedResolution(resolution)) {
-                        imageFile = materialIconsController.getImageFile(category, asset, color, size, resolution);
+                        imageFile = materialIconsController.getImageFile(asset, color, size, resolution);
                     } else {
-                        imageFile = materialIconsController.getImageFile(category,
-                                                                         asset,
+                        imageFile = materialIconsController.getImageFile(asset,
                                                                          color,
                                                                          size,
                                                                          Resolution.MDPI);

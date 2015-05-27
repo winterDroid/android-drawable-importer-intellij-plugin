@@ -21,6 +21,7 @@ import com.intellij.openapi.project.DumbAwareRunnable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.util.ui.UIUtil;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.jetbrains.annotations.NotNull;
 

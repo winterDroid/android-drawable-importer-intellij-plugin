@@ -26,7 +26,7 @@ import com.intellij.openapi.vfs.VirtualFileSystem;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.AndroidIconsObserver;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.MaterialIconsObserver;
-import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
+import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

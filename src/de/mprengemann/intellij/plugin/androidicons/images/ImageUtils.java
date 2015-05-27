@@ -17,6 +17,8 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.exceptions.Wrong9PatchException;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.MathUtils;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;

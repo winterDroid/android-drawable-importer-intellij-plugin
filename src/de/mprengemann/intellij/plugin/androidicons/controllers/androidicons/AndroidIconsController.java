@@ -4,8 +4,9 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import de.mprengemann.intellij.plugin.androidicons.images.IconPack;
-import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.model.Asset;
+import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -46,7 +48,7 @@ public class AndroidIconsController implements IAndroidIconsController {
     };
     private List<File> colorDirs = new ArrayList<File>();
     private List<String> colors = new ArrayList<String>();
-    private List<String> assets = new ArrayList<String>();
+    private List<Asset> assets = new ArrayList<Asset>();
 
     public AndroidIconsController() {
         observerSet = new HashSet<AndroidIconsObserver>();
@@ -116,7 +118,7 @@ public class AndroidIconsController implements IAndroidIconsController {
     }
 
     @Override
-    public List<String> getAssets() {
+    public List<Asset> getAssets() {
         return assets;
     }
 
@@ -132,7 +134,7 @@ public class AndroidIconsController implements IAndroidIconsController {
 
     @Override
     public List<String> getSizes() {
-        return Arrays.asList("18dp");
+        return Collections.singletonList("18dp");
     }
 
     @Override
@@ -141,8 +143,8 @@ public class AndroidIconsController implements IAndroidIconsController {
     }
 
     @Override
-    public File getImageFile(String asset) {
-        return getImageFile("black", asset, Resolution.LDPI);
+    public File getImageFile(Asset asset) {
+        return getImageFile(asset, "black", Resolution.LDPI);
     }
 
     @Override
@@ -151,12 +153,12 @@ public class AndroidIconsController implements IAndroidIconsController {
     }
 
     @Override
-    public File getImageFile(String color, String asset, Resolution resolution) {
+    public File getImageFile(Asset asset, String color, Resolution resolution) {
         return new File(getPath(),
                         String.format("%s/%s/ic_action_%s.png",
                                       color != null ? color.replace(" ", "_") : "",
                                       resolution.getName(),
-                                      asset));
+                                      asset.getName()));
     }
 
     public void load() {
@@ -201,7 +203,8 @@ public class AndroidIconsController implements IAndroidIconsController {
             if (!extension.equalsIgnoreCase("png")) {
                 continue;
             }
-            assets.add(ExportNameUtils.getExportNameFromFilename(asset.getName()).replace("ic_action_", ""));
+            String assetName = ExportNameUtils.getExportNameFromFilename(asset.getName()).replace("ic_action_", "");
+            assets.add(new Asset(IconPack.ANDROID_ICONS, assetName, Resolution.XHDPI));
         }
     }
 

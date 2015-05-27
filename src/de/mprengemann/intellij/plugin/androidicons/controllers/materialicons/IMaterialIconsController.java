@@ -3,7 +3,8 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.materialicons;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
-import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.model.Asset;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
 import java.io.File;
 import java.util.List;
@@ -21,9 +22,9 @@ public interface IMaterialIconsController extends IController<MaterialIconsObser
 
     List<String> getCategories();
 
-    List<String> getAssets();
+    List<Asset> getAssets();
 
-    List<String> getAssets(IIconsImporterController iconImporterController);
+    List<Asset> getAssets(IIconsImporterController iconImporterController);
 
     VirtualFile getRoot();
 
@@ -37,9 +38,9 @@ public interface IMaterialIconsController extends IController<MaterialIconsObser
 
     void openHelp();
 
-    File getImageFile(String category, String asset);
+    File getImageFile(Asset asset);
 
-    File getImageFile(String category, String asset, String color, String size, Resolution resolution);
+    File getImageFile(Asset asset, String color, String size, Resolution resolution);
 
     boolean isSupportedResolution(Resolution resolution);
 }

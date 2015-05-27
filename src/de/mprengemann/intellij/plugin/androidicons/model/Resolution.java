@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.images;
+package de.mprengemann.intellij.plugin.androidicons.model;
 
 import java.util.Locale;
 

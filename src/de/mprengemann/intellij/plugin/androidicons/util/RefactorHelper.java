@@ -20,9 +20,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import de.mprengemann.intellij.plugin.androidicons.images.ImageInformation;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
-import de.mprengemann.intellij.plugin.androidicons.images.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 

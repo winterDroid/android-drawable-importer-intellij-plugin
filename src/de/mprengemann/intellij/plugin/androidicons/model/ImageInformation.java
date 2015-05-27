@@ -11,10 +11,12 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.images;
+package de.mprengemann.intellij.plugin.androidicons.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.imgscalr.Scalr;
 

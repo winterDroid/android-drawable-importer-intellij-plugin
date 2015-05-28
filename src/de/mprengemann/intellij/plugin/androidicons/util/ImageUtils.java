@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.images;
+package de.mprengemann.intellij.plugin.androidicons.util;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -19,7 +19,6 @@ import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.exceptions.Wrong9PatchException;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
-import de.mprengemann.intellij.plugin.androidicons.util.MathUtils;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -107,7 +106,7 @@ public class ImageUtils {
             MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
         }
-        
+
         int newWidth = information.getTargetWidth();
         int newHeight = information.getTargetHeight();
         if (newWidth <= 0 || newHeight <= 0) {
@@ -171,12 +170,14 @@ public class ImageUtils {
 
         BufferedImage trimmedImage = trim9PBorder(image);
         ImageInformation trimmedImageInformation = ImageInformation.newBuilder(information)
-                                                                  .setExportName(getExportName("trimmed", information.getExportName()))
-                                                                  .build(project);
+                                                                   .setExportName(getExportName("trimmed",
+                                                                                                information.getExportName()))
+                                                                   .build(project);
         saveImageTempFile(trimmedImage, trimmedImageInformation);
         trimmedImage = resizeNormalImage(trimmedImage, newWidth, newHeight, trimmedImageInformation);
         saveImageTempFile(trimmedImage, ImageInformation.newBuilder(trimmedImageInformation)
-                                                        .setExportName(getExportName("trimmedResized", information.getExportName()))
+                                                        .setExportName(getExportName("trimmedResized",
+                                                                                     information.getExportName()))
                                                         .build(project));
 
         BufferedImage borderImage;
@@ -241,7 +242,9 @@ public class ImageUtils {
     private static BufferedImage generateBordersImage(BufferedImage source,
                                                       int trimmedWidth,
                                                       int trimmedHeight) throws Wrong9PatchException, IOException {
-        BufferedImage finalBorder = UIUtil.createImage(trimmedWidth + 2, trimmedHeight + 2, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage finalBorder = UIUtil.createImage(trimmedWidth + 2,
+                                                       trimmedHeight + 2,
+                                                       BufferedImage.TYPE_INT_ARGB);
         int cutW = source.getWidth() - 2;
         int cutH = source.getHeight() - 2;
 
@@ -269,8 +272,14 @@ public class ImageUtils {
                          source.getRGB(1, 0, cutW, 1, null, 0, cutW), 0, cutW);
         verifyBorderImage(topBorder);
         topBorder = resizeBorder(topBorder, trimmedWidth, 1);
-        finalBorder.setRGB(1, 0, trimmedWidth, 1, topBorder.getRGB(0, 0,
-                                                                  trimmedWidth, 1, null, 0, trimmedWidth), 0, trimmedWidth);
+        finalBorder.setRGB(1,
+                           0,
+                           trimmedWidth,
+                           1,
+                           topBorder.getRGB(0, 0,
+                                            trimmedWidth, 1, null, 0, trimmedWidth),
+                           0,
+                           trimmedWidth);
 
         // bottom border
         BufferedImage bottomBorder = UIUtil.createImage(cutW, 1, BufferedImage.TYPE_INT_ARGB);
@@ -339,7 +348,7 @@ public class ImageUtils {
         if (targetHeight == 0) {
             targetHeight = 1;
         }
-        
+
         if (targetHeight > 1 && targetWidth > 1) {
             throw new Wrong9PatchException();
         }
@@ -348,13 +357,13 @@ public class ImageUtils {
         int h = image.getHeight();
         int[] data = image.getRGB(0, 0, w, h, null, 0, w);
         int[] newData = new int[targetWidth * targetHeight];
-        
-        for (int x=0; x < w; x++) {
-            for (int y=0; y < h; y++) {
+
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
                 newData[y * targetWidth + x] = 0x00;
             }
         }
-        
+
         List<Integer> startPositions = new ArrayList<Integer>();
         List<Integer> endPositions = new ArrayList<Integer>();
 

@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.forms;
+package de.mprengemann.intellij.plugin.androidicons.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PathMacroManager;
@@ -32,12 +32,12 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
-import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
-import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.RefactorUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
@@ -420,32 +420,32 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
         } else {
             int targetHeight = item.getTargetHeight();
             int targetWidth = item.getTargetWidth();
-            float factor = RefactorHelper.getScaleFactor(Resolution.LDPI, item.getResolution());
+            float factor = RefactorUtils.getScaleFactor(Resolution.LDPI, item.getResolution());
             LDPICheckBox.setText(String.format(CHECKBOX_TEXT,
                                                Resolution.LDPI.getName(),
                                                factor * targetWidth,
                                                factor * targetHeight));
-            factor = RefactorHelper.getScaleFactor(Resolution.MDPI, item.getResolution());
+            factor = RefactorUtils.getScaleFactor(Resolution.MDPI, item.getResolution());
             MDPICheckBox.setText(String.format(CHECKBOX_TEXT,
                                                Resolution.MDPI.getName(),
                                                factor * targetWidth,
                                                factor * targetHeight));
-            factor = RefactorHelper.getScaleFactor(Resolution.HDPI, item.getResolution());
+            factor = RefactorUtils.getScaleFactor(Resolution.HDPI, item.getResolution());
             HDPICheckBox.setText(String.format(CHECKBOX_TEXT,
                                                Resolution.HDPI.getName(),
                                                factor * targetWidth,
                                                factor * targetHeight));
-            factor = RefactorHelper.getScaleFactor(Resolution.XHDPI, item.getResolution());
+            factor = RefactorUtils.getScaleFactor(Resolution.XHDPI, item.getResolution());
             XHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
                                                 Resolution.XHDPI.getName(),
                                                 factor * targetWidth,
                                                 factor * targetHeight));
-            factor = RefactorHelper.getScaleFactor(Resolution.XXHDPI, item.getResolution());
+            factor = RefactorUtils.getScaleFactor(Resolution.XXHDPI, item.getResolution());
             XXHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
                                                  Resolution.XXHDPI.getName(),
                                                  factor * targetWidth,
                                                  factor * targetHeight));
-            factor = RefactorHelper.getScaleFactor(Resolution.XXXHDPI, item.getResolution());
+            factor = RefactorUtils.getScaleFactor(Resolution.XXXHDPI, item.getResolution());
             XXXHDPICheckBox.setText(String.format(CHECKBOX_TEXT,
                                                   Resolution.XXXHDPI.getName(),
                                                   factor * targetWidth,
@@ -523,12 +523,12 @@ public class AndroidBatchScaleImporter extends DialogWrapper {
     }
 
     private void importSingleImage(ImageInformation baseInformation, Resolution targetResolution, RefactoringTask task) {
-        float toLDPI = RefactorHelper.getScaleFactor(Resolution.LDPI, targetResolution);
-        float toMDPI = RefactorHelper.getScaleFactor(Resolution.MDPI, targetResolution);
-        float toHDPI = RefactorHelper.getScaleFactor(Resolution.HDPI, targetResolution);
-        float toXHDPI = RefactorHelper.getScaleFactor(Resolution.XHDPI, targetResolution);
-        float toXXHDPI = RefactorHelper.getScaleFactor(Resolution.XXHDPI, targetResolution);
-        float toXXXHDPI = RefactorHelper.getScaleFactor(Resolution.XXXHDPI, targetResolution);
+        float toLDPI = RefactorUtils.getScaleFactor(Resolution.LDPI, targetResolution);
+        float toMDPI = RefactorUtils.getScaleFactor(Resolution.MDPI, targetResolution);
+        float toHDPI = RefactorUtils.getScaleFactor(Resolution.HDPI, targetResolution);
+        float toXHDPI = RefactorUtils.getScaleFactor(Resolution.XHDPI, targetResolution);
+        float toXXHDPI = RefactorUtils.getScaleFactor(Resolution.XXHDPI, targetResolution);
+        float toXXXHDPI = RefactorUtils.getScaleFactor(Resolution.XXXHDPI, targetResolution);
 
         task.addImage(getImageInformation(baseInformation, Resolution.LDPI, toLDPI, LDPICheckBox));
         task.addImage(getImageInformation(baseInformation, Resolution.MDPI, toMDPI, MDPICheckBox));

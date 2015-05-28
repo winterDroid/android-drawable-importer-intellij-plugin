@@ -15,9 +15,8 @@ package de.mprengemann.intellij.plugin.androidicons.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import de.mprengemann.intellij.plugin.androidicons.images.ImageUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
-import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
 import org.imgscalr.Scalr;
 
 import java.io.File;
@@ -78,7 +77,7 @@ public class ImageInformation {
     }
 
     public File getTempImage() {
-        return RefactorHelper.getTempImageFile(tempDir, resolution, exportName);
+        return new File(tempDir + "/plugin-images/" + resolution.toString() + "/" + exportName);
     }
 
     public File getTargetFile() {

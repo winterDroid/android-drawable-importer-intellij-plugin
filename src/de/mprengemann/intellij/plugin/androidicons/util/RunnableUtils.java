@@ -17,7 +17,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.project.Project;
 
-public class RunnableHelper {
+public class RunnableUtils {
 
     public static void runWriteCommand(Project project, Runnable cmd, String description) {
         CommandProcessor.getInstance().executeCommand(project, new WriteAction(cmd), description, project.getName());
@@ -35,6 +35,6 @@ public class RunnableHelper {
         Runnable cmd;
     }
 
-    private RunnableHelper() {
+    private RunnableUtils() {
     }
 }

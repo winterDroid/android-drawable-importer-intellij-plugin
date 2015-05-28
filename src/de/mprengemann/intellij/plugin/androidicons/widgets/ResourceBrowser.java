@@ -9,7 +9,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
-import de.mprengemann.intellij.plugin.androidicons.forms.ResourcesDialog;
+import de.mprengemann.intellij.plugin.androidicons.ui.ResourcesDialog;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import org.jetbrains.android.facet.AndroidFacet;
 import org.jetbrains.annotations.NotNull;

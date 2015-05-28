@@ -23,7 +23,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.Messages;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
-import de.mprengemann.intellij.plugin.androidicons.forms.IconsImporter;
+import de.mprengemann.intellij.plugin.androidicons.ui.IconsImporter;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import icons.AndroidIcons;
 import org.jetbrains.annotations.NotNull;

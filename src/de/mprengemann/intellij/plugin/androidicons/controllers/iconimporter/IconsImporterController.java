@@ -9,7 +9,7 @@ import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
-import de.mprengemann.intellij.plugin.androidicons.util.RefactorHelper;
+import de.mprengemann.intellij.plugin.androidicons.util.RefactorUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 import org.imgscalr.Scalr;
 
@@ -246,7 +246,7 @@ public class IconsImporterController implements IIconsImporterController {
                                .setTargetHeight(image.getHeight())
                                .setAlgorithm(ResizeAlgorithm.SCALR)
                                .setMethod(Scalr.Method.ULTRA_QUALITY)
-                               .setFactor(RefactorHelper.getScaleFactor(resolution, Resolution.XXHDPI));
+                               .setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.XXHDPI));
                     }
                     break;
                 case MATERIAL_ICONS:
@@ -269,7 +269,7 @@ public class IconsImporterController implements IIconsImporterController {
                                .setTargetHeight(image.getHeight())
                                .setAlgorithm(ResizeAlgorithm.SCALR)
                                .setMethod(Scalr.Method.ULTRA_QUALITY)
-                               .setFactor(RefactorHelper.getScaleFactor(resolution, Resolution.MDPI));
+                               .setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.MDPI));
                     }
                     break;
                 default:

@@ -25,6 +25,8 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.VirtualFileSystem;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.AndroidIconsObserver;
+import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAndroidIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.MaterialIconsObserver;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import org.jetbrains.annotations.Nls;
@@ -52,24 +54,18 @@ public class PluginSettings implements Configurable,
     private IconApplication container;
     private String initalAndroidIconsPath;
     private String initalMaterialIconsPath;
+    private IAndroidIconsController androidIconsController;
+    private IMaterialIconsController materialIconsController;
 
     @Nullable
     @Override
     public JComponent createComponent() {
         this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
-        initalAndroidIconsPath = container.getControllerFactory()
-                                          .getAndroidIconsController()
-                                          .getPath();
-        initalMaterialIconsPath = container.getControllerFactory()
-                                           .getMaterialIconsController()
-                                           .getPath();
+        initalAndroidIconsPath = androidIconsController.getPath();
+        initalMaterialIconsPath = materialIconsController.getPath();
 
-        container.getControllerFactory()
-                 .getAndroidIconsController()
-                 .addObserver(this);
-        container.getControllerFactory()
-                 .getMaterialIconsController()
-                 .addObserver(this);
+        androidIconsController.addObserver(this);
+        materialIconsController.addObserver(this);
 
         initAndroidIconsSettings();
         initMaterialIconsSettings();
@@ -87,9 +83,7 @@ public class PluginSettings implements Configurable,
             @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
-                container.getControllerFactory()
-                         .getAndroidIconsController()
-                         .setPath(chosenFile);
+                androidIconsController.setPath(chosenFile);
             }
         });
         androidIconsAssetHome.addKeyListener(new KeyListener() {
@@ -101,9 +95,7 @@ public class PluginSettings implements Configurable,
                     return;
                 }
                 VirtualFile file = fileSystem.findFileByPath(androidIconsAssetHome.getText());
-                container.getControllerFactory()
-                         .getAndroidIconsController()
-                         .setPath(file);
+                androidIconsController.setPath(file);
             }
 
             @Override
@@ -120,9 +112,7 @@ public class PluginSettings implements Configurable,
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                container.getControllerFactory()
-                         .getAndroidIconsController()
-                         .openBrowser();
+                androidIconsController.openBrowser();
             }
         });
     }
@@ -137,9 +127,7 @@ public class PluginSettings implements Configurable,
             @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
-                container.getControllerFactory()
-                         .getMaterialIconsController()
-                         .setPath(chosenFile);
+                materialIconsController.setPath(chosenFile);
             }
         });
         materialIconsAssetHome.addKeyListener(new KeyListener() {
@@ -151,9 +139,7 @@ public class PluginSettings implements Configurable,
                     return;
                 }
                 VirtualFile file = fileSystem.findFileByPath(androidIconsAssetHome.getText());
-                container.getControllerFactory()
-                         .getMaterialIconsController()
-                         .setPath(file);
+                materialIconsController.setPath(file);
             }
 
             @Override
@@ -170,9 +156,7 @@ public class PluginSettings implements Configurable,
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                container.getControllerFactory()
-                         .getMaterialIconsController()
-                         .openBrowser();
+                materialIconsController.openBrowser();
             }
         });
     }
@@ -185,19 +169,11 @@ public class PluginSettings implements Configurable,
 
     @Override
     public void apply() throws ConfigurationException {
-        initalAndroidIconsPath = container.getControllerFactory()
-                                          .getAndroidIconsController()
-                                          .getPath();
-        initalMaterialIconsPath = container.getControllerFactory()
-                                           .getMaterialIconsController()
-                                           .getPath();
+        initalAndroidIconsPath = androidIconsController.getPath();
+        initalMaterialIconsPath = materialIconsController.getPath();
 
-        container.getControllerFactory()
-                 .getAndroidIconsController()
-                 .savePath();
-        container.getControllerFactory()
-                 .getMaterialIconsController()
-                 .savePath();
+        androidIconsController.savePath();
+        materialIconsController.savePath();
     }
 
     @Override
@@ -205,18 +181,14 @@ public class PluginSettings implements Configurable,
         if (!isModified()) {
             return;
         }
-        container.getControllerFactory().getAndroidIconsController().reset();
-        container.getControllerFactory().getMaterialIconsController().reset();
+        androidIconsController.reset();
+        materialIconsController.reset();
     }
 
     @Override
     public void disposeUIResources() {
-        container.getControllerFactory()
-                 .getAndroidIconsController()
-                 .removeObserver(this);
-        container.getControllerFactory()
-                 .getMaterialIconsController()
-                 .removeObserver(this);
+        androidIconsController.removeObserver(this);
+        materialIconsController.removeObserver(this);
     }
 
     @Nls
@@ -236,33 +208,17 @@ public class PluginSettings implements Configurable,
         int assetCount;
         switch (iconPack) {
             case ANDROID_ICONS:
-                androidIconsAssetHome.setText(container.getControllerFactory()
-                                                       .getAndroidIconsController()
-                                                       .getPath());
-                int colorCount = container.getControllerFactory()
-                                          .getAndroidIconsController()
-                                          .getColors()
-                                          .size();
+                androidIconsAssetHome.setText(androidIconsController.getPath());
+                int colorCount = androidIconsController.getColors().size();
                 androidIconsFoundColorsText.setText(colorCount + " colors");
-                assetCount = container.getControllerFactory()
-                                      .getAndroidIconsController()
-                                      .getAssets()
-                                      .size();
+                assetCount = androidIconsController.getAssets().size();
                 androidIconsFoundDrawablesText.setText(assetCount + " drawables per color");
                 break;
             case MATERIAL_ICONS:
-                materialIconsAssetHome.setText(container.getControllerFactory()
-                                                        .getMaterialIconsController()
-                                                        .getPath());
-                int categoryCount = container.getControllerFactory()
-                                             .getMaterialIconsController()
-                                             .getCategories()
-                                             .size();
+                materialIconsAssetHome.setText(materialIconsController.getPath());
+                int categoryCount = materialIconsController.getCategories().size();
                 materialIconsFoundCategories.setText(categoryCount + " categories");
-                assetCount = container.getControllerFactory()
-                                      .getMaterialIconsController()
-                                      .getAssets()
-                                      .size();
+                assetCount = materialIconsController.getAssets().size();
                 materialIconsFoundDrawables.setText(assetCount + " drawables");
                 break;
         }

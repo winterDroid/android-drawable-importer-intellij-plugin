@@ -8,10 +8,13 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.IControllerFactor
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,10 +30,26 @@ public class IconApplication implements ApplicationComponent {
     public void initComponent() {
         controllerFactory = new DefaultControllerFactory();
 
-        final InputStream contentStream = getClass().getResourceAsStream("assets/content.json");
-        final Reader inputStream = new InputStreamReader(contentStream);
-        final Type listType = new TypeToken<ArrayList<IconPack>>() {}.getType();
-        final List<IconPack> iconPacks = new Gson().fromJson(inputStream, listType);
+        final URL resourcesFolder = IconApplication.class.getResource("/resources");
+        if (resourcesFolder == null) {
+            return;
+        }
+        final File contentFile = new File(resourcesFolder.getFile(), "assets/content.json");
+        InputStream contentStream = null;
+        try {
+            final Reader inputStream = new FileReader(contentFile);
+            final Type listType = new TypeToken<ArrayList<IconPack>>() {}.getType();
+            final List<IconPack> iconPacks = new Gson().fromJson(inputStream, listType);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (contentStream != null) {
+                try {
+                    contentStream.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
     }
 
     public void disposeComponent() {

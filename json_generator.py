@@ -4,7 +4,7 @@ import io
 from itertools import izip, islice
 from os.path import join
 
-root = 'src/main/assets/'
+root = 'src/main/resources/assets/'
 android_icons_url = 'http://www.androidicons.com/'
 material_icons_url = 'https://www.google.com/design/icons/'
 

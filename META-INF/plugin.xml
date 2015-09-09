@@ -72,7 +72,7 @@
                text="Drawable"
                popup="false"
                class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidAssetUtilsGroup"
-               icon="/res/icons/android.png">
+               icon="/src/main/resources/icons/android.png">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewAndroidAssetImage" />
             <separator />
             <action id="de.mprengemann.intellij.plugin.androidicons.actions.IconsAction"

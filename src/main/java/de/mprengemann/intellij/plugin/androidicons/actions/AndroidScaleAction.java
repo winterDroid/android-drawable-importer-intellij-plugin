@@ -26,7 +26,9 @@ import org.jetbrains.annotations.NotNull;
 public class AndroidScaleAction extends AnAction {
 
     public AndroidScaleAction() {
-        super("Scaled Drawable", "Imports a drawable and scales it to the missing resolutions.", AndroidIcons.Android);
+        super("Scaled Drawable",
+              "Imports a drawable and scales it to the missing resolutions.",
+              AndroidIcons.Android);
     }
 
     @Override

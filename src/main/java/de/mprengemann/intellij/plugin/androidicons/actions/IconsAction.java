@@ -35,6 +35,7 @@ public class IconsAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = getEventProject(event);
         Module module = event.getData(DataKeys.MODULE);
+
         IconImporter dialog = new IconImporter(project, module);
         dialog.show();
     }

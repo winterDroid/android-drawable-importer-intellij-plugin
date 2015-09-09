@@ -5,6 +5,8 @@ from itertools import izip, islice
 from os.path import join
 
 root = 'src/main/assets/'
+android_icons_url = 'http://www.androidicons.com/'
+material_icons_url = 'https://www.google.com/design/icons/'
 
 
 def handle_android_icons():
@@ -13,7 +15,7 @@ def handle_android_icons():
     firstcolordir = join(iconpack_root, colors[0])
     resolutions = os.listdir(firstcolordir)
     assets = os.listdir(join(firstcolordir, resolutions[0]))
-    packdata = {'pack': 'android_icons', 'path': iconpack_root}
+    packdata = {'pack': 'android_icons', 'url': android_icons_url, 'path': iconpack_root}
     assetdata = []
     for asset in assets:
         data = {'name': os.path.splitext(asset)[0],
@@ -41,7 +43,7 @@ def extract_data(icon_file_name):
 def handle_material_icons():
     iconpack_root = join(root, "material_icons")
     categories = os.listdir(iconpack_root)
-    packdata = {'pack': 'material_icons', 'path': iconpack_root}
+    packdata = {'pack': 'material_icons', 'url': material_icons_url, 'path': iconpack_root}
     assetdata = []
     for category in categories:
         category_root = join(iconpack_root, category)

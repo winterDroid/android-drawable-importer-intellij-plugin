@@ -1,12 +1,8 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers;
 
-import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.AndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAndroidIconsController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.filepicker.FilePickerController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.filepicker.IFilePickerController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.MaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.SettingsController;
 
@@ -16,12 +12,11 @@ public class DefaultControllerFactory implements IControllerFactory {
     private IMaterialIconsController materialIconsController;
     private ISettingsController settingsController;
     private IIconsImporterController iconImporterController;
-    private IFilePickerController filePickerController;
 
     @Override
     public IAndroidIconsController getAndroidIconsController() {
         if (androidIconsController == null) {
-            androidIconsController = new AndroidIconsController();
+//            androidIconsController = new AndroidIconsController();
         }
         return androidIconsController;
     }
@@ -29,7 +24,7 @@ public class DefaultControllerFactory implements IControllerFactory {
     @Override
     public IMaterialIconsController getMaterialIconsController() {
         if (materialIconsController == null) {
-            materialIconsController = new MaterialIconsController();
+//            materialIconsController = new MaterialIconsController();
         }
         return materialIconsController;
     }
@@ -40,14 +35,6 @@ public class DefaultControllerFactory implements IControllerFactory {
             settingsController = new SettingsController();
         }
         return settingsController;
-    }
-
-    @Override
-    public IFilePickerController getFilePickerController() {
-        if (filePickerController == null) {
-            filePickerController = new FilePickerController();
-        }
-        return filePickerController;
     }
 
     @Override
@@ -70,11 +57,6 @@ public class DefaultControllerFactory implements IControllerFactory {
         if (iconImporterController != null) {
             iconImporterController.tearDown();
             iconImporterController = null;
-        }
-
-        if (filePickerController != null) {
-            filePickerController.tearDown();
-            filePickerController = null;
         }
     }
 }

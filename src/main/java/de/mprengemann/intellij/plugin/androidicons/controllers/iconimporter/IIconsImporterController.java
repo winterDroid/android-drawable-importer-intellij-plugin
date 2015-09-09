@@ -3,7 +3,7 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter;
 import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
-import de.mprengemann.intellij.plugin.androidicons.model.Asset;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
@@ -16,7 +16,7 @@ public interface IIconsImporterController extends IController<IconsImporterObser
 
     void setSelectedCategory(String category);
 
-    void setSelectedAsset(Asset asset);
+    void setSelectedAsset(ImageAsset asset);
 
     void setSelectedSize(String size);
 
@@ -28,11 +28,11 @@ public interface IIconsImporterController extends IController<IconsImporterObser
 
     String getExportRoot();
 
-    File getImageFile(Asset asset);
+    File getImageFile(ImageAsset asset);
 
     File getSelectedImageFile();
 
-    Asset getAsset();
+    ImageAsset getAsset();
 
     String getSelectedSize();
 

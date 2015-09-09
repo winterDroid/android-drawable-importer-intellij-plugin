@@ -16,7 +16,6 @@ package de.mprengemann.intellij.plugin.androidicons.util;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.UIUtil;
-import de.mprengemann.intellij.plugin.androidicons.exceptions.Wrong9PatchException;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import net.coobird.thumbnailator.Thumbnails;
@@ -241,7 +240,7 @@ public class ImageUtils {
 
     private static BufferedImage generateBordersImage(BufferedImage source,
                                                       int trimmedWidth,
-                                                      int trimmedHeight) throws Wrong9PatchException, IOException {
+                                                      int trimmedHeight) throws IOException {
         BufferedImage finalBorder = UIUtil.createImage(trimmedWidth + 2,
                                                        trimmedHeight + 2,
                                                        BufferedImage.TYPE_INT_ARGB);
@@ -329,19 +328,19 @@ public class ImageUtils {
         return img;
     }
 
-    private static void verifyBorderImage(BufferedImage border) throws Wrong9PatchException {
+    private static void verifyBorderImage(BufferedImage border) throws IOException {
         int[] rgb = border.getRGB(0, 0, border.getWidth(), border.getHeight(),
                                   null, 0, border.getWidth());
         for (int aRgb : rgb) {
             if ((0xff000000 & aRgb) != 0) {
                 if (aRgb != 0xff000000 && aRgb != 0xffff0000) {
-                    throw new Wrong9PatchException();
+                    throw new IOException();
                 }
             }
         }
     }
 
-    private static BufferedImage rescaleBorder(BufferedImage image, int targetWidth, int targetHeight) {
+    private static BufferedImage rescaleBorder(BufferedImage image, int targetWidth, int targetHeight) throws IOException {
         if (targetWidth == 0) {
             targetWidth = 1;
         }
@@ -350,7 +349,7 @@ public class ImageUtils {
         }
 
         if (targetHeight > 1 && targetWidth > 1) {
-            throw new Wrong9PatchException();
+            throw new IOException();
         }
 
         int w = image.getWidth();

@@ -24,8 +24,6 @@ public interface IIconsImporterController extends IController<IconsImporterObser
 
     void setExportName(String exportName);
 
-    IconPack getSelectedPack();
-
     String getExportName();
 
     String getExportRoot();
@@ -34,15 +32,11 @@ public interface IIconsImporterController extends IController<IconsImporterObser
 
     File getSelectedImageFile();
 
-    String getSelectedCategory();
-
-    Asset getSelectedAsset();
+    Asset getAsset();
 
     String getSelectedSize();
 
     String getSelectedColor();
-
-    void reset();
 
     RefactoringTask getTask(Project project);
 

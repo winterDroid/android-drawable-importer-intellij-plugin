@@ -1,7 +1,6 @@
 package de.mprengemann.intellij.plugin.androidicons.model;
 
 public class Asset {
-    public static final Asset NONE = new Asset(IconPack.ANDROID_ICONS, "", Resolution.XHDPI);
     private final IconPack iconPack;
     private final String name;
     private final Resolution defaultResolution;

@@ -156,7 +156,7 @@
       </component>
       <component id="4db62" class="javax.swing.JCheckBox" binding="aspectRatioLock">
         <constraints>
-          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="4" hsize-policy="0" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="4" hsize-policy="0" anchor="1" fill="0" indent="2" use-parent-layout="false"/>
         </constraints>
         <properties>
           <disabledIcon value="icons/unlocked_disabled.png"/>

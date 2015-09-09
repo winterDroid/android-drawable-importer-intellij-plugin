@@ -28,14 +28,15 @@ import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IconsImporterObserver;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.Asset;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.widgets.ResourceBrowser;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -58,9 +59,39 @@ import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IconsImporter extends DialogWrapper implements IconsImporterObserver {
+public class IconImporter extends DialogWrapper implements IconsImporterObserver {
 
     private final Project project;
+    private final ActionListener iconPackActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            iconImporterController.setSelectedIconPack(IconPack.from((String) iconPackSpinner.getSelectedItem()));
+        }
+    };
+    private final ActionListener categoryActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            iconImporterController.setSelectedCategory((String) categorySpinner.getSelectedItem());
+        }
+    };
+    private final ActionListener assetActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+            iconImporterController.setSelectedAsset((Asset) assetSpinner.getSelectedItem());
+        }
+    };
+    private final ActionListener sizeActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            iconImporterController.setSelectedSize((String) sizeSpinner.getSelectedItem());
+        }
+    };
+    private final ActionListener colorActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+            iconImporterController.setSelectedColor((String) colorSpinner.getSelectedItem());
+        }
+    };
     private IAndroidIconsController androidIconsController;
     private IMaterialIconsController materialIconsController;
     private IIconsImporterController iconImporterController;
@@ -84,16 +115,16 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
     private JComboBox iconPackSpinner;
     private JComboBox searchField;
 
-    public IconsImporter(final Project project, Module module) {
+    public IconImporter(Project project, Module module) {
         super(project, true);
 
         final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
-        iconImporterController = container.getControllerFactory().getIconImporterController();
         androidIconsController = container.getControllerFactory().getAndroidIconsController();
         materialIconsController = container.getControllerFactory().getMaterialIconsController();
         settingsController = container.getControllerFactory().getSettingsController();
-        iconImporterController.addObserver(this);
 
+        iconImporterController = new IconsImporterController(androidIconsController, materialIconsController);
+        iconImporterController.addObserver(this);
         this.project = project;
 
         resRoot.setSelectionListener(new Consumer<File>() {
@@ -110,61 +141,24 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         });
         resRoot.init(project, module, container.getControllerFactory().getSettingsController());
 
-        setTitle("Icons Importer");
+        setTitle("Icon Importer");
         setResizable(false);
         getHelpAction().setEnabled(true);
 
-        iconPackSpinner.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                iconImporterController.reset();
-                iconImporterController.setSelectedIconPack(IconPack.from((String) iconPackSpinner.getSelectedItem()));
-            }
-        });
-        fillPacks();
-        categorySpinner.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                iconImporterController.setSelectedCategory((String) categorySpinner.getSelectedItem());
-            }
-        });
-        fillCategories();
         AssetSpinnerRenderer renderer = new AssetSpinnerRenderer();
         //noinspection GtkPreferredJComboBoxRenderer
         assetSpinner.setRenderer(renderer);
-        assetSpinner.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                iconImporterController.setSelectedAsset((Asset) assetSpinner.getSelectedItem());
-            }
-        });
-        fillAssets();
-        sizeSpinner.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                iconImporterController.setSelectedSize((String) sizeSpinner.getSelectedItem());
-            }
-        });
-        fillSizes();
-        colorSpinner.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                iconImporterController.setSelectedColor((String) colorSpinner.getSelectedItem());
-            }
-        });
-        fillColors();
-
         resExportName.addKeyListener(new KeyListener() {
             @Override
-            public void keyTyped(KeyEvent keyEvent) {
-                iconImporterController.setExportName(resExportName.getText());
-            }
+            public void keyTyped(KeyEvent keyEvent) {}
 
             @Override
             public void keyPressed(KeyEvent keyEvent) {}
 
             @Override
-            public void keyReleased(KeyEvent keyEvent) {}
+            public void keyReleased(KeyEvent keyEvent) {
+                iconImporterController.setExportName(((JTextField) keyEvent.getSource()).getText());
+            }
         });
         imageContainer.addComponentListener(new ComponentAdapter() {
             @Override
@@ -174,18 +168,24 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
             }
         });
 
+        fillPacks();
+        fillCategories();
+        fillAssets();
+        fillSizes();
+        fillColors();
+
         initCheckBox(Resolution.LDPI, LDPICheckBox);
         initCheckBox(Resolution.MDPI, MDPICheckBox);
         initCheckBox(Resolution.HDPI, HDPICheckBox);
         initCheckBox(Resolution.XHDPI, XHDPICheckBox);
         initCheckBox(Resolution.XXHDPI, XXHDPICheckBox);
         initCheckBox(Resolution.XXXHDPI, XXXHDPICheckBox);
-        initSearch(searchField);
+        initSearch();
 
         init();
     }
 
-    private void initSearch(final JComboBox searchField) {
+    private void initSearch() {
         final EventList<Asset> assets = GlazedLists.eventList(null);
         assets.addAll(androidIconsController.getAssets());
         assets.addAll(materialIconsController.getAssets());
@@ -193,12 +193,11 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
             searchField.addItem(asset);
         }
 
-        TextFilterator<Asset> textFilterator = GlazedLists.textFilterator(
-            Asset.class, "name");
+        TextFilterator<Asset> textFilterator =
+            GlazedLists.textFilterator(Asset.class, "name");
+        AutoCompleteSupport support =
+            AutoCompleteSupport.install(searchField, assets, textFilterator, new AssetFormat());
 
-        AutoCompleteSupport support = AutoCompleteSupport.install(
-            searchField, assets,
-            textFilterator, new AssetFormat());
         support.setStrict(true);
         support.setHidesPopupOnFocusLost(true);
         support.setBeepOnStrictViolation(true);
@@ -206,11 +205,10 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
 
         //noinspection GtkPreferredJComboBoxRenderer
         searchField.setRenderer(new AssetSpinnerRenderer());
-
         searchField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                Asset selectedItem = (Asset) searchField.getSelectedItem();
+                final Asset selectedItem = (Asset) searchField.getSelectedItem();
                 if (selectedItem == null) {
                     return;
                 }
@@ -233,15 +231,6 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         checkBox.setSelected(true);
     }
 
-    private void fillPacks() {
-        if (androidIconsController.isInitialized()) {
-            iconPackSpinner.addItem(IconPack.ANDROID_ICONS.getName());
-        }
-        if (materialIconsController.isInitialized()) {
-            iconPackSpinner.addItem(IconPack.MATERIAL_ICONS.getName());
-        }
-    }
-
     @NotNull
     @Override
     public Action[] createActions() {
@@ -256,10 +245,22 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         ImageUtils.updateImage(imageContainer, iconImporterController.getSelectedImageFile());
     }
 
+    private void fillPacks() {
+        iconPackSpinner.removeActionListener(iconPackActionListener);
+        if (androidIconsController.isInitialized()) {
+            iconPackSpinner.addItem(IconPack.ANDROID_ICONS.getName());
+        }
+        if (materialIconsController.isInitialized()) {
+            iconPackSpinner.addItem(IconPack.MATERIAL_ICONS.getName());
+        }
+        iconPackSpinner.addActionListener(iconPackActionListener);
+    }
+
     private void fillCategories() {
+        categorySpinner.removeActionListener(categoryActionListener);
         categorySpinner.removeAllItems();
         List<String> categories = new ArrayList<String>();
-        switch (iconImporterController.getSelectedPack()) {
+        switch (iconImporterController.getAsset().getIconPack()) {
             case MATERIAL_ICONS:
                 categories = materialIconsController.getCategories();
                 categorySpinner.setEnabled(true);
@@ -274,14 +275,16 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         if (categories.size() == 0) {
             iconImporterController.setSelectedCategory("");
         }
+        categorySpinner.addActionListener(categoryActionListener);
     }
 
     private void fillAssets() {
+        assetSpinner.removeActionListener(assetActionListener);
         assetSpinner.removeAllItems();
         List<Asset> assets = new ArrayList<Asset>();
-        switch (iconImporterController.getSelectedPack()) {
+        switch (iconImporterController.getAsset().getIconPack()) {
             case MATERIAL_ICONS:
-                assets = materialIconsController.getAssets(iconImporterController);
+//                assets = materialIconsController.getAssets(iconImporterController.get);
                 break;
             case ANDROID_ICONS:
                 assets = androidIconsController.getAssets();
@@ -290,15 +293,17 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         for (Asset asset : assets) {
             assetSpinner.addItem(asset);
         }
+        assetSpinner.addActionListener(assetActionListener);
     }
 
     private void fillSizes() {
+        sizeSpinner.removeActionListener(sizeActionListener);
         String lastItem = iconImporterController.getSelectedSize();
         sizeSpinner.removeAllItems();
         List<String> sizes = new ArrayList<String>();
-        switch (iconImporterController.getSelectedPack()) {
+        switch (iconImporterController.getAsset().getIconPack()) {
             case MATERIAL_ICONS:
-                sizes = materialIconsController.getSizes(iconImporterController);
+                sizes = materialIconsController.getSizes(iconImporterController.getAsset());
                 break;
             case ANDROID_ICONS:
                 sizes = androidIconsController.getSizes();
@@ -307,19 +312,21 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         for (String size : sizes) {
             sizeSpinner.addItem(size);
         }
-
         if (sizes.contains(lastItem)) {
             sizeSpinner.setSelectedItem(lastItem);
         }
+        sizeSpinner.addActionListener(sizeActionListener);
     }
 
     private void fillColors() {
+        colorSpinner.removeActionListener(colorActionListener);
         String lastItem = iconImporterController.getSelectedColor();
         colorSpinner.removeAllItems();
         List<String> colors = new ArrayList<String>();
-        switch (iconImporterController.getSelectedPack()) {
+        switch (iconImporterController.getAsset().getIconPack()) {
             case MATERIAL_ICONS:
-                colors = materialIconsController.getColors(iconImporterController);
+                colors = materialIconsController.getColors(iconImporterController.getAsset(),
+                                                           iconImporterController.getSelectedSize());
                 break;
             case ANDROID_ICONS:
                 colors = androidIconsController.getColors();
@@ -332,6 +339,7 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
         if (colors.contains(lastItem)) {
             colorSpinner.setSelectedItem(lastItem);
         }
+        colorSpinner.addActionListener(colorActionListener);
     }
 
     @Override
@@ -377,44 +385,14 @@ public class IconsImporter extends DialogWrapper implements IconsImporterObserve
     }
 
     @Override
-    public void onIconPackChanged() {
+    public void updated() {
+        fillPacks();
         fillCategories();
-    }
-
-    @Override
-    public void onCategoryChanged() {
         fillAssets();
-    }
-
-    @Override
-    public void onAssetChanged() {
         fillSizes();
-    }
-
-    @Override
-    public void onSizeChanged() {
         fillColors();
-    }
-
-    @Override
-    public void onColorChanged() {
-        updateImage();
-    }
-
-    @Override
-    public void onExportNameChanged(String exportName) {
-        if (resExportName.getText().equals(exportName)) {
-            return;
-        }
-        resExportName.setText(exportName);
-    }
-
-    @Override
-    public void onExportRootChanged(String exportRoot) {
-        if (resRoot.getText().equals(exportRoot)) {
-            return;
-        }
-        resRoot.setText(exportRoot);
+        resExportName.setText(iconImporterController.getExportName());
+        resRoot.setText(iconImporterController.getExportRoot());
     }
 
     private class AssetSpinnerRenderer extends DefaultListCellRenderer {

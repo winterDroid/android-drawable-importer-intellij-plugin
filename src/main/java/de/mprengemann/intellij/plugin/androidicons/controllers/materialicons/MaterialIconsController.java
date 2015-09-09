@@ -4,7 +4,6 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.model.Asset;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -191,8 +190,7 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
-    public List<Asset> getAssets(IIconsImporterController iconImporterController) {
-        final String selectedCategory = iconImporterController.getSelectedCategory();
+    public List<Asset> getAssets(String selectedCategory) {
         if (!isInitialized() ||
             selectedCategory == null) {
             return new ArrayList<Asset>();
@@ -212,21 +210,19 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
-    public List<String> getSizes(IIconsImporterController iconImporterController) {
-        if (!isInitialized() ||
-            iconImporterController.getSelectedCategory() == null ||
-            iconImporterController.getSelectedAsset() == null) {
+    public List<String> getSizes(Asset asset) {
+        if (!isInitialized()) {
             return new ArrayList<String>();
         }
         File assetRoot = new File(getPath());
-        assetRoot = new File(assetRoot, iconImporterController.getSelectedCategory());
+        assetRoot = new File(assetRoot, asset.getCategory());
         assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
-        final String assetName = iconImporterController.getSelectedAsset().getName();
+        final String assetName = asset.getName();
         final FilenameFilter drawableFileNameFiler = getAssetFileNameFilter(assetName);
         File[] assets = assetRoot.listFiles(drawableFileNameFiler);
         Set<String> sizes = new HashSet<String>();
-        for (File asset : assets) {
-            String drawableName = FilenameUtils.removeExtension(asset.getName());
+        for (File item : assets) {
+            String drawableName = FilenameUtils.removeExtension(item.getName());
             String[] numbers = drawableName.replaceAll("[^-?0-9]+", " ").trim().split(" ");
             drawableName = numbers[numbers.length - 1].trim() + "dp";
             sizes.add(drawableName);
@@ -272,22 +268,19 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
-    public List<String> getColors(IIconsImporterController iconImporterController) {
-        if (!isInitialized() ||
-            iconImporterController.getSelectedCategory() == null ||
-            iconImporterController.getSelectedAsset() == null ||
-            iconImporterController.getSelectedSize() == null) {
+    public List<String> getColors(Asset asset, String size) {
+        if (!isInitialized()) {
             return new ArrayList<String>();
         }
         File assetRoot = new File(getPath());
-        assetRoot = new File(assetRoot, iconImporterController.getSelectedCategory());
+        assetRoot = new File(assetRoot, asset.getCategory());
         assetRoot = new File(assetRoot, DEFAULT_RESOLUTION);
-        final String assetName = iconImporterController.getSelectedAsset().getName();
-        final String assetSize = iconImporterController.getSelectedSize();
+        final String assetName = asset.getName();
+        final String assetSize = size;
         File[] assets = assetRoot.listFiles(getAssetFileNameFilter(assetName, assetSize));
         Set<String> colors = new HashSet<String>();
-        for (File asset : assets) {
-            String drawableName = FilenameUtils.removeExtension(asset.getName());
+        for (File item : assets) {
+            String drawableName = FilenameUtils.removeExtension(item.getName());
             String[] color = drawableName.split("_");
             drawableName = color[color.length - 2].trim();
             colors.add(drawableName);

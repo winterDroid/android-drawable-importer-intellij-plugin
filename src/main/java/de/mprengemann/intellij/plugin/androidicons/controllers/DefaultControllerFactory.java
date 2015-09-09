@@ -5,7 +5,6 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAnd
 import de.mprengemann.intellij.plugin.androidicons.controllers.filepicker.FilePickerController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.filepicker.IFilePickerController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.MaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
@@ -41,15 +40,6 @@ public class DefaultControllerFactory implements IControllerFactory {
             settingsController = new SettingsController();
         }
         return settingsController;
-    }
-
-    @Override
-    public IIconsImporterController getIconImporterController() {
-        if (iconImporterController == null) {
-            iconImporterController = new IconsImporterController(getAndroidIconsController(),
-                                                                getMaterialIconsController());
-        }
-        return iconImporterController;
     }
 
     @Override

@@ -148,7 +148,7 @@ public class AndroidIconsController implements IAndroidIconsController {
     }
 
     @Override
-    public boolean isSupprtedResolution(Resolution resolution) {
+    public boolean isSupportedResolution(Resolution resolution) {
         return SUPPORTED_RESOLUTIONS.contains(resolution);
     }
 

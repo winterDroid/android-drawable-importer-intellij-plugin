@@ -27,14 +27,13 @@ public class IconsImporterController implements IIconsImporterController {
     private IAndroidIconsController androidIconsController;
     private IMaterialIconsController materialIconsController;
     private Set<IconsImporterObserver> observerSet;
-    private IconPack iconPack;
-    private String category;
-    private Asset asset = Asset.NONE;
-    private String size;
-    private String color;
+    private Asset asset;
     private String exportName;
     private String exportRoot;
     private List<Resolution> exportResolutions;
+
+    private String size;
+    private String color;
 
     public IconsImporterController(IAndroidIconsController androidIconsController,
                                    IMaterialIconsController materialIconsController) {
@@ -42,6 +41,7 @@ public class IconsImporterController implements IIconsImporterController {
         this.materialIconsController = materialIconsController;
         this.observerSet = new HashSet<IconsImporterObserver>();
         this.exportResolutions = new ArrayList<Resolution>();
+        this.asset = androidIconsController.getAssets().get(0);
     }
 
     @Override
@@ -67,64 +67,60 @@ public class IconsImporterController implements IIconsImporterController {
             return;
         }
         this.exportRoot = exportRoot;
-        notifyExportRootChanged();
+        notifyUpdated();
     }
 
     @Override
     public void setSelectedIconPack(IconPack iconPack) {
-        if (this.iconPack == iconPack) {
-            return;
+        switch (iconPack) {
+            case ANDROID_ICONS:
+                asset = androidIconsController.getAssets().get(0);
+                break;
+            case MATERIAL_ICONS:
+                asset = materialIconsController.getAssets().get(0);
+                break;
         }
-        this.iconPack = iconPack;
-        notifyIconPackChanged();
+        notifyUpdated();
     }
 
     @Override
     public void setSelectedCategory(String category) {
-        if (this.category != null &&
-            this.category.equals(category)) {
-            return;
-        }
-        this.category = category;
-        notifyCategoryChanged();
+        notifyUpdated();
     }
 
     @Override
     public void setSelectedAsset(Asset asset) {
         if (this.asset != null &&
-            this.asset.equals(asset)) {
+            this.asset == asset) {
             return;
         }
         this.asset = asset;
-        if (this.asset == null) {
-            this.asset = Asset.NONE;
-        }
-        notifyAssetChanged();
-        if (this.asset == null) {
-            setExportName("");
-            return;
-        }
-        setExportName(String.format("ic_action_%s", asset));
+//        if (this.asset == null) {
+//            this.asset = Asset.NONE;
+//        }
+        notifyUpdated();
+//        if (this.asset == Asset.NONE) {
+//            setExportName("");
+//        } else {
+            setExportName(String.format("ic_action_%s", asset.getName()));
+//        }
     }
 
     @Override
     public void setSelectedSize(String size) {
-        if (this.size != null &&
-            this.size.equals(size)) {
-            return;
-        }
         this.size = size;
-        notifySizeChanged();
+        notifyUpdated();
     }
 
     @Override
     public void setSelectedColor(String color) {
-        if (this.color != null &&
-            this.color.equals(color)) {
-            return;
+        switch (asset.getIconPack()) {
+            case ANDROID_ICONS:
+                break;
+            case MATERIAL_ICONS:
+                break;
         }
-        this.color = color;
-        notifyColorChanged();
+        notifyUpdated();
     }
 
     @Override
@@ -137,7 +133,7 @@ public class IconsImporterController implements IIconsImporterController {
             return;
         }
         this.exportName = exportName;
-        notifyExportNameChanged();
+        notifyUpdated();
     }
 
     private boolean isCustomExport() {
@@ -145,13 +141,17 @@ public class IconsImporterController implements IIconsImporterController {
             return false;
         }
         final String assetName = exportName.replace("ic_action_", "");
-        return !(materialIconsController.getAssets().contains(assetName) ||
-                 androidIconsController.getAssets().contains(assetName));
-    }
-
-    @Override
-    public IconPack getSelectedPack() {
-        return iconPack;
+        for (Asset asset : materialIconsController.getAssets()) {
+            if (asset.getName().equalsIgnoreCase(assetName)) {
+                return false;
+            }
+        }
+        for (Asset asset : androidIconsController.getAssets()) {
+            if (asset.getName().equalsIgnoreCase(assetName)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -177,7 +177,7 @@ public class IconsImporterController implements IIconsImporterController {
 
     @Override
     public File getSelectedImageFile() {
-        switch (iconPack) {
+        switch (asset.getIconPack()) {
             case ANDROID_ICONS:
                 return androidIconsController.getImageFile(asset, color, Resolution.XHDPI);
             case MATERIAL_ICONS:
@@ -187,12 +187,7 @@ public class IconsImporterController implements IIconsImporterController {
     }
 
     @Override
-    public String getSelectedCategory() {
-        return category;
-    }
-
-    @Override
-    public Asset getSelectedAsset() {
+    public Asset getAsset() {
         return asset;
     }
 
@@ -207,16 +202,6 @@ public class IconsImporterController implements IIconsImporterController {
     }
 
     @Override
-    public void reset() {
-        iconPack = null;
-        category = null;
-        asset = Asset.NONE;
-        size = null;
-        color = null;
-        exportName = null;
-    }
-
-    @Override
     public RefactoringTask getTask(Project project) {
         final RefactoringTask task = new RefactoringTask(project);
         ImageInformation baseInformation = ImageInformation.newBuilder()
@@ -228,9 +213,9 @@ public class IconsImporterController implements IIconsImporterController {
             ImageInformation.Builder builder = ImageInformation.newBuilder(baseInformation)
                                                                .setResolution(resolution);
             File imageFile;
-            switch (iconPack) {
+            switch (asset.getIconPack()) {
                 case ANDROID_ICONS:
-                    if (androidIconsController.isSupprtedResolution(resolution)) {
+                    if (androidIconsController.isSupportedResolution(resolution)) {
                         imageFile = androidIconsController.getImageFile(asset, color, resolution);
                     } else {
                         imageFile = androidIconsController.getImageFile(asset, color, Resolution.XXHDPI);
@@ -291,45 +276,9 @@ public class IconsImporterController implements IIconsImporterController {
         }
     }
 
-    private void notifyIconPackChanged() {
+    private void notifyUpdated() {
         for (IconsImporterObserver observer : observerSet) {
-            observer.onIconPackChanged();
-        }
-    }
-
-    private void notifyCategoryChanged() {
-        for (IconsImporterObserver observer : observerSet) {
-            observer.onCategoryChanged();
-        }
-    }
-
-    private void notifyAssetChanged() {
-        for (IconsImporterObserver observer : observerSet) {
-            observer.onAssetChanged();
-        }
-    }
-
-    private void notifySizeChanged() {
-        for (IconsImporterObserver observer : observerSet) {
-            observer.onSizeChanged();
-        }
-    }
-
-    private void notifyColorChanged() {
-        for (IconsImporterObserver observer : observerSet) {
-            observer.onColorChanged();
-        }
-    }
-
-    private void notifyExportNameChanged() {
-        for (IconsImporterObserver observer : observerSet) {
-            observer.onExportNameChanged(exportName);
-        }
-    }
-
-    private void notifyExportRootChanged() {
-        for (IconsImporterObserver observer : observerSet) {
-            observer.onExportRootChanged(exportRoot);
+            observer.updated();
         }
     }
 }

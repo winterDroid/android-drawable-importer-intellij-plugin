@@ -2,7 +2,6 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.materialicons;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.model.Asset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
@@ -24,15 +23,15 @@ public interface IMaterialIconsController extends IController<MaterialIconsObser
 
     List<Asset> getAssets();
 
-    List<Asset> getAssets(IIconsImporterController iconImporterController);
+    List<Asset> getAssets(String category);
 
     VirtualFile getRoot();
 
     void openBrowser();
 
-    List<String> getSizes(IIconsImporterController iconImporterController);
+    List<String> getSizes(Asset asset);
 
-    List<String> getColors(IIconsImporterController iconImporterController);
+    List<String> getColors(Asset asset, String size);
 
     boolean isInitialized();
 

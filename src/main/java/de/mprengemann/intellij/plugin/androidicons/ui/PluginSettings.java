@@ -61,6 +61,10 @@ public class PluginSettings implements Configurable,
     @Override
     public JComponent createComponent() {
         this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
+
+        androidIconsController = container.getControllerFactory().getAndroidIconsController();
+        materialIconsController = container.getControllerFactory().getMaterialIconsController();
+
         initalAndroidIconsPath = androidIconsController.getPath();
         initalMaterialIconsPath = materialIconsController.getPath();
 

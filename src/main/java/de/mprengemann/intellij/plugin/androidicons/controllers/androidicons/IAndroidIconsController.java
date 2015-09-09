@@ -35,5 +35,5 @@ public interface IAndroidIconsController extends IController<AndroidIconsObserve
 
     File getImageFile(Asset asset, String color, Resolution resolution);
 
-    boolean isSupprtedResolution(Resolution resolution);
+    boolean isSupportedResolution(Resolution resolution);
 }

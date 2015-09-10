@@ -52,7 +52,7 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
+                <directory>src/main/java/de/mprengemann/intellij/plugin/androidicons/resources</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>

@@ -4,7 +4,7 @@ import io
 from itertools import izip, islice
 from os.path import join
 
-root = 'src/main/resources/assets/'
+root = 'src/main/res/assets/'
 android_icons_url = 'http://www.androidicons.com/'
 material_icons_url = 'https://www.google.com/design/icons/'
 
@@ -71,7 +71,7 @@ def handle_material_icons():
 
 android_icons_data = handle_android_icons()
 material_icons_data = handle_material_icons()
-packs = {'packs': [android_icons_data, material_icons_data]}
+packs = {[android_icons_data, material_icons_data]}
 
 with io.open(join(root, 'content.json'), 'w', encoding='utf-8') as f:
     f.write(unicode(json.dumps(packs, ensure_ascii=False)))

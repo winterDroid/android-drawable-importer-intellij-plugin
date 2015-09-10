@@ -14,6 +14,6 @@ public class ResourceLoader {
 
     public static File getFile(String file) {
         final URL resource = rl.getClass().getResource("/assets/" + file);
-        return new File(resource.getFile());
+        return resource != null ? new File(resource.getFile()) : null;
     }
 }

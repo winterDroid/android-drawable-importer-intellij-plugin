@@ -10,15 +10,22 @@ material_icons_url = 'https://www.google.com/design/icons/'
 
 
 def handle_android_icons():
-    iconpack_root = join(root, "android_icons")
-    colors = os.listdir(iconpack_root)
+    iconpack_root = join(root, 'android_icons')
+    id = 'android_icons'
+    colors = list_dirs_only(iconpack_root)
     firstcolordir = join(iconpack_root, colors[0])
-    resolutions = os.listdir(firstcolordir)
-    assets = os.listdir(join(firstcolordir, resolutions[0]))
-    packdata = {'name': 'Android Icons', 'url': android_icons_url, 'path': iconpack_root}
+    resolutions = list_dirs_only(firstcolordir)
+    assets = list_images(join(firstcolordir, resolutions[0]))
+    packdata = {'name': 'Android Icons',
+                'id': id,
+                'url': android_icons_url,
+                'path': 'android_icons/',
+                'categories': ['all']
+                }
     assetdata = []
     for asset in assets:
         data = {'name': os.path.splitext(asset)[0],
+                'pack': id,
                 'category': 'all',
                 'resolutions': resolutions,
                 'colors': colors,
@@ -27,6 +34,13 @@ def handle_android_icons():
 
     packdata['assets'] = assetdata
     return packdata
+
+
+def list_dirs_only(dir):
+    return [f for f in os.listdir(dir) if os.path.isdir(join(dir, f))]
+
+def list_images(dir):
+    return [f for f in os.listdir(dir) if f.endswith('.png')]
 
 
 def extract_data(icon_file_name):
@@ -41,14 +55,20 @@ def extract_data(icon_file_name):
 
 
 def handle_material_icons():
-    iconpack_root = join(root, "material_icons")
-    categories = os.listdir(iconpack_root)
-    packdata = {'name': 'Material Icons', 'url': material_icons_url, 'path': iconpack_root}
+    iconpack_root = join(root, 'material_icons')
+    categories = list_dirs_only(iconpack_root)
+    id = 'material_icons'
+    packdata = {'name': 'Material Icons',
+                'id': id,
+                'url': material_icons_url,
+                'path': 'material_icons/',
+                'categories':categories
+                }
     assetdata = []
     for category in categories:
         category_root = join(iconpack_root, category)
-        resolutions = [s.split('-')[1] for s in os.listdir(category_root)]
-        raw_assets = [extract_data(f) for f in os.listdir(join(category_root, 'drawable-' + resolutions[0]))]
+        resolutions = [s.split('-')[1] for s in list_dirs_only(category_root)]
+        raw_assets = [extract_data(f) for f in list_images(join(category_root, 'drawable-' + resolutions[0]))]
         colors = []
         sizes = []
         for current_item, next_item in izip(raw_assets, islice(raw_assets, 1, None)):
@@ -56,6 +76,7 @@ def handle_material_icons():
             sizes.append(current_item[2])
             if current_item[0] != next_item[0]:
                 data = {'name': current_item[0],
+                        'pack': id,
                         'category': category,
                         'resolutions': resolutions,
                         'colors': sorted(set(colors)),
@@ -71,7 +92,7 @@ def handle_material_icons():
 
 android_icons_data = handle_android_icons()
 material_icons_data = handle_material_icons()
-packs = {[android_icons_data, material_icons_data]}
+packs = [android_icons_data, material_icons_data]
 
 with io.open(join(root, 'content.json'), 'w', encoding='utf-8') as f:
     f.write(unicode(json.dumps(packs, ensure_ascii=False)))

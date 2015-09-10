@@ -5,17 +5,20 @@ import java.util.List;
 public class ImageAsset {
 
     private final String name;
+    private final String pack;
     private final String category;
     private final List<Resolution> resolutions;
     private final List<String> colors;
     private final List<String> sizes;
 
     public ImageAsset(String name,
+                      String pack,
                       String category,
                       List<Resolution> resolutions,
                       List<String> colors,
                       List<String> sizes) {
         this.name = name;
+        this.pack = pack;
         this.category = category;
         this.resolutions = resolutions;
         this.colors = colors;
@@ -24,6 +27,10 @@ public class ImageAsset {
 
     public String getName() {
         return name;
+    }
+
+    public String getIconPack() {
+        return pack;
     }
 
     public String getCategory() {

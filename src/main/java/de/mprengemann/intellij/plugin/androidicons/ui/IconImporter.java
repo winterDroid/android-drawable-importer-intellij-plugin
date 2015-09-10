@@ -13,21 +13,39 @@
 
 package de.mprengemann.intellij.plugin.androidicons.ui;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.SystemInfo;
+import de.mprengemann.intellij.plugin.androidicons.IconApplication;
+import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAndroidIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IconsImporterObserver;
+import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.widgets.ResourceBrowser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
+import java.util.List;
 
 public class IconImporter extends DialogWrapper implements IconsImporterObserver {
 
     private final Project project;
+    private final IAndroidIconsController androidIconsController;
+    private final IMaterialIconsController materialIconsController;
+    private final ISettingsController settingsController;
+    private final IIconsImporterController iconImporterController;
 
     private JLabel imageContainer;
     private JComboBox assetSpinner;
@@ -49,14 +67,13 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 
     public IconImporter(Project project, Module module) {
         super(project, true);
-//
-//        final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
-//        androidIconsController = container.getControllerFactory().getAndroidIconsController();
-//        materialIconsController = container.getControllerFactory().getMaterialIconsController();
-//        settingsController = container.getControllerFactory().getSettingsController();
-//
-//        iconImporterController = new IconsImporterController(androidIconsController, materialIconsController);
-//        iconImporterController.addObserver(this);
+
+        final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
+        androidIconsController = container.getControllerFactory().getAndroidIconsController();
+        materialIconsController = container.getControllerFactory().getMaterialIconsController();
+        settingsController = container.getControllerFactory().getSettingsController();
+
+        iconImporterController = new IconsImporterController(androidIconsController, materialIconsController);
         this.project = project;
 //
 //        resRoot.setSelectionListener(new Consumer<File>() {
@@ -73,13 +90,13 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 //        });
 //        resRoot.init(project, module, container.getControllerFactory().getSettingsController());
 //
-//        setTitle("Icon Importer");
-//        setResizable(false);
-//        getHelpAction().setEnabled(true);
-//
-//        AssetSpinnerRenderer renderer = new AssetSpinnerRenderer();
-//        //noinspection GtkPreferredJComboBoxRenderer
-//        assetSpinner.setRenderer(renderer);
+        setTitle("Icon Importer");
+        setResizable(false);
+        getHelpAction().setEnabled(true);
+
+        AssetSpinnerRenderer renderer = new AssetSpinnerRenderer();
+        //noinspection GtkPreferredJComboBoxRenderer
+        assetSpinner.setRenderer(renderer);
 //        resExportName.addKeyListener(new KeyListener() {
 //            @Override
 //            public void keyTyped(KeyEvent keyEvent) {}
@@ -100,12 +117,6 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 //            }
 //        });
 //
-//        fillPacks();
-//        fillCategories();
-//        fillAssets();
-//        fillSizes();
-//        fillColors();
-//
 //        initCheckBox(Resolution.LDPI, LDPICheckBox);
 //        initCheckBox(Resolution.MDPI, MDPICheckBox);
 //        initCheckBox(Resolution.HDPI, HDPICheckBox);
@@ -114,6 +125,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 //        initCheckBox(Resolution.XXXHDPI, XXXHDPICheckBox);
 //        initSearch();
 
+        iconImporterController.addObserver(this);
         init();
     }
 
@@ -144,8 +156,8 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 //                if (selectedItem == null) {
 //                    return;
 //                }
-//                iconImporterController.setSelectedIconPack(selectedItem.getIconPack());
-//                if (selectedItem.getIconPack() == IconPack.MATERIAL_ICONS) {
+//                iconImporterController.setSelectedIconPack(selectedItem.getId());
+//                if (selectedItem.getId() == IconPack.MATERIAL_ICONS) {
 //                    iconImporterController.setSelectedCategory(selectedItem.getCategory());
 //                }
 //                iconImporterController.setSelectedAsset(selectedItem);
@@ -177,106 +189,66 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 //        ImageUtils.updateImage(imageContainer, iconImporterController.getSelectedImageFile());
 //    }
 //
-//    private void fillPacks() {
+    private void fillPacks() {
 //        iconPackSpinner.removeActionListener(iconPackActionListener);
-//        if (androidIconsController.isInitialized()) {
-//            iconPackSpinner.addItem(IconPack.ANDROID_ICONS.getName());
-//        }
-//        if (materialIconsController.isInitialized()) {
-//            iconPackSpinner.addItem(IconPack.MATERIAL_ICONS.getName());
-//        }
+        iconPackSpinner.addItem(androidIconsController.getIconPackName());
+        iconPackSpinner.addItem(materialIconsController.getIconPackName());
 //        iconPackSpinner.addActionListener(iconPackActionListener);
-//    }
+    }
 //
-//    private void fillCategories() {
+    private void fillCategories() {
 //        categorySpinner.removeActionListener(categoryActionListener);
-//        categorySpinner.removeAllItems();
-//        List<String> categories = new ArrayList<String>();
-//        switch (iconImporterController.getAsset().getIconPack()) {
-//            case MATERIAL_ICONS:
-//                categories = materialIconsController.getCategories();
-//                categorySpinner.setEnabled(true);
-//                break;
-//            case ANDROID_ICONS:
-//                categorySpinner.setEnabled(false);
-//                break;
-//        }
-//        for (String category : categories) {
-//            categorySpinner.addItem(category);
-//        }
-//        if (categories.size() == 0) {
-//            iconImporterController.setSelectedCategory("");
-//        }
+        categorySpinner.removeAllItems();
+        List<String> categories = iconImporterController.getCategories();
+        for (String category : categories) {
+            categorySpinner.addItem(category);
+        }
+        categorySpinner.setEnabled(categories.size() > 1);
 //        categorySpinner.addActionListener(categoryActionListener);
-//    }
+    }
 //
-//    private void fillAssets() {
+    private void fillAssets() {
 //        assetSpinner.removeActionListener(assetActionListener);
-//        assetSpinner.removeAllItems();
-//        List<ImageAsset> assets = new ArrayList<ImageAsset>();
-//        switch (iconImporterController.getAsset().getIconPack()) {
-//            case MATERIAL_ICONS:
-////                assets = materialIconsController.getAssets(iconImporterController.get);
-//                break;
-//            case ANDROID_ICONS:
-//                assets = androidIconsController.getAssets();
-//                break;
-//        }
-//        for (ImageAsset asset : assets) {
-//            assetSpinner.addItem(asset);
-//        }
+        assetSpinner.removeAllItems();
+        List<ImageAsset> assets = iconImporterController.getAssets();
+        for (ImageAsset asset : assets) {
+            assetSpinner.addItem(asset);
+        }
 //        assetSpinner.addActionListener(assetActionListener);
-//    }
+    }
 //
-//    private void fillSizes() {
+    private void fillSizes() {
 //        sizeSpinner.removeActionListener(sizeActionListener);
 //        String lastItem = iconImporterController.getSelectedSize();
-//        sizeSpinner.removeAllItems();
-//        List<String> sizes = new ArrayList<String>();
-//        switch (iconImporterController.getAsset().getIconPack()) {
-//            case MATERIAL_ICONS:
-//                sizes = materialIconsController.getSizes(iconImporterController.getAsset());
-//                break;
-//            case ANDROID_ICONS:
-//                sizes = androidIconsController.getSizes();
-//                break;
-//        }
-//        for (String size : sizes) {
-//            sizeSpinner.addItem(size);
-//        }
+        sizeSpinner.removeAllItems();
+        List<String> sizes = iconImporterController.getSizes();
+        for (String size : sizes) {
+            sizeSpinner.addItem(size);
+        }
 //        if (sizes.contains(lastItem)) {
 //            sizeSpinner.setSelectedItem(lastItem);
 //        }
 //        sizeSpinner.addActionListener(sizeActionListener);
-//    }
+    }
 //
-//    private void fillColors() {
+    private void fillColors() {
 //        colorSpinner.removeActionListener(colorActionListener);
 //        String lastItem = iconImporterController.getSelectedColor();
-//        colorSpinner.removeAllItems();
-//        List<String> colors = new ArrayList<String>();
-//        switch (iconImporterController.getAsset().getIconPack()) {
-//            case MATERIAL_ICONS:
-//                colors = materialIconsController.getColors(iconImporterController.getAsset(),
-//                                                           iconImporterController.getSelectedSize());
-//                break;
-//            case ANDROID_ICONS:
-//                colors = androidIconsController.getColors();
-//                break;
-//        }
-//        for (String color : colors) {
-//            colorSpinner.addItem(color);
-//        }
-//
+        colorSpinner.removeAllItems();
+        List<String> colors = iconImporterController.getColors();
+        for (String color : colors) {
+            colorSpinner.addItem(color);
+        }
+
 //        if (colors.contains(lastItem)) {
 //            colorSpinner.setSelectedItem(lastItem);
 //        }
 //        colorSpinner.addActionListener(colorActionListener);
-//    }
+    }
 
     @Override
     protected void doHelpAction() {
-//        materialIconsController.openHelp();
+        materialIconsController.openHelp();
     }
 
     @Override
@@ -318,44 +290,44 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 
     @Override
     public void updated() {
-//        fillPacks();
-//        fillCategories();
-//        fillAssets();
-//        fillSizes();
-//        fillColors();
+        fillPacks();
+        fillCategories();
+        fillAssets();
+        fillSizes();
+        fillColors();
 //        resExportName.setText(iconImporterController.getExportName());
 //        resRoot.setText(iconImporterController.getExportRoot());
     }
 
-//    private class AssetSpinnerRenderer extends DefaultListCellRenderer {
-//        @Override
-//        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-//            ImageAsset asset = (ImageAsset) value;
-//            JLabel label = (JLabel) super.getListCellRendererComponent(list, asset.extractName(this.file), index, isSelected, cellHasFocus);
-//            if (label == null ||
-//                iconImporterController == null) {
-//                return label;
-//            }
-//            File imageFile = iconImporterController.getImageFile(asset);
-//            if (imageFile.exists()) {
-//                label.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
-//            }
-//            return label;
-//        }
-//    }
-//
-//    private class AssetFormat extends Format {
-//        @Override
-//        public StringBuffer format(Object obj, @NotNull StringBuffer toAppendTo, @NotNull FieldPosition pos) {
-//            if (obj != null) {
-//                toAppendTo.append(((ImageAsset) obj).extractName(this.file));
-//            }
-//            return toAppendTo;
-//        }
-//
-//        @Override
-//        public Object parseObject(String s, @NotNull ParsePosition parsePosition) {
-//            return null;
-//        }
-//    }
+    private class AssetSpinnerRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            ImageAsset asset = (ImageAsset) value;
+            JLabel label = (JLabel) super.getListCellRendererComponent(list, asset.getName(), index, isSelected, cellHasFocus);
+            if (label == null ||
+                iconImporterController == null) {
+                return label;
+            }
+            File imageFile = iconImporterController.getThumbnailFile(asset);
+            if (imageFile != null && imageFile.exists()) {
+                label.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
+            }
+            return label;
+        }
+    }
+
+    private class AssetFormat extends Format {
+        @Override
+        public StringBuffer format(Object obj, @NotNull StringBuffer toAppendTo, @NotNull FieldPosition pos) {
+            if (obj != null) {
+                toAppendTo.append(((ImageAsset) obj).getName());
+            }
+            return toAppendTo;
+        }
+
+        @Override
+        public Object parseObject(String s, @NotNull ParsePosition parsePosition) {
+            return null;
+        }
+    }
 }

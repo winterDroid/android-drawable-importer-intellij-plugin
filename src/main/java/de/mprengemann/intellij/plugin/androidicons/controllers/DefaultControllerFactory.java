@@ -1,10 +1,10 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers;
 
-import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.AndroidIconsController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAndroidIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.AndroidIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.MaterialIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.MaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.SettingsController;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;

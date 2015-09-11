@@ -1,10 +1,11 @@
-package de.mprengemann.intellij.plugin.androidicons.controllers.materialicons;
+package de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons;
 
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.resources.ResourceLoader;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -64,6 +65,16 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
+    public IconPack getIconPack() {
+        return iconPack;
+    }
+
+    @Override
+    public Resolution getThumbnailResolution() {
+        return Resolution.MDPI;
+    }
+
+    @Override
     public List<ImageAsset> getAssets(String category) {
         return categoryMap.get(category);
     }
@@ -90,12 +101,18 @@ public class MaterialIconsController implements IMaterialIconsController {
 
     @Override
     public File getImageFile(ImageAsset asset, String color, Resolution resolution) {
-        return null;
+        return getImageFile(asset, color, "24dp", resolution);
     }
 
     @Override
     public File getImageFile(ImageAsset asset, String color, String size, Resolution resolution) {
-        return null;
+        final String localPath = String.format("%s/drawable-%s/%s_%s_%s.png",
+                                               asset.getCategory(),
+                                               resolution.toString(),
+                                               asset.getName(),
+                                               color,
+                                               size);
+        return ResourceLoader.getFile(new File(iconPack.getPath(), localPath).getPath());
     }
 
     @Override

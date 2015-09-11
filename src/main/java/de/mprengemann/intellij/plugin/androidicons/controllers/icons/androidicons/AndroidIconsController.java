@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.controllers.androidicons;
+package de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
@@ -48,6 +48,16 @@ public class AndroidIconsController implements IAndroidIconsController {
     }
 
     @Override
+    public IconPack getIconPack() {
+        return iconPack;
+    }
+
+    @Override
+    public Resolution getThumbnailResolution() {
+        return Resolution.LDPI;
+    }
+
+    @Override
     public List<ImageAsset> getAssets(String category) {
         return iconPack.getAssets();
     }
@@ -69,10 +79,15 @@ public class AndroidIconsController implements IAndroidIconsController {
 
     @Override
     public File getImageFile(ImageAsset asset, String color, Resolution resolution) {
+        return getImageFile(asset, color, null, resolution);
+    }
+
+    @Override
+    public File getImageFile(ImageAsset asset, String color, String size, Resolution resolution) {
         final String localPath = String.format("%s/%s/%s.png",
-                                            color,
-                                            resolution.toString(),
-                                            asset.getName());
+                                               color,
+                                               resolution.toString(),
+                                               asset.getName());
         return ResourceLoader.getFile(new File(iconPack.getPath(), localPath).getPath());
     }
 

@@ -1,12 +1,13 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter;
 
 import com.intellij.openapi.project.Project;
-import de.mprengemann.intellij.plugin.androidicons.controllers.IIconPackController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAndroidIconsController;
-import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.IIconPackController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.IAndroidIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.HashSet;
@@ -63,12 +64,23 @@ public class IconsImporterController implements IIconsImporterController {
         if (selectedAsset.getIconPack().equals(iconPack)) {
             return;
         }
-        if (androidIconsController.getId().equals(iconPack)) {
-            selectedAsset = androidIconsController.getAssets(selectedAsset.getCategory()).get(0);
-        } else if (materialIconsController.getId().equals(iconPack)) {
-            selectedAsset = materialIconsController.getAssets(selectedAsset.getCategory()).get(0);
-        }
+        final IIconPackController controller = getControllerForIconPackId(iconPack);
+        final String category = controller.getCategories().get(0);
+        selectedAsset = controller.getAssets(category).get(0);
         notifyUpdated();
+    }
+
+    @NotNull
+    private IIconPackController getControllerForIconPackId(String iconPack) {
+        IIconPackController controller;
+        if (androidIconsController.getId().equals(iconPack)) {
+            controller = androidIconsController;
+        } else if (materialIconsController.getId().equals(iconPack)) {
+            controller = materialIconsController;
+        } else {
+            throw new IllegalArgumentException(iconPack + " not found!");
+        }
+        return controller;
     }
 
     @Override
@@ -129,39 +141,29 @@ public class IconsImporterController implements IIconsImporterController {
 
     @Override
     public File getImageFile(ImageAsset asset, String color, Resolution resolution) {
-        return getIconPack().getImageFile(asset, color, resolution);
+        return getSelectedIconPack().getImageFile(asset, color, resolution);
     }
 
     @Override
     public File getThumbnailFile(ImageAsset asset) {
-        if (androidIconsController.getId().equals(asset.getIconPack())) {
-            return androidIconsController.getImageFile(asset, "black", Resolution.LDPI);
-        } else {
-            return materialIconsController.getImageFile(asset, "black", Resolution.MDPI);
-        }
+        final IIconPackController iconPackController = getControllerForIconPackId(asset.getIconPack());
+        return iconPackController.getImageFile(asset, "black", iconPackController.getThumbnailResolution());
     }
 
     @Override
     public File getSelectedImageFile() {
-        return null;
-    }
-
-    private IIconPackController getIconPack() {
-        if (selectedAsset.getIconPack().equals(androidIconsController.getId())) {
-            return androidIconsController;
-        } else {
-            return materialIconsController;
-        }
+        final IIconPackController iconPackController = getSelectedIconPack();
+        return iconPackController.getImageFile(selectedAsset, selectedColor, selectedSize, Resolution.XHDPI);
     }
 
     @Override
     public List<String> getCategories() {
-        return getIconPack().getCategories();
+        return getSelectedIconPack().getCategories();
     }
 
     @Override
     public List<ImageAsset> getAssets() {
-        return getIconPack().getAssets(selectedAsset.getCategory());
+        return getSelectedIconPack().getAssets(selectedAsset.getCategory());
     }
 
     @Override
@@ -187,6 +189,16 @@ public class IconsImporterController implements IIconsImporterController {
     @Override
     public String getSelectedColor() {
         return selectedColor;
+    }
+
+    @Override
+    public IIconPackController getSelectedIconPack() {
+        return getControllerForIconPackId(selectedAsset.getIconPack());
+    }
+
+    @Override
+    public String getSelectedCategory() {
+        return selectedAsset.getCategory();
     }
 
     @Override

@@ -20,19 +20,23 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.SystemInfo;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
-import de.mprengemann.intellij.plugin.androidicons.controllers.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IconsImporterObserver;
-import de.mprengemann.intellij.plugin.androidicons.controllers.materialicons.IMaterialIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.IAndroidIconsController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
+import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.widgets.ResourceBrowser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.FieldPosition;
 import java.text.Format;
@@ -64,6 +68,46 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
     private JCheckBox XXXHDPICheckBox;
     private JComboBox iconPackSpinner;
     private JComboBox searchField;
+    private final ActionListener iconPackActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            final JComboBox source = (JComboBox) actionEvent.getSource();
+            final IconPack selectedItem = (IconPack) source.getSelectedItem();
+            iconImporterController.setSelectedIconPack(selectedItem.getId());
+        }
+    };
+    private final ActionListener categoryActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            final JComboBox source = (JComboBox) actionEvent.getSource();
+            final String selectedItem = (String) source.getSelectedItem();
+            iconImporterController.setSelectedCategory(selectedItem);
+        }
+    };
+    private final ActionListener assetActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            final JComboBox source = (JComboBox) actionEvent.getSource();
+            final ImageAsset selectedItem = (ImageAsset) source.getSelectedItem();
+            iconImporterController.setSelectedAsset(selectedItem);
+        }
+    };
+    private final ActionListener sizeActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            final JComboBox source = (JComboBox) actionEvent.getSource();
+            final String selectedItem = (String) source.getSelectedItem();
+            iconImporterController.setSelectedSize(selectedItem);
+        }
+    };
+    private final ActionListener colorActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            final JComboBox source = (JComboBox) actionEvent.getSource();
+            final String selectedItem = (String) source.getSelectedItem();
+            iconImporterController.setSelectedColor(selectedItem);
+        }
+    };
 
     public IconImporter(Project project, Module module) {
         super(project, true);
@@ -182,68 +226,70 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
                                 : new Action[] {this.getOKAction(), this.getCancelAction(), this.getHelpAction()};
     }
 
-//    private void updateImage() {
-//        if (imageContainer == null) {
-//            return;
-//        }
-//        ImageUtils.updateImage(imageContainer, iconImporterController.getSelectedImageFile());
-//    }
-//
-    private void fillPacks() {
-//        iconPackSpinner.removeActionListener(iconPackActionListener);
-        iconPackSpinner.addItem(androidIconsController.getIconPackName());
-        iconPackSpinner.addItem(materialIconsController.getIconPackName());
-//        iconPackSpinner.addActionListener(iconPackActionListener);
+    private void prepareSpinner(JComboBox comboBox, ActionListener listener) {
+        comboBox.removeActionListener(listener);
+        comboBox.setSelectedItem(null);
+        comboBox.removeAllItems();
     }
-//
-    private void fillCategories() {
-//        categorySpinner.removeActionListener(categoryActionListener);
-        categorySpinner.removeAllItems();
-        List<String> categories = iconImporterController.getCategories();
-        for (String category : categories) {
+
+    private void initSpinner(JComboBox comboBox, Object selectedItem, ActionListener listener) {
+        comboBox.setSelectedItem(selectedItem);
+        comboBox.addActionListener(listener);
+    }
+
+    private void updatePacks() {
+        prepareSpinner(iconPackSpinner, iconPackActionListener);
+        iconPackSpinner.addItem(androidIconsController.getIconPack());
+        iconPackSpinner.addItem(materialIconsController.getIconPack());
+        initSpinner(iconPackSpinner, iconImporterController.getSelectedIconPack().getIconPack(), iconPackActionListener);
+    }
+
+    private void updateCategories() {
+        prepareSpinner(categorySpinner, categoryActionListener);
+        for (String category : iconImporterController.getCategories()) {
             categorySpinner.addItem(category);
         }
-        categorySpinner.setEnabled(categories.size() > 1);
-//        categorySpinner.addActionListener(categoryActionListener);
+        categorySpinner.setEnabled(categorySpinner.getItemCount() > 1);
+        initSpinner(categorySpinner, iconImporterController.getSelectedCategory(), categoryActionListener);
     }
-//
-    private void fillAssets() {
-//        assetSpinner.removeActionListener(assetActionListener);
-        assetSpinner.removeAllItems();
+
+    private void updateAssets() {
+        prepareSpinner(assetSpinner, assetActionListener);
         List<ImageAsset> assets = iconImporterController.getAssets();
         for (ImageAsset asset : assets) {
             assetSpinner.addItem(asset);
         }
-//        assetSpinner.addActionListener(assetActionListener);
+        initSpinner(assetSpinner, iconImporterController.getSelectedAsset(), assetActionListener);
     }
-//
-    private void fillSizes() {
-//        sizeSpinner.removeActionListener(sizeActionListener);
-//        String lastItem = iconImporterController.getSelectedSize();
-        sizeSpinner.removeAllItems();
+
+    private void updateSizes() {
+        prepareSpinner(sizeSpinner, sizeActionListener);
         List<String> sizes = iconImporterController.getSizes();
         for (String size : sizes) {
             sizeSpinner.addItem(size);
         }
-//        if (sizes.contains(lastItem)) {
-//            sizeSpinner.setSelectedItem(lastItem);
-//        }
-//        sizeSpinner.addActionListener(sizeActionListener);
+        initSpinner(sizeSpinner, iconImporterController.getSelectedSize(), sizeActionListener);
     }
-//
-    private void fillColors() {
-//        colorSpinner.removeActionListener(colorActionListener);
-//        String lastItem = iconImporterController.getSelectedColor();
-        colorSpinner.removeAllItems();
+
+    private void updateColors() {
+        prepareSpinner(colorSpinner, colorActionListener);
         List<String> colors = iconImporterController.getColors();
         for (String color : colors) {
             colorSpinner.addItem(color);
         }
+        initSpinner(colorSpinner, iconImporterController.getSelectedColor(), colorActionListener);
+    }
 
-//        if (colors.contains(lastItem)) {
-//            colorSpinner.setSelectedItem(lastItem);
-//        }
-//        colorSpinner.addActionListener(colorActionListener);
+    private void updateImage() {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                if (imageContainer == null) {
+                    return;
+                }
+                ImageUtils.updateImage(imageContainer, iconImporterController.getSelectedImageFile());
+            }
+        });
     }
 
     @Override
@@ -290,11 +336,12 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 
     @Override
     public void updated() {
-        fillPacks();
-        fillCategories();
-        fillAssets();
-        fillSizes();
-        fillColors();
+        updatePacks();
+        updateCategories();
+        updateAssets();
+        updateSizes();
+        updateColors();
+        updateImage();
 //        resExportName.setText(iconImporterController.getExportName());
 //        resRoot.setText(iconImporterController.getExportRoot());
     }

@@ -2,6 +2,7 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter;
 
 import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.icons.IIconPackController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -47,6 +48,10 @@ public interface IIconsImporterController extends IController<IconsImporterObser
     String getSelectedSize();
 
     String getSelectedColor();
+
+    IIconPackController getSelectedIconPack();
+
+    String getSelectedCategory();
 
     RefactoringTask getTask(Project project);
 

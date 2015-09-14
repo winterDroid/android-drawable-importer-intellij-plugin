@@ -278,6 +278,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         for (String size : sizes) {
             sizeSpinner.addItem(size);
         }
+        sizeSpinner.setEnabled(sizeSpinner.getItemCount() > 1);
         initSpinner(sizeSpinner, iconImporterController.getSelectedSize(), sizeActionListener);
     }
 

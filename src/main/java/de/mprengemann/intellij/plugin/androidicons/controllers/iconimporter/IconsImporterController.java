@@ -1,12 +1,15 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter;
 
 import com.intellij.openapi.project.Project;
+import com.jgoodies.common.base.Objects;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.IIconPackController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.util.RefactorUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -20,10 +23,12 @@ public class IconsImporterController implements IIconsImporterController {
     private final IAndroidIconsController androidIconsController;
     private final IMaterialIconsController materialIconsController;
 
+    private Set<Resolution> exportResolutions;
     private ImageAsset selectedAsset;
     private String selectedSize;
     private String selectedColor;
     private String exportName;
+    private String exportRoot;
 
     public IconsImporterController(IAndroidIconsController androidIconsController,
                                    IMaterialIconsController materialIconsController) {
@@ -35,7 +40,9 @@ public class IconsImporterController implements IIconsImporterController {
         this.selectedAsset = androidIconsController.getAssets(category).get(0);
         this.selectedSize = selectedAsset.getSizes().get(0);
         this.selectedColor = selectedAsset.getColors().get(0);
+
         this.exportName = null;
+        this.exportResolutions = new HashSet<Resolution>();
     }
 
     @Override
@@ -56,7 +63,11 @@ public class IconsImporterController implements IIconsImporterController {
 
     @Override
     public void setExportRoot(String exportRoot) {
-
+        if (exportRoot.equals(this.exportRoot)) {
+            return;
+        }
+        this.exportRoot = exportRoot;
+        notifyUpdated();
     }
 
     @Override
@@ -67,6 +78,7 @@ public class IconsImporterController implements IIconsImporterController {
         final IIconPackController controller = getControllerForIconPackId(iconPack);
         final String category = controller.getCategories().get(0);
         selectedAsset = controller.getAssets(category).get(0);
+        updateColorAndSize();
         notifyUpdated();
     }
 
@@ -89,13 +101,24 @@ public class IconsImporterController implements IIconsImporterController {
             return;
         }
         selectedAsset = materialIconsController.getAssets(category).get(0);
+        updateColorAndSize();
         notifyUpdated();
     }
 
     @Override
     public void setSelectedAsset(ImageAsset asset) {
         selectedAsset = asset;
+        updateColorAndSize();
         notifyUpdated();
+    }
+
+    private void updateColorAndSize() {
+        if (!selectedAsset.getColors().contains(selectedColor)) {
+            selectedColor = selectedAsset.getColors().get(0);
+        }
+        if (!selectedAsset.getSizes().contains(selectedSize)) {
+            selectedSize = selectedAsset.getSizes().get(0);
+        }
     }
 
     @Override
@@ -126,7 +149,14 @@ public class IconsImporterController implements IIconsImporterController {
 
     @Override
     public void setExportName(String exportName) {
-
+        if (exportName.equals(selectedAsset.getName())) {
+            exportName = null;
+        }
+        if (Objects.equals(exportName, this.exportName)) {
+            return;
+        }
+        this.exportName = exportName;
+        notifyUpdated();
     }
 
     @Override
@@ -136,7 +166,7 @@ public class IconsImporterController implements IIconsImporterController {
 
     @Override
     public String getExportRoot() {
-        return null;
+        return exportRoot;
     }
 
     @Override
@@ -152,8 +182,13 @@ public class IconsImporterController implements IIconsImporterController {
 
     @Override
     public File getSelectedImageFile() {
+        return getSelectedImageFile(Resolution.XHDPI);
+    }
+
+    @Override
+    public File getSelectedImageFile(Resolution resolution) {
         final IIconPackController iconPackController = getSelectedIconPack();
-        return iconPackController.getImageFile(selectedAsset, selectedColor, selectedSize, Resolution.XHDPI);
+        return iconPackController.getImageFile(selectedAsset, selectedColor, selectedSize, resolution);
     }
 
     @Override
@@ -203,12 +238,41 @@ public class IconsImporterController implements IIconsImporterController {
 
     @Override
     public RefactoringTask getTask(Project project) {
-        return null;
+        final RefactoringTask task = new RefactoringTask(project);
+        final ImageInformation baseInformation = ImageInformation.newBuilder()
+                                                                 .setExportName(getExportName())
+                                                                 .setExportPath(getExportRoot())
+                                                                 .build(project);
+        for (Resolution resolution : exportResolutions) {
+            ImageInformation.Builder imageInformationBuilder = ImageInformation.newBuilder(baseInformation);
+            imageInformationBuilder.setResolution(resolution);
+            final File selectedImageFile;
+            if (getSelectedAsset().getResolutions().contains(resolution)) {
+                selectedImageFile = getSelectedImageFile(resolution);
+            } else {
+                if (getSelectedIconPack().getId().equals("android_icons")) {
+                    selectedImageFile = getSelectedImageFile(Resolution.XXHDPI);
+                    imageInformationBuilder.setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.XXHDPI));
+                } else if (getSelectedIconPack().getId().equals("material_icons")) {
+                    selectedImageFile = getSelectedImageFile(Resolution.MDPI);
+                    imageInformationBuilder.setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.MDPI));
+                } else {
+                    throw new IllegalStateException();
+                }
+            }
+            imageInformationBuilder.setImageFile(selectedImageFile);
+            task.addImage(imageInformationBuilder.build(project));
+        }
+        return task;
     }
 
     @Override
     public void setExportResolution(Resolution resolution, boolean export) {
-
+        if (exportResolutions.contains(resolution) && !export) {
+            exportResolutions.remove(resolution);
+        } else if (!exportResolutions.contains(resolution) && export) {
+            exportResolutions.add(resolution);
+        }
     }
 
     private void notifyUpdated() {

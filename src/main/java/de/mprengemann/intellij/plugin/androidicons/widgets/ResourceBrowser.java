@@ -94,6 +94,7 @@ public class ResourceBrowser extends TextFieldWithBrowseButton implements KeyLis
 
     public void setSelectionListener(Consumer<File> fileConsumer) {
         this.listener = fileConsumer;
+        notifyListener(getText());
     }
 
     @Override

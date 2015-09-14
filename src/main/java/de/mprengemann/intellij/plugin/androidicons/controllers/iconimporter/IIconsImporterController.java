@@ -37,6 +37,8 @@ public interface IIconsImporterController extends IController<IconsImporterObser
 
     ImageAsset getSelectedAsset();
 
+    File getSelectedImageFile(Resolution resolution);
+
     List<String> getCategories();
 
     List<ImageAsset> getAssets();

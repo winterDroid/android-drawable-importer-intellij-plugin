@@ -23,6 +23,8 @@ public interface IIconPackController {
 
     List<ImageAsset> getAssets(String category);
 
+    List<ImageAsset> getAssets(List<String> categories);
+
     VirtualFile getRoot();
 
     void openBrowser();
@@ -38,4 +40,5 @@ public interface IIconPackController {
     IconPack getIconPack();
 
     Resolution getThumbnailResolution();
+
 }

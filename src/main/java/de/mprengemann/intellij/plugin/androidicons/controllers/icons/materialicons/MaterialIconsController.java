@@ -80,6 +80,11 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
+    public List<ImageAsset> getAssets(List<String> categories) {
+        return iconPack.getAssets();
+    }
+
+    @Override
     public List<String> getCategories() {
         return iconPack.getCategories();
     }

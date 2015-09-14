@@ -18,18 +18,16 @@
     <vendor email="marcprengemann@gmail.com" url="https://plus.google.com/+MarcPrengemann">Marc Prengemann</vendor>
     <description><![CDATA[
         This plugin consists of four main features. You can access them by a right-click anywhere, but <b>not on a file</b>, inside an Android module under New.<br><br>
-        <b>1. AndroidIcons Drawable Import</b><br>
+        <b>1. AndroidIcons and Material Icons Drawable Import</b><br>
         You are able to select the asset, specify your color, change the target resource name and select all the resolutions you want to import.<br>
         All the missing folders will be created automatically. If there are already drawables with the same name, you will be warned.<br>
+        Currently Material Icons 2.0 is not supported, but it will be added soon.<br>
         <br>
-        <b>2. Material Icons Drawable Import</b><br>
-        This feature offers basically the same like the AndroidIcons import. You are able to select the asset by category, specify the color, change the target resource name and select all the resolutions you want to import.<br>
-        <br>
-        <b>3. Scaled Drawable</b><br>
+        <b>2. Scaled Drawable</b><br>
         Select at least one asset and specify the resolution of it. If you want to scale the to be imported image as well, you should select "other" and then fill out the "target resolution" and the "target width / height". Then you can specify all the resolutions, to which the drawable should be resized to.<br>
         This works also with 9-Patch-Images. But take care: sometimes it's necessary to remove / add about one "pixel" in the 9-Patch-Editor. But just try it :)<br>
         <br>
-        <b>4. Multisource-Drawable</b><br>
+        <b>3. Multisource-Drawable</b><br>
         Ever got a zip with drawables for your Android project by your designer with the following structure?<br><br>
         root/<br>
         ./drawable_ldpi.png<br>
@@ -38,10 +36,14 @@
         ./drawable_xhdpi.png<br><br>
         No problem! Now you can just select for every resolution a different asset, specify one name for them, and the rest is done by the plugin.<br><br>
         <em>Hint: When you select an asset, you can also just drag a file from your finder / explorer to the text field and drop it there.</em>
-        ]]></description>
+        ]]>
+    </description>
 
     <change-notes><![CDATA[
-      Bug-Fixes
+      - Search added
+      - Merged Android Icons and Material Icons importers
+      - Bundled icon packs to prevent own download and to get rid of the settings
+      - Show actions on library modules
     ]]>
     </change-notes>
 

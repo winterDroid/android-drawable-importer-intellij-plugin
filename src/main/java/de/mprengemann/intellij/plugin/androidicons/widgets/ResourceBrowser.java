@@ -68,15 +68,16 @@ public class ResourceBrowser extends TextFieldWithBrowseButton implements KeyLis
 
     private void getResRootFile(ResourcesDialog.ResourceSelectionListener listener) {
         AndroidFacet currentFacet = AndroidFacetUtils.getCurrentFacet(project, module);
+        if (currentFacet == null) {
+            return;
+        }
 
-        if (currentFacet != null) {
-            List<VirtualFile> allResourceDirectories = currentFacet.getAllResourceDirectories();
-            if (allResourceDirectories.size() == 1) {
-                listener.onResourceSelected(allResourceDirectories.get(0));
-            } else if (allResourceDirectories.size() > 1) {
-                ResourcesDialog dialog = new ResourcesDialog(project, allResourceDirectories, listener);
-                dialog.show();
-            }
+        List<VirtualFile> allResourceDirectories = currentFacet.getAllResourceDirectories();
+        if (allResourceDirectories.size() == 1) {
+            listener.onResourceSelected(allResourceDirectories.get(0));
+        } else if (allResourceDirectories.size() > 1) {
+            ResourcesDialog dialog = new ResourcesDialog(project, allResourceDirectories, listener);
+            dialog.show();
         }
     }
 

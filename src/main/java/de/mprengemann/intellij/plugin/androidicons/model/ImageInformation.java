@@ -15,57 +15,40 @@ package de.mprengemann.intellij.plugin.androidicons.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import org.imgscalr.Scalr;
 
 import java.io.File;
 
 public class ImageInformation {
 
-    private static final int KEEP = -1;
-    private static final float UNSET = -1f;
-
+    public static final String TMP_ROOT_DIR = "plugin-images";
     private final File imageFile;
     private final Resolution resolution;
     private final float factor;
-    private final int imageWidth;
-    private final int imageHeight;
-    private final int targetWidth;
-    private final int targetHeight;
     private final String exportPath;
     private final String exportName;
     private final boolean ninePatch;
     private ResizeAlgorithm algorithm;
     private Object method;
-    private String tempDir;
 
     private ImageInformation(File imageFile,
                              Resolution resolution,
                              float factor,
-                             int imageWidth,
-                             int imageHeight,
-                             int targetWidth,
-                             int targetHeight,
                              String exportPath,
                              String exportName,
                              boolean isNinePatch,
                              ResizeAlgorithm algorithm,
-                             Object method, 
-                             String tempDir) {
+                             Object method) {
         this.imageFile = imageFile;
         this.resolution = resolution;
         this.factor = factor;
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
-        this.targetWidth = targetWidth;
-        this.targetHeight = targetHeight;
         this.exportPath = exportPath;
         this.exportName = exportName;
         this.ninePatch = isNinePatch;
         this.algorithm = algorithm;
         this.method = method;
-        this.tempDir = tempDir;
     }
 
     public static Builder newBuilder() {
@@ -76,8 +59,18 @@ public class ImageInformation {
         return new Builder(imageInformation);
     }
 
-    public File getTempImage() {
-        return new File(tempDir + "/plugin-images/" + resolution.toString() + "/" + exportName);
+    public File getTempImage(String tmpDirRoot) {
+        return new File(tmpDirRoot, TMP_ROOT_DIR + "/" + resolution.toString() + "/" + exportName);
+    }
+
+    public File getTempImage(File tmpDirRoot) {
+        return getTempImage(tmpDirRoot.getAbsolutePath());
+    }
+
+    public File getTempImage(Project project) {
+        VirtualFile workspaceFile = project.getWorkspaceFile();
+        assert workspaceFile != null;
+        return getTempImage(workspaceFile.getParent().getCanonicalPath());
     }
 
     public File getTargetFile() {
@@ -94,14 +87,6 @@ public class ImageInformation {
 
     public float getFactor() {
         return factor;
-    }
-
-    public int getTargetWidth() {
-        return targetWidth;
-    }
-
-    public int getTargetHeight() {
-        return targetHeight;
     }
 
     public String getExportPath() {
@@ -124,30 +109,18 @@ public class ImageInformation {
         return method;
     }
 
-    public int getImageWidth() {
-        return imageWidth;
-    }
-
-    public int getImageHeight() {
-        return imageHeight;
-    }
-
     public static class Builder {
 
         private File imageFile = null;
         private String exportPath = null;
         private String exportName = null;
+        private float factor = 1f;
 
         // Optional parameters
-        private float factor = ImageInformation.UNSET;
         private Resolution resolution = Resolution.XHDPI;
-        private int targetWidth = ImageInformation.KEEP;
-        private int targetHeight = ImageInformation.KEEP;
         private boolean ninePatch = false;
         private ResizeAlgorithm algorithm = ResizeAlgorithm.SCALR;
         private Object method = Scalr.Method.AUTOMATIC;
-        private int imageWidth = 0;
-        private int imageHeight = 0;
 
         private Builder() {
         }
@@ -156,10 +129,6 @@ public class ImageInformation {
             this.imageFile = imageInformation.imageFile;
             this.resolution = imageInformation.resolution;
             this.factor = imageInformation.factor;
-            this.imageWidth = imageInformation.imageWidth;
-            this.imageHeight = imageInformation.imageHeight;
-            this.targetWidth = imageInformation.targetWidth;
-            this.targetHeight = imageInformation.targetHeight;
             this.exportPath = imageInformation.exportPath;
             this.exportName = imageInformation.exportName;
             this.ninePatch = imageInformation.ninePatch;
@@ -187,26 +156,6 @@ public class ImageInformation {
             return this;
         }
 
-        public Builder setTargetWidth(int targetWidth) {
-            this.targetWidth = targetWidth;
-            return this;
-        }
-
-        public Builder setTargetHeight(int targetHeight) {
-            this.targetHeight = targetHeight;
-            return this;
-        }
-
-        public Builder setImageWidth(int imageWidth) {
-            this.imageWidth = imageWidth;
-            return this;
-        }
-
-        public Builder setImageHeight(int imageHeight) {
-            this.imageHeight = imageHeight;
-            return this;
-        }
-
         public Builder setNinePatch(boolean ninePatch) {
             this.ninePatch = ninePatch;
             return this;
@@ -230,23 +179,47 @@ public class ImageInformation {
             return this;
         }
 
-        public ImageInformation build(Project project) {
-            VirtualFile workspaceFile = project.getWorkspaceFile();
-            assert workspaceFile != null;
-            VirtualFile ideaDir = workspaceFile.getParent();
+        public ImageInformation build() {
             return new ImageInformation(this.imageFile,
                                         this.resolution,
                                         this.factor,
-                                        this.imageWidth,
-                                        this.imageHeight,
-                                        this.targetWidth,
-                                        this.targetHeight,
                                         this.exportPath,
                                         this.exportName,
                                         this.ninePatch,
                                         this.algorithm,
-                                        this.method,
-                                        ideaDir.getCanonicalPath());
+                                        this.method);
+        }
+
+        public File getImageFile() {
+            return imageFile;
+        }
+
+        public String getExportPath() {
+            return exportPath;
+        }
+
+        public String getExportName() {
+            return exportName;
+        }
+
+        public float getFactor() {
+            return factor;
+        }
+
+        public Resolution getResolution() {
+            return resolution;
+        }
+
+        public boolean isNinePatch() {
+            return ninePatch;
+        }
+
+        public ResizeAlgorithm getAlgorithm() {
+            return algorithm;
+        }
+
+        public Object getMethod() {
+            return method;
         }
     }
 }

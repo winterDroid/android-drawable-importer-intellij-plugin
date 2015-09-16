@@ -25,13 +25,13 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
-import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
-import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.listeners.ImageFileBrowserFolderActionListener;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleMouseListener;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import org.apache.commons.lang.StringUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
@@ -161,9 +161,9 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
     @Override
     protected void doOKAction() {
         ImageInformation baseInformation = ImageInformation.newBuilder()
-            .setExportPath(resRoot.getText().trim())
-            .setExportName(resExportName.getText().trim())
-            .build(project);
+                                                           .setExportPath(resRoot.getText().trim())
+                                                           .setExportName(resExportName.getText().trim())
+                                                           .build();
 
         final RefactoringTask task = new RefactoringTask(project);
 
@@ -193,7 +193,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper {
         return ImageInformation.newBuilder(baseInformation)
                                .setImageFile(source)
                                .setResolution(resolution)
-                               .build(project);
+                               .build();
     }
 
     @Nullable

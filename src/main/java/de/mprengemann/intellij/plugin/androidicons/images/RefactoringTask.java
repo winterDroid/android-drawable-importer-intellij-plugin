@@ -34,10 +34,9 @@ import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.activation.MimetypesFileTypeMap;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,7 +192,7 @@ public class RefactoringTask extends Task.Backgroundable {
             return;
         }
 
-        throw new IOException("File not found. No idea why.");
+        throw new FileNotFoundException();
     }
 
     private void move(Project project,
@@ -201,33 +200,16 @@ public class RefactoringTask extends Task.Backgroundable {
                       final List<File> sources,
                       final List<File> targets) throws IOException {
         copy(project, description, sources, targets);
+        VirtualFile workspaceFile = project.getWorkspaceFile();
+        assert workspaceFile != null;
+        final String path = workspaceFile.getParent().getCanonicalPath();
+        assert path != null;
+        final File tmpDirRoot = new File(path, ImageInformation.TMP_ROOT_DIR);
         RunnableUtils.runWriteCommand(project, new Runnable() {
             @Override
             public void run() {
                 try {
-                    File dir = null;
-                    for (File source : sources) {
-                        if (dir == null) {
-                            dir = source.getParentFile();
-                        }
-                        FileUtils.forceDelete(source);
-                    }
-
-                    if (dir != null) {
-                        if (dir.isDirectory()) {
-                            File[] images = dir.listFiles(new FilenameFilter() {
-                                @Override
-                                public boolean accept(File file, String s) {
-                                    String mimetype = new MimetypesFileTypeMap().getContentType(file);
-                                    String type = mimetype.split("/")[0];
-                                    return type.equals("image");
-                                }
-                            });
-                            if (images == null || images.length == 0) {
-                                FileUtils.forceDelete(dir);
-                            }
-                        }
-                    }
+                    FileUtils.forceDelete(tmpDirRoot);
                 } catch (IOException ignored) {
                 }
             }
@@ -235,11 +217,14 @@ public class RefactoringTask extends Task.Backgroundable {
     }
 
     private void move(Project project, List<ImageInformation> scalingInformationList) throws IOException {
+        final VirtualFile workspaceFile = project.getWorkspaceFile();
+        assert workspaceFile != null;
+        final String tmpDirRoot = workspaceFile.getParent().getCanonicalPath();
         List<File> tempFiles = new ArrayList<File>();
         List<File> targets = new ArrayList<File>();
 
         for (ImageInformation information : scalingInformationList) {
-            tempFiles.add(information.getTempImage());
+            tempFiles.add(information.getTempImage(tmpDirRoot));
             targets.add(information.getTargetFile());
         }
 
@@ -254,9 +239,9 @@ public class RefactoringTask extends Task.Backgroundable {
             if (information.isNinePatch()) {
                 resizeImageJpg = ImageUtils.resizeNinePatchImage(project, information);
             } else {
-                resizeImageJpg = ImageUtils.resizeNormalImage(information);
+                resizeImageJpg = ImageUtils.resizeNormalImage(project, information);
             }
-            ImageUtils.saveImageTempFile(resizeImageJpg, information);
+            ImageUtils.saveImageTempFile(project, resizeImageJpg, information);
 
         } catch (Exception ignored) {
         }

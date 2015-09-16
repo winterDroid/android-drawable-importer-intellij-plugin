@@ -24,7 +24,7 @@ public enum ResizeAlgorithm {
 
     private final String name;
 
-    private ResizeAlgorithm(String name) {
+    ResizeAlgorithm(String name) {
         this.name = name;
     }
 

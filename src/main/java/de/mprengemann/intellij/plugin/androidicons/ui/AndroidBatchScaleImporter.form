@@ -14,7 +14,7 @@
     <children>
       <component id="bbccf" class="javax.swing.JLabel" binding="imageContainer">
         <constraints>
-          <grid row="0" column="3" row-span="3" col-span="1" vsize-policy="6" hsize-policy="0" anchor="0" fill="2" indent="0" use-parent-layout="false">
+          <grid row="0" column="3" row-span="12" col-span="1" vsize-policy="6" hsize-policy="0" anchor="0" fill="2" indent="0" use-parent-layout="false">
             <preferred-size width="200" height="-1"/>
             <maximum-size width="200" height="-1"/>
           </grid>
@@ -48,96 +48,6 @@
           </component>
         </children>
       </scrollpane>
-      <component id="edf44" class="javax.swing.JCheckBox" binding="XXXHDPICheckBox" default-binding="true">
-        <constraints>
-          <grid row="11" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <selected value="true"/>
-          <text value="XXXHDPI"/>
-        </properties>
-      </component>
-      <component id="fdf31" class="javax.swing.JCheckBox" binding="XXHDPICheckBox" default-binding="true">
-        <constraints>
-          <grid row="10" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <selected value="true"/>
-          <text value="XXHDPI"/>
-        </properties>
-      </component>
-      <component id="d2a96" class="javax.swing.JCheckBox" binding="XHDPICheckBox" default-binding="true">
-        <constraints>
-          <grid row="9" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <selected value="true"/>
-          <text value="XHDPI"/>
-        </properties>
-      </component>
-      <component id="bd96" class="javax.swing.JCheckBox" binding="HDPICheckBox" default-binding="true">
-        <constraints>
-          <grid row="8" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <selected value="true"/>
-          <text value="HDPI"/>
-        </properties>
-      </component>
-      <component id="83531" class="javax.swing.JCheckBox" binding="MDPICheckBox" default-binding="true">
-        <constraints>
-          <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <selected value="true"/>
-          <text value="MDPI"/>
-        </properties>
-      </component>
-      <component id="4aa7d" class="javax.swing.JCheckBox" binding="LDPICheckBox" default-binding="true">
-        <constraints>
-          <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <selected value="true"/>
-          <text value="LDPI"/>
-        </properties>
-      </component>
-      <component id="8e0e2" class="javax.swing.JComboBox" binding="methodSpinner">
-        <constraints>
-          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="270" height="26"/>
-          </grid>
-        </constraints>
-        <properties>
-          <model/>
-        </properties>
-      </component>
-      <component id="fb3c5" class="javax.swing.JComboBox" binding="algorithmSpinner">
-        <constraints>
-          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="270" height="26"/>
-          </grid>
-        </constraints>
-        <properties>
-          <model/>
-        </properties>
-      </component>
-      <component id="7306e" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Method:"/>
-        </properties>
-      </component>
-      <component id="e378c" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Dimens:"/>
-        </properties>
-      </component>
       <component id="a7e64" class="javax.swing.JButton" binding="addButton">
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="2" fill="0" indent="0" use-parent-layout="false"/>
@@ -152,22 +62,6 @@
         </constraints>
         <properties>
           <text value="-"/>
-        </properties>
-      </component>
-      <component id="4db62" class="javax.swing.JCheckBox" binding="aspectRatioLock">
-        <constraints>
-          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="4" hsize-policy="0" anchor="1" fill="0" indent="2" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <disabledIcon value="icons/unlocked_disabled.png"/>
-          <disabledSelectedIcon value="icons/locked_disabled.png"/>
-          <enabled value="true"/>
-          <horizontalAlignment value="2"/>
-          <horizontalTextPosition value="2"/>
-          <icon value="icons/unlocked.png"/>
-          <selected value="true"/>
-          <selectedIcon value="icons/locked.png"/>
-          <text value=""/>
         </properties>
       </component>
     </children>

@@ -33,6 +33,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicon
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -51,7 +52,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.File;
 import java.text.FieldPosition;
 import java.text.Format;
@@ -136,18 +136,6 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
             iconImporterController.setExportRoot(path);
         }
     };
-    private final KeyListener resExportNameListener = new KeyListener() {
-        @Override
-        public void keyTyped(KeyEvent keyEvent) {}
-
-        @Override
-        public void keyPressed(KeyEvent keyEvent) {}
-
-        @Override
-        public void keyReleased(KeyEvent keyEvent) {
-            iconImporterController.setExportName(((JTextField) keyEvent.getSource()).getText());
-        }
-    };
     private final ActionListener searchFieldListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent event) {
@@ -172,7 +160,12 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 
         resRoot.setSelectionListener(resRootListener);
         resRoot.init(project, module, container.getControllerFactory().getSettingsController());
-        resExportName.addKeyListener(resExportNameListener);
+        resExportName.addKeyListener(new SimpleKeyListener() {
+            @Override
+            public void keyReleased(KeyEvent keyEvent) {
+                iconImporterController.setExportName(((JTextField) keyEvent.getSource()).getText());
+            }
+        });
 
         setTitle("Icon Importer");
         setResizable(false);

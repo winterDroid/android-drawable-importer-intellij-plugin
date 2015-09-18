@@ -242,7 +242,7 @@ public class IconsImporterController implements IIconsImporterController {
         final ImageInformation baseInformation = ImageInformation.newBuilder()
                                                                  .setExportName(getExportName())
                                                                  .setExportPath(getExportRoot())
-                                                                 .build(project);
+                                                                 .build();
         for (Resolution resolution : exportResolutions) {
             ImageInformation.Builder imageInformationBuilder = ImageInformation.newBuilder(baseInformation);
             imageInformationBuilder.setResolution(resolution);
@@ -261,7 +261,7 @@ public class IconsImporterController implements IIconsImporterController {
                 }
             }
             imageInformationBuilder.setImageFile(selectedImageFile);
-            task.addImage(imageInformationBuilder.build(project));
+            task.addImage(imageInformationBuilder.build());
         }
         return task;
     }

@@ -91,26 +91,17 @@ public class ImageUtils {
         return dScale;
     }
 
-    public static BufferedImage resizeNormalImage(ImageInformation information) throws IOException {
+    public static BufferedImage resizeNormalImage(Project project, ImageInformation information) throws IOException {
         BufferedImage image = ImageIO.read(information.getImageFile());
         return resizeNormalImage(image, information);
     }
 
     private static BufferedImage resizeNormalImage(BufferedImage image,
                                                    ImageInformation information) throws IOException {
-        int originalWidth = image.getWidth();
-        int originalHeight = image.getHeight();
-        if (originalHeight == information.getTargetHeight() &&
-            originalWidth == information.getTargetWidth() &&
-            MathUtils.floatEquals(information.getFactor(), 1f)) {
+        int newWidth = image.getWidth();
+        int newHeight = image.getHeight();
+        if (MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
-        }
-
-        int newWidth = information.getTargetWidth();
-        int newHeight = information.getTargetHeight();
-        if (newWidth <= 0 || newHeight <= 0) {
-            newWidth = originalWidth;
-            newHeight = originalHeight;
         }
 
         if (information.getFactor() >= 0) {
@@ -118,18 +109,6 @@ public class ImageUtils {
             newHeight = (int) (newHeight * information.getFactor());
         }
 
-        return resizeNormalImage(image, newWidth, newHeight, information);
-    }
-
-    private static BufferedImage resizeNormalImage(BufferedImage image,
-                                                   int newWidth,
-                                                   int newHeight,
-                                                   ImageInformation information) throws IOException {
-        if (newWidth == information.getImageWidth() &&
-            newHeight == information.getImageHeight() &&
-            MathUtils.floatEquals(information.getFactor(), 1f)) {
-            return image;
-        }
         BufferedImage resizedImage = null;
         switch (information.getAlgorithm()) {
             case SCALR:
@@ -147,37 +126,21 @@ public class ImageUtils {
     public static BufferedImage resizeNinePatchImage(Project project,
                                                      ImageInformation information) throws IOException {
         BufferedImage image = ImageIO.read(information.getImageFile());
-        int originalWidth = image.getWidth();
-        int originalHeight = image.getHeight();
-        if (originalWidth - 2 == information.getTargetWidth() &&
-            originalHeight - 2 == information.getTargetHeight() &&
-            MathUtils.floatEquals(information.getFactor(), 1f)) {
+        if (MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
-        }
-
-        int newWidth = information.getTargetWidth();
-        int newHeight = information.getTargetHeight();
-        if (newWidth <= 0 || newHeight <= 0) {
-            newWidth = originalWidth;
-            newHeight = originalHeight;
-        }
-
-        if (information.getFactor() >= 0) {
-            newWidth = (int) (newWidth * information.getFactor());
-            newHeight = (int) (newHeight * information.getFactor());
         }
 
         BufferedImage trimmedImage = trim9PBorder(image);
         ImageInformation trimmedImageInformation = ImageInformation.newBuilder(information)
                                                                    .setExportName(getExportName("trimmed",
                                                                                                 information.getExportName()))
-                                                                   .build(project);
-        saveImageTempFile(trimmedImage, trimmedImageInformation);
-        trimmedImage = resizeNormalImage(trimmedImage, newWidth, newHeight, trimmedImageInformation);
-        saveImageTempFile(trimmedImage, ImageInformation.newBuilder(trimmedImageInformation)
+                                                                   .build();
+        saveImageTempFile(project, trimmedImage, trimmedImageInformation);
+        trimmedImage = resizeNormalImage(trimmedImage, trimmedImageInformation);
+        saveImageTempFile(project, trimmedImage, ImageInformation.newBuilder(trimmedImageInformation)
                                                         .setExportName(getExportName("trimmedResized",
                                                                                      information.getExportName()))
-                                                        .build(project));
+                                                        .build());
 
         BufferedImage borderImage;
 
@@ -421,9 +384,9 @@ public class ImageUtils {
         return null;
     }
 
-    public static File saveImageTempFile(BufferedImage resizeImageJpg,
+    public static File saveImageTempFile(Project project, BufferedImage resizeImageJpg,
                                          ImageInformation imageInformation) throws IOException {
-        File exportFile = imageInformation.getTempImage();
+        File exportFile = imageInformation.getTempImage(project);
         if (exportFile != null) {
             if (!exportFile.getParentFile().exists()) {
                 FileUtils.forceMkdir(exportFile.getParentFile());

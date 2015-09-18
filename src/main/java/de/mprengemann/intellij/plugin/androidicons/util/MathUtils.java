@@ -17,4 +17,8 @@ public class MathUtils {
     public static boolean floatEquals(float a, float b) {
         return Float.compare(a, b) == 0;
     }
+
+    public static int clamp(int val, int min, int max) {
+        return Math.max(Math.min(val, max), min);
+    }
 }

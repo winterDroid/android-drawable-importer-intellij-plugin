@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.ui;
+package de.mprengemann.intellij.plugin.androidicons.dialogs;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
@@ -16,7 +16,9 @@ import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
-import de.mprengemann.intellij.plugin.androidicons.widgets.ResourceBrowser;
+import de.mprengemann.intellij.plugin.androidicons.widgets.ExportNameField;
+import de.mprengemann.intellij.plugin.androidicons.widgets.FileBrowserField;
+import de.mprengemann.intellij.plugin.androidicons.widgets.ResolutionButtonModel;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -51,8 +53,8 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private JComboBox sourceResolutionSpinner;
     private JFormattedTextField targetWidth;
     private JFormattedTextField targetHeight;
-    private JTextField targetName;
-    private ResourceBrowser targetRoot;
+    private ExportNameField targetName;
+    private FileBrowserField targetRoot;
     private JComboBox algorithmSpinner;
     private JComboBox methodSpinner;
     private IAddItemBatchScaleImporterController controller;
@@ -160,7 +162,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
                 controller.setTargetRoot(file.getAbsolutePath());
             }
         });
-        targetRoot.init(project, module, settingsController);
+        targetRoot.initWithResourceRoot(project, module, settingsController);
     }
 
     private void initAlgorithms() {
@@ -192,10 +194,10 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
 
     private void initExportName() {
         targetName.setText(controller.getExportName());
-        targetName.addKeyListener(new SimpleKeyListener() {
+        targetName.addPropertyChangeListener("value", new PropertyChangeListener() {
             @Override
-            public void keyReleased(KeyEvent keyEvent) {
-                controller.setTargetName(((JTextField) keyEvent.getSource()).getText());
+            public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+                controller.setTargetName((String) targetName.getValue());
             }
         });
     }
@@ -300,8 +302,6 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
-
         NumberFormat format = NumberFormat.getIntegerInstance();
         NumberFormatter numberFormatter = new NumberFormatter(format);
         numberFormatter.setValueClass(Integer.class);
@@ -310,5 +310,6 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
 
         targetHeight = new JFormattedTextField(numberFormatter);
         targetWidth = new JFormattedTextField(numberFormatter);
+        targetRoot = new FileBrowserField(FileBrowserField.RESOURCE_DIR_CHOOSER);
     }
 }

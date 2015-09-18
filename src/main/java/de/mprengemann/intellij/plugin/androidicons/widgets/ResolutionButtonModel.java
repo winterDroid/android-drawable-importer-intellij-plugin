@@ -1,4 +1,4 @@
-package de.mprengemann.intellij.plugin.androidicons.ui;
+package de.mprengemann.intellij.plugin.androidicons.widgets;
 
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 

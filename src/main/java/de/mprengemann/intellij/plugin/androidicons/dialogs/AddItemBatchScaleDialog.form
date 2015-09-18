@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="de.mprengemann.intellij.plugin.androidicons.ui.AddItemBatchScaleDialog">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="de.mprengemann.intellij.plugin.androidicons.dialogs.AddItemBatchScaleDialog">
   <grid id="27dc6" binding="uiContainer" layout-manager="GridLayoutManager" row-count="16" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
@@ -41,7 +41,9 @@
         <constraints>
           <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
-        <properties/>
+        <properties>
+          <editable value="false"/>
+        </properties>
       </component>
       <component id="269fb" class="javax.swing.JLabel">
         <constraints>
@@ -141,18 +143,18 @@
           <text value="Target-Root"/>
         </properties>
       </component>
-      <component id="a4885" class="javax.swing.JTextField" binding="targetName">
+      <component id="5a54a" class="de.mprengemann.intellij.plugin.androidicons.widgets.ExportNameField" binding="targetName">
         <constraints>
           <grid row="11" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
       </component>
-      <component id="3d284" class="de.mprengemann.intellij.plugin.androidicons.widgets.ResourceBrowser" binding="targetRoot">
+      <component id="3d284" class="de.mprengemann.intellij.plugin.androidicons.widgets.FileBrowserField" binding="targetRoot" custom-create="true">
         <constraints>
           <grid row="12" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value=""/>
+          <editable value="false"/>
         </properties>
       </component>
       <component id="ab59f" class="javax.swing.JFormattedTextField" binding="targetWidth" custom-create="true">

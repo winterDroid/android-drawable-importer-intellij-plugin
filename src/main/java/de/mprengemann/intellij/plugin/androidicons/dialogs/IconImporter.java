@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.mprengemann.intellij.plugin.androidicons.ui;
+package de.mprengemann.intellij.plugin.androidicons.dialogs;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
@@ -33,12 +33,12 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicon
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
-import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
-import de.mprengemann.intellij.plugin.androidicons.widgets.ResourceBrowser;
+import de.mprengemann.intellij.plugin.androidicons.widgets.ExportNameField;
+import de.mprengemann.intellij.plugin.androidicons.widgets.FileBrowserField;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +51,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.text.FieldPosition;
 import java.text.Format;
@@ -62,6 +63,7 @@ import java.util.List;
 public class IconImporter extends DialogWrapper implements IconsImporterObserver {
 
     private final Project project;
+    private Module module;
     private final IAndroidIconsController androidIconsController;
     private final IMaterialIconsController materialIconsController;
     private final ISettingsController settingsController;
@@ -74,8 +76,8 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
     private JComboBox sizeSpinner;
 
     private JPanel uiContainer;
-    private ResourceBrowser resRoot;
-    private JTextField resExportName;
+    private FileBrowserField resRoot;
+    private ExportNameField resExportName;
     private JCheckBox LDPICheckBox;
     private JCheckBox MDPICheckBox;
     private JCheckBox HDPICheckBox;
@@ -149,23 +151,16 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 
     public IconImporter(Project project, Module module) {
         super(project, true);
+        this.project = project;
+        this.module = module;
 
         final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
         androidIconsController = container.getControllerFactory().getAndroidIconsController();
         materialIconsController = container.getControllerFactory().getMaterialIconsController();
         settingsController = container.getControllerFactory().getSettingsController();
-
         iconImporterController = new IconsImporterController(androidIconsController, materialIconsController);
-        this.project = project;
 
-        resRoot.setSelectionListener(resRootListener);
-        resRoot.init(project, module, container.getControllerFactory().getSettingsController());
-        resExportName.addKeyListener(new SimpleKeyListener() {
-            @Override
-            public void keyReleased(KeyEvent keyEvent) {
-                iconImporterController.setExportName(((JTextField) keyEvent.getSource()).getText());
-            }
-        });
+        initResRoot();
 
         setTitle("Icon Importer");
         setResizable(false);
@@ -358,6 +353,21 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         updateColors();
         updateImage();
         updateExportName();
+    }
+
+    private void createUIComponents() {
+        resRoot = new FileBrowserField(FileBrowserField.RESOURCE_DIR_CHOOSER);
+    }
+
+    private void initResRoot() {
+        resRoot.setSelectionListener(resRootListener);
+        resRoot.initWithResourceRoot(project, module, settingsController);
+        resExportName.addPropertyChangeListener("value", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+                iconImporterController.setExportName((String) resExportName.getValue());
+            }
+        });
     }
 
     private class AssetSpinnerRenderer extends DefaultListCellRenderer {

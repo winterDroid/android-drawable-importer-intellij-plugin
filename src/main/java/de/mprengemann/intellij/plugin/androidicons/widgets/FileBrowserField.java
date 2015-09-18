@@ -3,6 +3,7 @@ package de.mprengemann.intellij.plugin.androidicons.widgets;
 import com.intellij.openapi.components.PathMacroManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.fileChooser.ex.FileDrop;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
@@ -13,6 +14,7 @@ import com.intellij.util.Consumer;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.dialogs.ResourcesDialog;
 import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
+import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.android.facet.AndroidFacet;
 import org.jetbrains.annotations.NotNull;
@@ -83,6 +85,29 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
                 return path;
             }
         });
+        new FileDrop(getTextField(), new FileDrop.Target() {
+            @Override
+            public FileChooserDescriptor getDescriptor() {
+                return descriptor;
+            }
+
+            @Override
+            public boolean isHiddenShown() {
+                return false;
+            }
+
+            @Override
+            public void dropFiles(final List<VirtualFile> virtualFiles) {
+                if (virtualFiles == null ||
+                    virtualFiles.size() == 0) {
+                    return;
+                }
+                final VirtualFile file = virtualFiles.get(0);
+                final String filePath = file.getCanonicalPath();
+                settingsController.saveLastImageFolder(project, filePath);
+                setText(filePath);
+            }
+        });
     }
 
     public void initWithResourceRoot(Project project, Module module, ISettingsController settings) {
@@ -123,9 +148,10 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
     }
 
     private void notifyListener(String filePath) {
-        if (listener != null) {
-            listener.consume(new File(filePath));
+        if (listener == null || TextUtils.isEmpty(filePath)) {
+            return;
         }
+        listener.consume(new File(filePath));
     }
 
     public void setSelectionListener(Consumer<File> fileConsumer) {

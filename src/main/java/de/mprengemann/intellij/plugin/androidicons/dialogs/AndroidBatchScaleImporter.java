@@ -25,7 +25,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.Consumer;
 import com.intellij.util.ui.UIUtil;
@@ -33,6 +35,9 @@ import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.BatchScaleImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.BatchScaleImporterObserver;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.IBatchScaleImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.AddItemBatchScaleImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.IAddItemBatchScaleImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
@@ -155,17 +160,56 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                     return;
                 }
                 final VirtualFile file = virtualFiles.get(0);
-                if (file.isDirectory()) {
+                if (file == null) {
                     return;
                 }
-                container.getControllerFactory()
-                         .getSettingsController()
-                         .saveLastImageFolder(project, file.getCanonicalPath());
-                AddItemBatchScaleDialog addItemBatchScaleDialog =
-                    new AddItemBatchScaleDialog(project, module, controller, file);
-                addItemBatchScaleDialog.show();
+                if (virtualFiles.size() == 1 && !file.isDirectory()) {
+                    addSingleFile(file);
+                } else {
+                    addMultipleFiles(virtualFiles);
+                }
             }
         });
+    }
+
+    private void addMultipleFiles(List<VirtualFile> virtualFiles) {
+        for (VirtualFile file : virtualFiles) {
+            if (file.isDirectory()) {
+                VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor() {
+                    @Override
+                    public boolean visitFile(@NotNull VirtualFile file) {
+                        addSingleFileImmediately(file);
+                        return true;
+                    }
+                });
+                continue;
+            }
+            addSingleFileImmediately(file);
+        }
+    }
+
+    private void addSingleFileImmediately(VirtualFile file) {
+        // Hack
+        String path = file.getCanonicalPath();
+        if (path == null) {
+            return;
+        }
+        final File realFile = new File(path);
+        final ISettingsController settingsController = container.getControllerFactory().getSettingsController();
+        final VirtualFile root = settingsController.getResRootForProject(project);
+        final IAddItemBatchScaleImporterController addItemController =
+            new AddItemBatchScaleImporterController(root, realFile);
+        controller.addImage(addItemController.getSourceResolution(), addItemController.getImageInformation(project));
+        addItemController.tearDown();
+    }
+
+    private void addSingleFile(VirtualFile file) {
+        container.getControllerFactory()
+                 .getSettingsController()
+                 .saveLastImageFolder(project, file.getCanonicalPath());
+        AddItemBatchScaleDialog addItemBatchScaleDialog =
+            new AddItemBatchScaleDialog(project, module, controller, file);
+        addItemBatchScaleDialog.show();
     }
 
     private void initTable() {

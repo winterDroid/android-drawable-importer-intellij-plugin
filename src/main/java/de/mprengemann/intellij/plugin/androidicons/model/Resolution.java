@@ -19,30 +19,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
-import java.util.Locale;
 
 public enum Resolution {
-    LDPI("ldpi"),
-    MDPI("mdpi"),
-    HDPI("hdpi"),
-    XHDPI("xhdpi"),
-    XXHDPI("xxhdpi"),
-    XXXHDPI("xxxhdpi");
-
-    private String resolution;
-
-    Resolution(String resolution) {
-        this.resolution = resolution;
-    }
-
-    public String getName() {
-        return resolution.toUpperCase(Locale.US);
-    }
-    
-    @Override
-    public String toString() {
-        return resolution;
-    }
+    LDPI,
+    MDPI,
+    HDPI,
+    XHDPI,
+    XXHDPI,
+    XXXHDPI;
 
     public static Resolution from(String value) {
         if (value.equalsIgnoreCase(LDPI.toString())) {

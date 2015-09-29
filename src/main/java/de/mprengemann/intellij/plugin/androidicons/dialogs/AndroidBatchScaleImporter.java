@@ -60,7 +60,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -101,7 +103,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         controller.addObserver(this);
         this.module = module;
 
-        setTitle("Android Scale Importer");
+        setTitle("Batch Drawable Importer");
         setResizable(false);
 
         initButtons(project);
@@ -222,7 +224,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     }
 
     private void initRenderers() {
-        DefaultTableCellRenderer fileCellRenderer = new DefaultTableCellRenderer() {
+        final DefaultTableCellRenderer fileCellRenderer = new DefaultTableCellRenderer() {
             @Override
             protected void setValue(Object o) {
                 File file = (File) o;
@@ -235,18 +237,18 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                 } else {
                     setText(FilenameUtils.removeExtension(file.getName()));
                 }
-
             }
         };
-        fileCellRenderer.setHorizontalTextPosition(DefaultTableCellRenderer.RIGHT);
+        fileCellRenderer.setHorizontalTextPosition(DefaultTableCellRenderer.TRAILING);
         table.setDefaultRenderer(File.class, fileCellRenderer);
-        table.setDefaultRenderer(List.class, new DefaultTableCellRenderer() {
+        table.setDefaultRenderer(ArrayList.class, new DefaultTableCellRenderer() {
             @Override
             protected void setValue(Object o) {
                 if (o == null) {
                     setText("");
                 } else {
-                    List list = (List) o;
+                    ArrayList list = (ArrayList) o;
+                    Collections.sort(list);
                     StringBuilder buffer = new StringBuilder();
                     Iterator iterator = list.iterator();
                     while (iterator.hasNext()) {

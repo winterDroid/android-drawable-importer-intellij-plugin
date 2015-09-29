@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 public class AndroidBatchImportAction extends AnAction {
 
     public AndroidBatchImportAction() {
-        super("Batch Import",
+        super("Batch Drawable Import",
               "Import drawables and scale them to the missing resolutions.",
               AndroidIcons.Android);
     }

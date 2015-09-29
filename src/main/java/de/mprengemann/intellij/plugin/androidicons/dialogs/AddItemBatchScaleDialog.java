@@ -290,7 +290,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
             final Resolution resolution = ((ResolutionButtonModel) checkBox.getModel()).getResolution();
             checkBox.setSelected(resolutions.contains(resolution));
             final int[] sizes = controller.getScaledSize(resolution);
-            checkBox.setText(String.format("%s (%d px x %d px)", resolution.getName(), sizes[0], sizes[1]));
+            checkBox.setText(String.format("%s (%d px x %d px)", resolution, sizes[0], sizes[1]));
         }
     }
 

@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 public class IconsAction extends AnAction {
 
     public IconsAction() {
-        super("Icons Import",
+        super("Icon Pack Drawable Importer",
               "Creates a new Android Asset by the use of Google\'s Material Icons or Android Icons",
               AndroidIcons.Android);
     }

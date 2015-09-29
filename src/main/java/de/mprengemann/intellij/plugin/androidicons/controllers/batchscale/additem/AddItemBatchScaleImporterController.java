@@ -38,23 +38,44 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     public AddItemBatchScaleImporterController(VirtualFile root, File file) {
         this.observers = new HashSet<AddItemBatchScaleDialogObserver>();
         this.targetResolutions = new HashSet<Resolution>(Arrays.asList(Resolution.values()));
-        init(root, file);
+        init(file);
+
+        final String fileName = file.getName();
+        exportName = ExportNameUtils.getExportNameFromFilename(fileName);
+        sourceResolution = Resolution.XHDPI;
+        algorithm = ResizeAlgorithm.SCALR;
+        method = algorithm.getMethods().get(0);
+        exportRoot = root.getCanonicalPath();
+        isNinePatch = fileName.endsWith(".9.png");
     }
 
-    private void init(VirtualFile root, File file) {
+    public AddItemBatchScaleImporterController(Resolution sourceResolution, List<ImageInformation> information) {
+        this.observers = new HashSet<AddItemBatchScaleDialogObserver>();
+        this.targetResolutions = new HashSet<Resolution>();
+        for (ImageInformation imageInformation : information) {
+            targetResolutions.add(imageInformation.getResolution());
+        }
+        final ImageInformation baseinformation = information.get(0);
+        init(baseinformation.getImageFile());
+
+        this.exportName = baseinformation.getExportName();
+        this.sourceResolution = sourceResolution;
+        this.algorithm = baseinformation.getAlgorithm();
+        this.method = algorithm.getPrettyMethod(baseinformation.getMethod());
+        this.exportRoot = baseinformation.getExportPath();
+        this.isNinePatch = baseinformation.isNinePatch();
+
+        this.targetHeight = getOriginalTargetSize(sourceResolution, baseinformation.getResolution(), targetHeight, baseinformation.getFactor());
+        this.targetWidth = getOriginalTargetSize(sourceResolution, baseinformation.getResolution(), targetWidth, baseinformation.getFactor());
+    }
+
+    private void init(File file) {
         try {
             BufferedImage image = ImageIO.read(file);
-            final String fileName = file.getName();
-            exportName = ExportNameUtils.getExportNameFromFilename(fileName);
             imageFile = file;
-            isNinePatch = fileName.endsWith(".9.png");
             originalImageWidth = image.getWidth();
             targetWidth = image.getWidth();
             targetHeight = image.getHeight();
-            sourceResolution = Resolution.XHDPI;
-            algorithm = ResizeAlgorithm.SCALR;
-            method = algorithm.getMethods().get(0);
-            exportRoot = root.getCanonicalPath();
             aspectRatio = (float) image.getHeight() / (float) originalImageWidth;
         } catch (IOException e) {
             e.printStackTrace();
@@ -218,10 +239,16 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         return images;
     }
 
-    private float getRealScaleFactor(Resolution resolution) {
-        final float resolutionScaleFactor = RefactorUtils.getScaleFactor(resolution, sourceResolution);
+    private float getRealScaleFactor(Resolution targetResolution) {
+        final float resolutionScaleFactor = RefactorUtils.getScaleFactor(targetResolution, sourceResolution);
         final float sizeScaleFactor = (float) targetWidth / (float) originalImageWidth;
         return resolutionScaleFactor * sizeScaleFactor;
+    }
+
+    private int getOriginalTargetSize(Resolution sourceResolution, Resolution targetResolution, int size, float factor) {
+        final float resolutionScaleFactor = RefactorUtils.getScaleFactor(targetResolution, sourceResolution);
+        final float sizeScaleFactor = factor / resolutionScaleFactor;
+        return (int) (sizeScaleFactor * size);
     }
 
     @Override

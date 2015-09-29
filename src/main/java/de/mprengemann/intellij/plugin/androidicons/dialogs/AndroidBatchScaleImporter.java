@@ -23,14 +23,21 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.Consumer;
+import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.BatchScaleImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.BatchScaleImporterObserver;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.IBatchScaleImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.AddItemBatchScaleImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.IAddItemBatchScaleImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
@@ -53,7 +60,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -82,6 +91,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     private JLabel imageContainer;
     private JButton addButton;
     private JButton deleteButton;
+    private JButton editButton;
     private ImageTableModel tableModel;
     private final BatchScaleImporterController controller;
 
@@ -93,7 +103,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         controller.addObserver(this);
         this.module = module;
 
-        setTitle("Android Scale Importer");
+        setTitle("Batch Drawable Importer");
         setResizable(false);
 
         initButtons(project);
@@ -125,6 +135,12 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                 controller.removeImage(table.getSelectedRow());
             }
         });
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                controller.editImage(project, module, table.getSelectedRow());
+            }
+        });
     }
 
     private void initDragDrop() {
@@ -146,17 +162,56 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                     return;
                 }
                 final VirtualFile file = virtualFiles.get(0);
-                if (file.isDirectory()) {
+                if (file == null) {
                     return;
                 }
-                container.getControllerFactory()
-                         .getSettingsController()
-                         .saveLastImageFolder(project, file.getCanonicalPath());
-                AddItemBatchScaleDialog addItemBatchScaleDialog =
-                    new AddItemBatchScaleDialog(project, module, controller, file);
-                addItemBatchScaleDialog.show();
+                if (virtualFiles.size() == 1 && !file.isDirectory()) {
+                    addSingleFile(file);
+                } else {
+                    addMultipleFiles(virtualFiles);
+                }
             }
         });
+    }
+
+    private void addMultipleFiles(List<VirtualFile> virtualFiles) {
+        for (VirtualFile file : virtualFiles) {
+            if (file.isDirectory()) {
+                VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor() {
+                    @Override
+                    public boolean visitFile(@NotNull VirtualFile file) {
+                        addSingleFileImmediately(file);
+                        return true;
+                    }
+                });
+                continue;
+            }
+            addSingleFileImmediately(file);
+        }
+    }
+
+    private void addSingleFileImmediately(VirtualFile file) {
+        // Hack
+        String path = file.getCanonicalPath();
+        if (path == null) {
+            return;
+        }
+        final File realFile = new File(path);
+        final ISettingsController settingsController = container.getControllerFactory().getSettingsController();
+        final VirtualFile root = settingsController.getResRootForProject(project);
+        final IAddItemBatchScaleImporterController addItemController =
+            new AddItemBatchScaleImporterController(root, realFile);
+        controller.addImage(addItemController.getSourceResolution(), addItemController.getImageInformation(project));
+        addItemController.tearDown();
+    }
+
+    private void addSingleFile(VirtualFile file) {
+        container.getControllerFactory()
+                 .getSettingsController()
+                 .saveLastImageFolder(project, file.getCanonicalPath());
+        AddItemBatchScaleDialog addItemBatchScaleDialog =
+            new AddItemBatchScaleDialog(project, module, controller, file);
+        addItemBatchScaleDialog.show();
     }
 
     private void initTable() {
@@ -169,7 +224,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     }
 
     private void initRenderers() {
-        DefaultTableCellRenderer fileCellRenderer = new DefaultTableCellRenderer() {
+        final DefaultTableCellRenderer fileCellRenderer = new DefaultTableCellRenderer() {
             @Override
             protected void setValue(Object o) {
                 File file = (File) o;
@@ -182,18 +237,18 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                 } else {
                     setText(FilenameUtils.removeExtension(file.getName()));
                 }
-
             }
         };
-        fileCellRenderer.setHorizontalTextPosition(DefaultTableCellRenderer.RIGHT);
+        fileCellRenderer.setHorizontalTextPosition(DefaultTableCellRenderer.TRAILING);
         table.setDefaultRenderer(File.class, fileCellRenderer);
-        table.setDefaultRenderer(List.class, new DefaultTableCellRenderer() {
+        table.setDefaultRenderer(ArrayList.class, new DefaultTableCellRenderer() {
             @Override
             protected void setValue(Object o) {
                 if (o == null) {
                     setText("");
                 } else {
-                    List list = (List) o;
+                    ArrayList list = (ArrayList) o;
+                    Collections.sort(list);
                     StringBuilder buffer = new StringBuilder();
                     Iterator iterator = list.iterator();
                     while (iterator.hasNext()) {
@@ -298,6 +353,16 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                 return c;
             }
         };
+        addButton = new JButton(getIcon("ic_action_add"));
+        editButton = new JButton(getIcon("ic_action_edit"));
+        deleteButton = new JButton(getIcon("ic_action_trash"));
+    }
+
+    @NotNull
+    private Icon getIcon(String name) {
+        boolean isDarkTheme = UIUtil.isUnderDarcula();
+        final String asset = String.format("/icons/%s%s.png", name, isDarkTheme ? "_dark" : "");
+        return IconLoader.getIcon(asset);
     }
 
     @Override

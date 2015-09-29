@@ -162,7 +162,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 
         initResRoot();
 
-        setTitle("Icon Importer");
+        setTitle("Icon Pack Drawable Importer");
         setResizable(false);
         getHelpAction().setEnabled(true);
 

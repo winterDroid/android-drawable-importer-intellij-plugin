@@ -14,6 +14,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.addite
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.widgets.ExportNameField;
@@ -128,23 +129,25 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         }
 
         final File realFile = new File(path);
-        init(realFile);
+        initController(realFile);
+        initInternal();
     }
 
     public AddItemBatchScaleDialog(final Project project,
                                    final Module module,
                                    final BatchScaleImporterController batchScaleImporterController,
-                                   final File file) {
+                                   final Resolution sourceResolution,
+                                   final List<ImageInformation> information) {
         super(project);
         this.project = project;
         this.module = module;
         this.batchScaleController = batchScaleImporterController;
 
-        init(file);
+        initController(sourceResolution, information);
+        initInternal();
     }
 
-    private void init(File realFile) {
-        initController(realFile);
+    private void initInternal() {
         initTargetRoot();
         initCheckBoxes();
         initExportName();
@@ -209,6 +212,12 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         controller = new AddItemBatchScaleImporterController(root, file);
     }
 
+    private void initController(Resolution sourceResolution, List<ImageInformation> information) {
+        final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
+        settingsController = container.getControllerFactory().getSettingsController();
+        controller = new AddItemBatchScaleImporterController(sourceResolution, information);
+    }
+
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
@@ -217,7 +226,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
 
     @Override
     protected void doOKAction() {
-        batchScaleController.addImage(controller.getImageInformation(project));
+        batchScaleController.addImage(controller.getSourceResolution(), controller.getImageInformation(project));
         super.doOKAction();
     }
 

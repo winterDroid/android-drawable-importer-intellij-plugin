@@ -69,6 +69,30 @@ public enum ResizeAlgorithm {
         throw new IllegalArgumentException("Method doesn't exist: " + method);
     }
 
+    public String getPrettyMethod(Object method) {
+        switch (this) {
+            case SCALR:
+                Scalr.Method scalrMethod = (Scalr.Method) method;
+                switch (scalrMethod) {
+                    case AUTOMATIC:
+                        return "Automatic";
+                    case SPEED:
+                        return "Speed";
+                    case BALANCED:
+                        return "Balanced";
+                    case QUALITY:
+                        return "Quality";
+                    case ULTRA_QUALITY:
+                        return "Ultra Quality";
+                    default:
+                        return null;
+                }
+            case THUMBNAILATOR:
+            default:
+                return "Default";
+        }
+    }
+
     @Override
     public String toString() {
         return name;

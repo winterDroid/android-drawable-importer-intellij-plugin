@@ -1,6 +1,8 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.batchscale;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import de.mprengemann.intellij.plugin.androidicons.dialogs.AddItemBatchScaleDialog;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -16,12 +18,22 @@ public class BatchScaleImporterController implements IBatchScaleImporterControll
 
     private Set<BatchScaleImporterObserver> observers;
     private Map<String, List<ImageInformation>> images;
+    private Map<String, Resolution> sourceResolutions;
     private List<String> sourceFiles;
 
     public BatchScaleImporterController() {
         this.observers = new HashSet<BatchScaleImporterObserver>();
         this.images = new HashMap<String, List<ImageInformation>>();
-        this.sourceFiles = new ArrayList<String>();
+        this.sourceResolutions = new HashMap<String, Resolution>();
+        this.sourceFiles = new ArrayList<String>() {
+            @Override
+            public boolean add(String s) {
+                if (contains(s)) {
+                    return false;
+                }
+                return super.add(s);
+            }
+        };
         notifyUpdated();
     }
 
@@ -42,7 +54,7 @@ public class BatchScaleImporterController implements IBatchScaleImporterControll
     }
 
     @Override
-    public void addImage(List<ImageInformation> imageInformation) {
+    public void addImage(Resolution sourceResolution, List<ImageInformation> imageInformation) {
         if (imageInformation == null ||
             imageInformation.size() == 0) {
             return;
@@ -50,7 +62,26 @@ public class BatchScaleImporterController implements IBatchScaleImporterControll
         final String sourcePath = imageInformation.get(0).getImageFile().getAbsolutePath();
         images.put(sourcePath, imageInformation);
         sourceFiles.add(sourcePath);
+        sourceResolutions.put(sourcePath, sourceResolution);
         notifyUpdated();
+    }
+
+    @Override
+    public void editImage(Project project, Module module, int index) {
+        if (index >= sourceFiles.size() ||
+            0 > index) {
+            return;
+        }
+        final String sourceFile = sourceFiles.get(index);
+        final List<ImageInformation> imageInformations = images.get(sourceFile);
+
+        AddItemBatchScaleDialog addItemBatchScaleDialog =
+            new AddItemBatchScaleDialog(project,
+                                        module,
+                                        this,
+                                        sourceResolutions.get(sourceFile),
+                                        imageInformations);
+        addItemBatchScaleDialog.show();
     }
 
     @Override
@@ -70,6 +101,7 @@ public class BatchScaleImporterController implements IBatchScaleImporterControll
         }
         images.remove(sourcePath);
         sourceFiles.remove(sourcePath);
+        sourceResolutions.remove(sourcePath);
         notifyUpdated();
     }
 

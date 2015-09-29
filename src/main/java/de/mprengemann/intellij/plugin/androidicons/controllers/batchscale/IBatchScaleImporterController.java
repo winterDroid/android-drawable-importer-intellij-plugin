@@ -1,5 +1,6 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.batchscale;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
@@ -10,7 +11,9 @@ import java.util.List;
 
 public interface IBatchScaleImporterController extends IController<BatchScaleImporterObserver> {
 
-    void addImage(List<ImageInformation> imageInformation);
+    void addImage(Resolution sourceResolution, List<ImageInformation> imageInformation);
+
+    void editImage(Project project, Module module, int index);
 
     void removeImage(int index);
 

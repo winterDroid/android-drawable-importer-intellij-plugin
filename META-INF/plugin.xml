@@ -23,7 +23,7 @@
         All the missing folders will be created automatically. If there are already drawables with the same name, you will be warned.<br>
         Currently Material Icons 2.0 is not supported, but it will be added soon.<br>
         <br>
-        <b>2. Scaled Drawable</b><br>
+        <b>2. Batch Import</b><br>
         Select at least one asset and specify the resolution of it. If you want to scale the to be imported image as well, you should select "other" and then fill out the "target resolution" and the "target width / height". Then you can specify all the resolutions, to which the drawable should be resized to.<br>
         This works also with 9-Patch-Images. But take care: sometimes it's necessary to remove / add about one "pixel" in the 9-Patch-Editor. But just try it :)<br>
         <br>
@@ -79,8 +79,8 @@
             <separator />
             <action id="de.mprengemann.intellij.plugin.androidicons.actions.IconsAction"
                     class="de.mprengemann.intellij.plugin.androidicons.actions.IconsAction" />
-            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction"
-                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidScaleAction" />
+            <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidBatchImportAction"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidBatchImportAction" />
             <action id="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableImporter"
                     class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidMultiDrawableAction" />
             <separator />

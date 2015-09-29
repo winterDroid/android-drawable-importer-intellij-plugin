@@ -23,11 +23,11 @@ import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import icons.AndroidIcons;
 import org.jetbrains.annotations.NotNull;
 
-public class AndroidScaleAction extends AnAction {
+public class AndroidBatchImportAction extends AnAction {
 
-    public AndroidScaleAction() {
-        super("Scaled Drawable",
-              "Imports a drawable and scales it to the missing resolutions.",
+    public AndroidBatchImportAction() {
+        super("Batch Import",
+              "Import drawables and scale them to the missing resolutions.",
               AndroidIcons.Android);
     }
 

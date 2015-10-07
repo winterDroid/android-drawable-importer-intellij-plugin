@@ -316,6 +316,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         numberFormatter.setValueClass(Integer.class);
         numberFormatter.setAllowsInvalid(false);
         numberFormatter.setMinimum(1);
+        numberFormatter.setCommitsOnValidEdit(true);
 
         targetHeight = new JFormattedTextField(numberFormatter);
         targetWidth = new JFormattedTextField(numberFormatter);

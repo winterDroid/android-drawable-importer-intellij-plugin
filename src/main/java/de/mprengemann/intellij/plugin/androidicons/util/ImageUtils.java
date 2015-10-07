@@ -39,7 +39,8 @@ public class ImageUtils {
     public static final String TARGET_FILE_PATTERN = "%s/drawable-%s/%s.png";
 
     public static void updateImage(JLabel imageContainer, File imageFile) {
-        if (!imageFile.exists()) {
+        if (imageFile == null ||
+            !imageFile.exists()) {
             return;
         }
         BufferedImage img = null;
@@ -399,7 +400,7 @@ public class ImageUtils {
     }
 
     public static File getTargetFile(String path, Resolution resolution, String exportName) {
-        return new File(String.format(TARGET_FILE_PATTERN, path, resolution.toString(), exportName));
+        return new File(String.format(TARGET_FILE_PATTERN, path, resolution.toString().toLowerCase(), exportName));
     }
 
     public static File getTargetFile(ImageInformation information) {

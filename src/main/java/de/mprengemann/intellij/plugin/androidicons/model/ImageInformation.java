@@ -60,7 +60,7 @@ public class ImageInformation {
     }
 
     public File getTempImage(String tmpDirRoot) {
-        return new File(tmpDirRoot, TMP_ROOT_DIR + "/" + resolution.toString() + "/" + exportName);
+        return new File(tmpDirRoot, TMP_ROOT_DIR + "/" + resolution.toString().toLowerCase() + "/" + exportName);
     }
 
     public File getTempImage(File tmpDirRoot) {

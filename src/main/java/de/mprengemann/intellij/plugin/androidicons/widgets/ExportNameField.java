@@ -48,6 +48,9 @@ public class ExportNameField extends JFormattedTextField {
         public RegexFormatter(String pattern) throws PatternSyntaxException {
             super();
             setPattern(Pattern.compile(pattern));
+            setOverwriteMode(false);
+            setCommitsOnValidEdit(true);
+            setAllowsInvalid(false);
         }
 
         public void setPattern(Pattern pattern) {

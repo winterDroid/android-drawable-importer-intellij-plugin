@@ -47,7 +47,7 @@
         <properties>
           <editable value="false"/>
           <enabled value="false"/>
-          <horizontalAlignment value="4"/>
+          <horizontalAlignment value="2"/>
         </properties>
       </component>
       <component id="269fb" class="javax.swing.JLabel">

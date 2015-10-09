@@ -1,5 +1,7 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.intellij.ide.BrowserUtil;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
@@ -7,7 +9,6 @@ import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.resources.ResourceLoader;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +24,12 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     private HashMap<String, List<ImageAsset>> initCategoryMap(IconPack iconPack) {
-        final HashMap<String, List<ImageAsset>> categoryMap = new HashMap<String, List<ImageAsset>>();
+        final HashMap<String, List<ImageAsset>> categoryMap = Maps.newHashMap();
+        if (iconPack == null) {
+            return categoryMap;
+        }
         for (String category : iconPack.getCategories()) {
-            categoryMap.put(category, new ArrayList<ImageAsset>());
+            categoryMap.put(category, Lists.<ImageAsset>newArrayList());
         }
         for (ImageAsset asset : iconPack.getAssets()) {
             categoryMap.get(asset.getCategory()).add(asset);

@@ -45,7 +45,11 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         sourceResolution = Resolution.XHDPI;
         algorithm = ResizeAlgorithm.SCALR;
         method = algorithm.getMethods().get(0);
-        exportRoot = root.getCanonicalPath();
+        if (root != null) {
+            exportRoot = root.getCanonicalPath();
+        } else {
+            exportRoot = "";
+        }
         isNinePatch = fileName.endsWith(".9.png");
     }
 

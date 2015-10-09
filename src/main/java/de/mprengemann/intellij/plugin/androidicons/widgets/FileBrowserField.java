@@ -128,10 +128,6 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
 
     private void getResRootFile(Project project, Module module, ResourcesDialog.ResourceSelectionListener listener) {
         final AndroidFacet currentFacet = AndroidFacetUtils.getCurrentFacet(project, module);
-        if (currentFacet == null) {
-            return;
-        }
-
         final List<VirtualFile> allResourceDirectories = currentFacet.getAllResourceDirectories();
         if (allResourceDirectories.size() == 1) {
             listener.onResourceSelected(allResourceDirectories.get(0));

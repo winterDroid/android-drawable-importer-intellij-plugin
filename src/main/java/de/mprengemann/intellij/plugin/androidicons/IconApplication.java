@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.intellij.openapi.components.ApplicationComponent;
+import com.intellij.openapi.diagnostic.Logger;
 import de.mprengemann.intellij.plugin.androidicons.controllers.DefaultControllerFactory;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IControllerFactory;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
@@ -19,6 +20,8 @@ import java.util.List;
 
 public class IconApplication implements ApplicationComponent {
 
+    private static final String TAG = IconApplication.class.getSimpleName();
+    private static final Logger LOGGER = Logger.getInstance(TAG);
     private IControllerFactory controllerFactory;
 
     @NotNull
@@ -41,7 +44,7 @@ public class IconApplication implements ApplicationComponent {
             androidIcons = iconPacks.get(0);
             materialIcons = iconPacks.get(1);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e);
         }
 
         controllerFactory = new DefaultControllerFactory(androidIcons, materialIcons);

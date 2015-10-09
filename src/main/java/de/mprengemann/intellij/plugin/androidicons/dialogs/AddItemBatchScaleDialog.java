@@ -129,7 +129,9 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         }
 
         final File realFile = new File(path);
+        initSettingsController();
         initController(realFile);
+        initTargetRoot();
         initInternal();
     }
 
@@ -142,13 +144,13 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         this.project = project;
         this.module = module;
         this.batchScaleController = batchScaleImporterController;
-
+        initSettingsController();
         initController(sourceResolution, information);
+        initTargetRoot();
         initInternal();
     }
 
     private void initInternal() {
-        initTargetRoot();
         initCheckBoxes();
         initExportName();
         initExportRoot();
@@ -159,13 +161,13 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     }
 
     private void initTargetRoot() {
+        targetRoot.initWithResourceRoot(project, module, settingsController);
         targetRoot.setSelectionListener(new Consumer<File>() {
             @Override
             public void consume(File file) {
                 controller.setTargetRoot(file.getAbsolutePath());
             }
         });
-        targetRoot.initWithResourceRoot(project, module, settingsController);
     }
 
     private void initAlgorithms() {
@@ -206,15 +208,16 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     }
 
     private void initController(File file) {
-        final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
-        settingsController = container.getControllerFactory().getSettingsController();
         final VirtualFile root = settingsController.getResRootForProject(project);
         controller = new AddItemBatchScaleImporterController(root, file);
     }
 
-    private void initController(Resolution sourceResolution, List<ImageInformation> information) {
+    private void initSettingsController() {
         final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
         settingsController = container.getControllerFactory().getSettingsController();
+    }
+
+    private void initController(Resolution sourceResolution, List<ImageInformation> information) {
         controller = new AddItemBatchScaleImporterController(sourceResolution, information);
     }
 

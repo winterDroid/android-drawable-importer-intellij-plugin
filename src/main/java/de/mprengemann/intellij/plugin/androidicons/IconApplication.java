@@ -43,6 +43,8 @@ public class IconApplication implements ApplicationComponent {
 
             androidIcons = iconPacks.get(0);
             materialIcons = iconPacks.get(1);
+
+            CacheMana
         } catch (Exception e) {
             LOGGER.error(e);
         }

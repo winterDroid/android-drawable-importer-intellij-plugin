@@ -26,7 +26,8 @@ public enum Resolution {
     HDPI,
     XHDPI,
     XXHDPI,
-    XXXHDPI;
+    XXXHDPI,
+    TVDPI;
 
     public static Resolution from(String value) {
         if (value.equalsIgnoreCase(LDPI.toString())) {
@@ -41,6 +42,8 @@ public enum Resolution {
             return XXHDPI;
         } else if (value.equalsIgnoreCase(XXXHDPI.toString())) {
             return XXXHDPI;
+        } else if (value.equalsIgnoreCase(TVDPI.toString())) {
+            return TVDPI;
         }
         return null;
     }

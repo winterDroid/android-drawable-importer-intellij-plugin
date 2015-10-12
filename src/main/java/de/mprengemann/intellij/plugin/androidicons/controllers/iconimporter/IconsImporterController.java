@@ -254,8 +254,8 @@ public class IconsImporterController implements IIconsImporterController {
                     selectedImageFile = getSelectedImageFile(Resolution.XXHDPI);
                     imageInformationBuilder.setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.XXHDPI));
                 } else if (getSelectedIconPack().getId().equals("material_icons")) {
-                    selectedImageFile = getSelectedImageFile(Resolution.MDPI);
-                    imageInformationBuilder.setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.MDPI));
+                    selectedImageFile = getSelectedImageFile(Resolution.HDPI);
+                    imageInformationBuilder.setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.HDPI));
                 } else {
                     throw new IllegalStateException();
                 }

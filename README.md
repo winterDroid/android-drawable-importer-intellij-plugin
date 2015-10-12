@@ -2,7 +2,7 @@
 
 ![alt text](src/main/resources/images/menu.png "New menu")
 
-This plugin consists of 4 main features. You can access them by **right-clicking** anywhere, but **not** on a file, inside an **Android (library) module** under **New**.
+This plugin consists of three main features. You can access them by **right-clicking** anywhere, but **not** on a file, inside an **Android (library) module** under **New**.
 
 ## AndroidIcons and Material Icons Drawable Import
 You are able to select the asset, specify your color, change the target resource name and select all the resolutions you want to import.  

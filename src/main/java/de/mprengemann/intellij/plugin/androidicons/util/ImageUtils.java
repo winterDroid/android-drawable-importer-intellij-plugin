@@ -14,7 +14,6 @@
 package de.mprengemann.intellij.plugin.androidicons.util;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.UIUtil;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -92,7 +91,7 @@ public class ImageUtils {
         return dScale;
     }
 
-    public static BufferedImage resizeNormalImage(Project project, ImageInformation information) throws IOException {
+    public static BufferedImage resizeNormalImage(ImageInformation information) throws IOException {
         BufferedImage image = ImageIO.read(information.getImageFile());
         return resizeNormalImage(image, information);
     }
@@ -124,8 +123,7 @@ public class ImageUtils {
         return resizedImage;
     }
 
-    public static BufferedImage resizeNinePatchImage(Project project,
-                                                     ImageInformation information) throws IOException {
+    public static BufferedImage resizeNinePatchImage(ImageInformation information) throws IOException {
         BufferedImage image = ImageIO.read(information.getImageFile());
         if (MathUtils.floatEquals(information.getFactor(), 1f)) {
             return image;
@@ -136,9 +134,9 @@ public class ImageUtils {
                                                                    .setExportName(getExportName("trimmed",
                                                                                                 information.getExportName()))
                                                                    .build();
-        saveImageTempFile(project, trimmedImage, trimmedImageInformation);
+        saveImageTempFile(trimmedImage, trimmedImageInformation);
         trimmedImage = resizeNormalImage(trimmedImage, trimmedImageInformation);
-        saveImageTempFile(project, trimmedImage, ImageInformation.newBuilder(trimmedImageInformation)
+        saveImageTempFile(trimmedImage, ImageInformation.newBuilder(trimmedImageInformation)
                                                         .setExportName(getExportName("trimmedResized",
                                                                                      information.getExportName()))
                                                         .build());
@@ -385,9 +383,9 @@ public class ImageUtils {
         return null;
     }
 
-    public static File saveImageTempFile(Project project, BufferedImage resizeImageJpg,
+    public static File saveImageTempFile(BufferedImage resizeImageJpg,
                                          ImageInformation imageInformation) throws IOException {
-        File exportFile = imageInformation.getTempImage(project);
+        File exportFile = imageInformation.getTempImage();
         if (exportFile != null) {
             if (!exportFile.getParentFile().exists()) {
                 FileUtils.forceMkdir(exportFile.getParentFile());

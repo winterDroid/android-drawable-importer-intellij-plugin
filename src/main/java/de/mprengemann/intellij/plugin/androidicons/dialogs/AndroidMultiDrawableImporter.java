@@ -56,6 +56,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
     private JLabel imageContainer;
     private ExportNameField resExportName;
     private JPanel uiContainer;
+    private FileBrowserField tvdpiFile;
     private final ISettingsController settingsController;
 
     public AndroidMultiDrawableImporter(final Project project, final Module module) {
@@ -75,6 +76,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
         initBrowser(Resolution.XHDPI, xhdpiFile);
         initBrowser(Resolution.XXHDPI, xxhdpiFile);
         initBrowser(Resolution.XXXHDPI, xxxhdpiFile);
+        initBrowser(Resolution.TVDPI, tvdpiFile);
 
         setTitle("Android Multi Drawable Importer");
         setResizable(false);
@@ -179,5 +181,6 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
         xhdpiFile = new FileBrowserField(FileBrowserField.IMAGE_FILE_CHOOSER);
         xxhdpiFile = new FileBrowserField(FileBrowserField.IMAGE_FILE_CHOOSER);
         xxxhdpiFile = new FileBrowserField(FileBrowserField.IMAGE_FILE_CHOOSER);
+        tvdpiFile = new FileBrowserField(FileBrowserField.IMAGE_FILE_CHOOSER);
     }
 }

@@ -86,6 +86,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
     private JCheckBox XXXHDPICheckBox;
     private JComboBox iconPackSpinner;
     private JComboBox searchField;
+    private JCheckBox TVDPICheckBox;
     private final ActionListener iconPackActionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -183,6 +184,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         initCheckBox(Resolution.XHDPI, XHDPICheckBox);
         initCheckBox(Resolution.XXHDPI, XXHDPICheckBox);
         initCheckBox(Resolution.XXXHDPI, XXXHDPICheckBox);
+        initCheckBox(Resolution.TVDPI, TVDPICheckBox);
         initSearch();
 
         iconImporterController.addObserver(this);

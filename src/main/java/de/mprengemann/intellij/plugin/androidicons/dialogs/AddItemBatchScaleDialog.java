@@ -58,6 +58,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private FileBrowserField targetRoot;
     private JComboBox algorithmSpinner;
     private JComboBox methodSpinner;
+    private JCheckBox TVDPICheckBox;
     private IAddItemBatchScaleImporterController controller;
     private final ActionListener sourceResolutionListener = new ActionListener() {
         @Override
@@ -185,6 +186,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         XHDPICheckBox.setModel(new ResolutionButtonModel(Resolution.XHDPI));
         XXHDPICheckBox.setModel(new ResolutionButtonModel(Resolution.XXHDPI));
         XXXHDPICheckBox.setModel(new ResolutionButtonModel(Resolution.XXXHDPI));
+        TVDPICheckBox.setModel(new ResolutionButtonModel(Resolution.TVDPI));
     }
 
     private void initExportRoot() {
@@ -288,7 +290,8 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
                                                 HDPICheckBox,
                                                 XHDPICheckBox,
                                                 XXHDPICheckBox,
-                                                XXXHDPICheckBox)) {
+                                                XXXHDPICheckBox,
+                                                TVDPICheckBox)) {
             checkBox.addActionListener(resolutionActionListener);
             final Resolution resolution = ((ResolutionButtonModel) checkBox.getModel()).getResolution();
             checkBox.setSelected(resolutions.contains(resolution));

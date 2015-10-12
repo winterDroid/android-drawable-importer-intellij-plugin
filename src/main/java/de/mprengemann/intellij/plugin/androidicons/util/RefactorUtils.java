@@ -33,6 +33,8 @@ public class RefactorUtils {
                         return 3f;
                     case XXXHDPI:
                         return 4f;
+                    case TVDPI:
+                        return 4f / 3f;
                 }
                 break;
             case LDPI:
@@ -49,6 +51,8 @@ public class RefactorUtils {
                         return 2f * 3f;
                     case XXXHDPI:
                         return 2f * 4f;
+                    case TVDPI:
+                        return 2f * 4f / 3f;
                 }
                 break;
             case HDPI:
@@ -65,6 +69,8 @@ public class RefactorUtils {
                         return 2f / 3f * 3f;
                     case XXXHDPI:
                         return 2f / 3f * 4f;
+                    case TVDPI:
+                        return 2f / 3f * 4f / 3f;
                 }
                 break;
             case XHDPI:
@@ -81,6 +87,8 @@ public class RefactorUtils {
                         return 1f / 2f * 3f;
                     case XXXHDPI:
                         return 1f / 2f * 4f;
+                    case TVDPI:
+                        return 1f / 2f * 4f / 3f;
                 }
                 break;
             case XXHDPI:
@@ -97,6 +105,8 @@ public class RefactorUtils {
                         return 1f / 3f * 3f;
                     case XXXHDPI:
                         return 1f / 3f * 4f;
+                    case TVDPI:
+                        return 1f / 3f * 4f / 3f;
                 }
                 break;
             case XXXHDPI:
@@ -113,8 +123,27 @@ public class RefactorUtils {
                         return 1f / 4f * 3f;
                     case XXXHDPI:
                         return 1f / 4f * 4f;
+                    case TVDPI:
+                        return 1f / 4f * 4f / 3f;
                 }
                 break;
+            case TVDPI:
+                switch (target) {
+                    case LDPI:
+                        return 3f / 4f * 0.5f;
+                    case MDPI:
+                        return 3f / 4f * 1f;
+                    case HDPI:
+                        return 3f / 4f * 1.5f;
+                    case XHDPI:
+                        return 3f / 4f * 2f;
+                    case XXHDPI:
+                        return 3f / 4f * 3f;
+                    case XXXHDPI:
+                        return 3f / 4f * 4f;
+                    case TVDPI:
+                        return 3f / 4f * 4f / 3f;
+                }
         }
         throw new IllegalArgumentException();
     }

@@ -59,7 +59,7 @@ public class RefactoringTask extends Task.Backgroundable {
         for (int i = 0; i < imageInformationList.size(); i++) {
             ImageInformation information = imageInformationList.get(i);
             indicator.checkCanceled();
-            exportTempImage(project, information);
+            exportTempImage(information);
             indicator.setFraction((float) (i + 1) / (float) imageInformationList.size());
         }
 
@@ -200,16 +200,11 @@ public class RefactoringTask extends Task.Backgroundable {
                       final List<File> sources,
                       final List<File> targets) throws IOException {
         copy(project, description, sources, targets);
-        VirtualFile workspaceFile = project.getWorkspaceFile();
-        assert workspaceFile != null;
-        final String path = workspaceFile.getParent().getCanonicalPath();
-        assert path != null;
-        final File tmpDirRoot = new File(path, ImageInformation.TMP_ROOT_DIR);
         RunnableUtils.runWriteCommand(project, new Runnable() {
             @Override
             public void run() {
                 try {
-                    FileUtils.forceDelete(tmpDirRoot);
+                    FileUtils.forceDelete(ImageInformation.getTempDir());
                 } catch (IOException ignored) {
                 }
             }
@@ -217,14 +212,11 @@ public class RefactoringTask extends Task.Backgroundable {
     }
 
     private void move(Project project, List<ImageInformation> scalingInformationList) throws IOException {
-        final VirtualFile workspaceFile = project.getWorkspaceFile();
-        assert workspaceFile != null;
-        final String tmpDirRoot = workspaceFile.getParent().getCanonicalPath();
         List<File> tempFiles = new ArrayList<File>();
         List<File> targets = new ArrayList<File>();
 
         for (ImageInformation information : scalingInformationList) {
-            tempFiles.add(information.getTempImage(tmpDirRoot));
+            tempFiles.add(information.getTempImage());
             targets.add(information.getTargetFile());
         }
 
@@ -233,15 +225,15 @@ public class RefactoringTask extends Task.Backgroundable {
         move(project, description, tempFiles, targets);
     }
 
-    private void exportTempImage(Project project, ImageInformation information) {
+    private void exportTempImage(ImageInformation information) {
         try {
             BufferedImage resizeImageJpg;
             if (information.isNinePatch()) {
-                resizeImageJpg = ImageUtils.resizeNinePatchImage(project, information);
+                resizeImageJpg = ImageUtils.resizeNinePatchImage(information);
             } else {
-                resizeImageJpg = ImageUtils.resizeNormalImage(project, information);
+                resizeImageJpg = ImageUtils.resizeNormalImage(information);
             }
-            ImageUtils.saveImageTempFile(project, resizeImageJpg, information);
+            ImageUtils.saveImageTempFile(resizeImageJpg, information);
 
         } catch (Exception ignored) {
         }

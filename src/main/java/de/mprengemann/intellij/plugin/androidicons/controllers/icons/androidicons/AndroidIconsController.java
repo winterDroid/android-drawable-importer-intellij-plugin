@@ -57,7 +57,7 @@ public class AndroidIconsController implements IAndroidIconsController {
                                                color,
                                                resolution.toString().toLowerCase(),
                                                asset.getName());
-        return ResourceLoader.getFile(new File(iconPack.getPath(), localPath).getPath());
+        return ResourceLoader.getAssetResource(new File(iconPack.getPath(), localPath).getPath());
     }
 
     @Override

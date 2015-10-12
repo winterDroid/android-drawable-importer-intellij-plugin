@@ -13,8 +13,7 @@
 
 package de.mprengemann.intellij.plugin.androidicons.model;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.application.PathManager;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import org.imgscalr.Scalr;
@@ -59,18 +58,12 @@ public class ImageInformation {
         return new Builder(imageInformation);
     }
 
-    public File getTempImage(String tmpDirRoot) {
-        return new File(tmpDirRoot, TMP_ROOT_DIR + "/" + resolution.toString().toLowerCase() + "/" + exportName);
+    public static File getTempDir() {
+        return new File(PathManager.getPluginTempPath(), TMP_ROOT_DIR);
     }
 
-    public File getTempImage(File tmpDirRoot) {
-        return getTempImage(tmpDirRoot.getAbsolutePath());
-    }
-
-    public File getTempImage(Project project) {
-        VirtualFile workspaceFile = project.getWorkspaceFile();
-        assert workspaceFile != null;
-        return getTempImage(workspaceFile.getParent().getCanonicalPath());
+    public File getTempImage() {
+        return new File(getTempDir(), String.format("%s/%s", resolution.toString().toLowerCase(), exportName));
     }
 
     public File getTargetFile() {

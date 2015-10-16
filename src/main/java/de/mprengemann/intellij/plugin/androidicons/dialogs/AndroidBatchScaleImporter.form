@@ -6,9 +6,9 @@
       <xy x="20" y="20" width="1200" height="450"/>
     </constraints>
     <properties>
-      <maximumSize width="1200" height="450"/>
+      <maximumSize width="-1" height="-1"/>
       <minimumSize width="1200" height="450"/>
-      <preferredSize width="1200" height="450"/>
+      <preferredSize width="-1" height="-1"/>
     </properties>
     <border type="none"/>
     <children>
@@ -67,10 +67,7 @@
       </grid>
       <component id="bbccf" class="javax.swing.JLabel" binding="imageContainer">
         <constraints>
-          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="0" anchor="0" fill="2" indent="0" use-parent-layout="false">
-            <preferred-size width="200" height="-1"/>
-            <maximum-size width="200" height="-1"/>
-          </grid>
+          <grid row="1" column="3" row-span="11" col-span="1" vsize-policy="6" hsize-policy="0" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <alignmentX value="0.5"/>

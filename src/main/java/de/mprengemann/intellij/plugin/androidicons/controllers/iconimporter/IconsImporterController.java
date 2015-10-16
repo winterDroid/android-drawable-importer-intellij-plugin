@@ -182,7 +182,7 @@ public class IconsImporterController implements IIconsImporterController {
 
     @Override
     public File getSelectedImageFile() {
-        return getSelectedImageFile(Resolution.XXHDPI);
+        return getSelectedImageFile(Resolution.HDPI);
     }
 
     @Override

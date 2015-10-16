@@ -14,7 +14,7 @@
 <idea-plugin version="2">
     <id>de.mprengemann.intellij.plugin.androidicons</id>
     <name>Android Drawable Importer</name>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
     <vendor email="marcprengemann@gmail.com" url="https://plus.google.com/+MarcPrengemann">Marc Prengemann</vendor>
     <description><![CDATA[
         This plugin consists of three main features. You can access them by a right-click anywhere, but <b>not on a file</b>, inside an Android module under New.<br><br>
@@ -44,7 +44,8 @@
       - Merged Android Icons and Material Icons importers<br>
       - Bundled icon packs to prevent own download and to get rid of the settings<br>
       - Show actions on library modules<br>
-      - Add TVDPI as suitable export density
+      - Add TVDPI as suitable export density<br>
+      - Fix for Windows where the bundled resources couldn't be loaded
     ]]>
     </change-notes>
 

@@ -79,8 +79,9 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
         initBrowser(Resolution.TVDPI, tvdpiFile);
 
         setTitle("Android Multi Drawable Importer");
-        setResizable(false);
         init();
+        pack();
+        setResizable(false);
     }
 
     @Nullable

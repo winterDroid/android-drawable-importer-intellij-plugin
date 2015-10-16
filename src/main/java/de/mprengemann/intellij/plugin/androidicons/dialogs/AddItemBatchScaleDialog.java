@@ -157,6 +157,8 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         initExportRoot();
         initAlgorithms();
         init();
+        pack();
+        setResizable(false);
 
         controller.addObserver(this);
     }

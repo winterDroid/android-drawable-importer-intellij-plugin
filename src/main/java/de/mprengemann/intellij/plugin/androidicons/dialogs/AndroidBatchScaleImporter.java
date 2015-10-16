@@ -104,12 +104,13 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         this.module = module;
 
         setTitle("Batch Drawable Importer");
-        setResizable(false);
 
         initButtons(project);
         initDragDrop();
         initTable();
         init();
+        pack();
+        setResizable(false);
     }
 
     private void initButtons(final Project project) {

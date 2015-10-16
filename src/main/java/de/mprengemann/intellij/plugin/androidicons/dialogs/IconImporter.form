@@ -3,11 +3,11 @@
   <grid id="27dc6" binding="uiContainer" layout-manager="GridLayoutManager" row-count="24" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="650" height="590"/>
+      <xy x="20" y="20" width="650" height="450"/>
     </constraints>
     <properties>
       <minimumSize width="650" height="450"/>
-      <preferredSize width="650" height="450"/>
+      <preferredSize width="-1" height="-1"/>
     </properties>
     <border type="none"/>
     <children>

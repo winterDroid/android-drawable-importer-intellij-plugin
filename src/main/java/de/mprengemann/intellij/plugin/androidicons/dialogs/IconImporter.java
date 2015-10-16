@@ -164,7 +164,6 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         initResRoot();
 
         setTitle("Icon Pack Drawable Importer");
-        setResizable(false);
         getHelpAction().setEnabled(true);
 
         AssetSpinnerRenderer renderer = new AssetSpinnerRenderer();
@@ -189,6 +188,8 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
 
         iconImporterController.addObserver(this);
         init();
+        pack();
+        setResizable(false);
     }
 
     private void initSearch() {

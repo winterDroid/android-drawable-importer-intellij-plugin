@@ -39,6 +39,6 @@ public class ResourceLoader {
 
     @NotNull
     private static String getAssetPath(String file) {
-        return new File("/assets", file).getAbsolutePath();
+        return String.format("/assets/%s", file);
     }
 }

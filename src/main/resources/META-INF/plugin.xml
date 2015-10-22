@@ -14,7 +14,6 @@
 <idea-plugin version="2">
     <id>de.mprengemann.intellij.plugin.androidicons</id>
     <name>Android Drawable Importer</name>
-    <version>0.3.2</version>
     <vendor email="marcprengemann@gmail.com" url="https://plus.google.com/+MarcPrengemann">Marc Prengemann</vendor>
     <description><![CDATA[
         This plugin consists of three main features. You can access them by a right-click anywhere, but <b>not on a file</b>, inside an Android module under New.<br><br>

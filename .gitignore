@@ -63,6 +63,7 @@ hs_err_pid*
 
 ### Specific ###
 *.zip
+!icon_packs.zip
 !libs/*
 
 ### Maven ###

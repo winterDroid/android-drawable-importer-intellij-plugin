@@ -76,11 +76,17 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                                                                                     false,
                                                                                     false) {
         public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
-            return file.getFileType() == imageFileType;
+            if (file.isDirectory()) {
+                return super.isFileVisible(file, showHiddenFiles);
+            }
+            return file.getFileType().equals(imageFileType);
         }
 
         public boolean isFileSelectable(VirtualFile file) {
-            return super.isFileSelectable(file) && file.getFileType() == imageFileType;
+            if (file.isDirectory()) {
+                return super.isFileSelectable(file);
+            }
+            return super.isFileSelectable(file) && file.getFileType().equals(imageFileType);
         }
     };
     private final Project project;
@@ -120,12 +126,11 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                 FileChooser.chooseFile(imageDescriptor, project, getInitialFile(), new Consumer<VirtualFile>() {
                     @Override
                     public void consume(final VirtualFile file) {
-                        container.getControllerFactory()
-                                 .getSettingsController()
-                                 .saveLastImageFolder(project, file.getCanonicalPath());
-                        AddItemBatchScaleDialog addItemBatchScaleDialog =
-                            new AddItemBatchScaleDialog(project, module, controller, file);
-                        addItemBatchScaleDialog.show();
+                        if (!file.isDirectory()) {
+                            addSingleFile(file);
+                        } else {
+                            addMultipleFiles(Arrays.asList(file));
+                        }
                     }
                 });
             }
@@ -176,12 +181,15 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     }
 
     private void addMultipleFiles(List<VirtualFile> virtualFiles) {
-        for (VirtualFile file : virtualFiles) {
+        for (final VirtualFile file : virtualFiles) {
             if (file.isDirectory()) {
                 VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor() {
                     @Override
-                    public boolean visitFile(@NotNull VirtualFile file) {
-                        addSingleFileImmediately(file);
+                    public boolean visitFile(@NotNull VirtualFile child) {
+                        if (file.equals(child)) {
+                            return true;
+                        }
+                        addMultipleFiles(Arrays.asList(child));
                         return true;
                     }
                 });
@@ -192,6 +200,9 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     }
 
     private void addSingleFileImmediately(VirtualFile file) {
+        if (!file.getFileType().equals(imageFileType)) {
+            return;
+        }
         // Hack
         String path = file.getCanonicalPath();
         if (path == null) {

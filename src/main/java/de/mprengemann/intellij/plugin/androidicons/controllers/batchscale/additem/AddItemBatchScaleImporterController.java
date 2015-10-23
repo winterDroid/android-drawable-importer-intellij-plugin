@@ -1,6 +1,7 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem;
 
 import com.google.common.base.Objects;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
@@ -12,7 +13,6 @@ import de.mprengemann.intellij.plugin.androidicons.util.RefactorUtils;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,6 +21,7 @@ import java.util.Set;
 
 public class AddItemBatchScaleImporterController implements IAddItemBatchScaleImporterController {
 
+    private static final Logger LOGGER = Logger.getInstance(AddItemBatchScaleImporterController.class);
     private Set<AddItemBatchScaleDialogObserver> observers;
     private Set<Resolution> targetResolutions;
     private Resolution sourceResolution;
@@ -75,14 +76,15 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
 
     private void init(File file) {
         try {
+            LOGGER.info(String.format("Adding file %s", file));
             BufferedImage image = ImageIO.read(file);
             imageFile = file;
             originalImageWidth = image.getWidth();
             targetWidth = image.getWidth();
             targetHeight = image.getHeight();
             aspectRatio = (float) image.getHeight() / (float) originalImageWidth;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.error(e);
         }
     }
 

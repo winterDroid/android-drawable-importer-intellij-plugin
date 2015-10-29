@@ -7,7 +7,7 @@ notifications:
 branches:
   only:
     - master
-    - developg
+    - develop
 
 before_script:
   - if [ $TRAVIS_BRANCH == 'development' ]; then export PLUGIN_CHANNEL=nightly; fi

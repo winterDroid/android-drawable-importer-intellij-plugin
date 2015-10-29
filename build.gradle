@@ -15,7 +15,7 @@ intellij {
 }
 
 group 'de.mprengemann.intellij.plugin.androidicons'
-version '0.4'
+version '0.3.3'
 
 repositories {
     mavenCentral()

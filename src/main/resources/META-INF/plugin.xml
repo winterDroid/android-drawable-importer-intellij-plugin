@@ -44,7 +44,8 @@
       - Bundled icon packs to prevent own download and to get rid of the settings<br>
       - Show actions on library modules<br>
       - Add TVDPI as suitable export density<br>
-      - Fix for Windows where the bundled resources couldn't be loaded
+      - Fix for Windows where the bundled resources couldn't be loaded<br>
+      - Fix for image asset selection in batch importer on Windows
     ]]>
     </change-notes>
 

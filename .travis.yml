@@ -10,7 +10,7 @@ branches:
     - develop
 
 before_script:
-  - if [ $TRAVIS_BRANCH == 'development' ]; then export PLUGIN_CHANNEL=nightly; fi
+  - if [ $TRAVIS_BRANCH == 'develop' ]; then export PLUGIN_CHANNEL=nightly; fi
 
 script:
 - ./gradlew buildPlugin

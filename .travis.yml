@@ -1,0 +1,17 @@
+language: java
+sudo: false
+
+notifications:
+  email: false
+
+branches:
+  only:
+    - master
+    - development
+
+before_script:
+  - if [ $TRAVIS_BRANCH == 'development' ]; then export PLUGIN_CHANNEL=nightly; fi
+
+script:
+- ./gradlew buildPlugin
+- if [ $TRAVIS_PULL_REQUEST == 'false' ]; then ./gradlew publishPlugin; fi

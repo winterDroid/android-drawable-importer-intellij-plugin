@@ -87,6 +87,8 @@ Afterwards click on the *Close* button. If IntelliJ asks you to restart, allow i
 
 # Contribution
 
+[![Build Status](https://travis-ci.org/winterDroid/android-drawable-importer-intellij-plugin.svg)](https://travis-ci.org/winterDroid/android-drawable-importer-intellij-plugin)
+
 1. Fork it
 2. Checkout develop branch
   `git checkout develop && git pull`

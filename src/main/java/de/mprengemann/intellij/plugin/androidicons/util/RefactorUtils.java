@@ -22,7 +22,7 @@ public class RefactorUtils {
             case MDPI:
                 switch (target) {
                     case LDPI:
-                        return 0.5f;
+                        return 0.75f;
                     case MDPI:
                         return 1f;
                     case HDPI:
@@ -40,7 +40,7 @@ public class RefactorUtils {
             case LDPI:
                 switch (target) {
                     case LDPI:
-                        return 2f * 0.5f;
+                        return 2f * 0.75f;
                     case MDPI:
                         return 2f * 1f;
                     case HDPI:
@@ -58,7 +58,7 @@ public class RefactorUtils {
             case HDPI:
                 switch (target) {
                     case LDPI:
-                        return 2f / 3f * 0.5f;
+                        return 2f / 3f * 0.75f;
                     case MDPI:
                         return 2f / 3f * 1f;
                     case HDPI:
@@ -76,7 +76,7 @@ public class RefactorUtils {
             case XHDPI:
                 switch (target) {
                     case LDPI:
-                        return 1f / 2f * 0.5f;
+                        return 1f / 2f * 0.75f;
                     case MDPI:
                         return 1f / 2f * 1f;
                     case HDPI:
@@ -94,7 +94,7 @@ public class RefactorUtils {
             case XXHDPI:
                 switch (target) {
                     case LDPI:
-                        return 1f / 3f * 0.5f;
+                        return 1f / 3f * 0.75f;
                     case MDPI:
                         return 1f / 3f * 1f;
                     case HDPI:
@@ -112,7 +112,7 @@ public class RefactorUtils {
             case XXXHDPI:
                 switch (target) {
                     case LDPI:
-                        return 1f / 4f * 0.5f;
+                        return 1f / 4f * 0.75f;
                     case MDPI:
                         return 1f / 4f * 1f;
                     case HDPI:
@@ -130,7 +130,7 @@ public class RefactorUtils {
             case TVDPI:
                 switch (target) {
                     case LDPI:
-                        return 3f / 4f * 0.5f;
+                        return 3f / 4f * 0.75f;
                     case MDPI:
                         return 3f / 4f * 1f;
                     case HDPI:

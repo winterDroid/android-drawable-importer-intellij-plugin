@@ -5,6 +5,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -37,8 +38,13 @@ public class ResourceLoader {
         }
     }
 
+    public static InputStream getBundledResourceStream(String file) {
+        return rl.getClass().getResourceAsStream(getAssetPath(file));
+    }
+
     @NotNull
     private static String getAssetPath(String file) {
         return String.format("/assets/%s", file);
     }
+
 }

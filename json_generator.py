@@ -4,9 +4,53 @@ import io
 from itertools import izip, islice
 from os.path import join
 
+from PIL import Image
+
+
 root = 'src/main/resources/assets/'
 android_icons_url = 'http://www.androidicons.com/'
 material_icons_url = 'https://www.google.com/design/icons/'
+
+def convert_image(file):
+    pil_img = Image.open(file)
+    if pil_img.mode == '1':
+        img = Image.open(file)
+        img = img.convert('RGBA')
+        datas = img.getdata()
+        newData = []
+        for item in datas:
+            if item[0] == 0 and item[1] == 0 and item[2] == 0:
+                newData.append((0, 0, 0, 0))
+            else:
+                newData.append(item)
+
+        img.putdata(newData)
+        img.save(file)
+
+def convert_images():
+    iconpack_root = join(root, 'android_icons')
+    for color in list_dirs_only(iconpack_root):
+        color_root = join(iconpack_root, color)
+        for resolution in list_dirs_only(color_root):
+            resolution_root = join(color_root, resolution)
+            for image in list_images(resolution_root):
+                convert_image(join(resolution_root, image))
+
+    iconpack_root = join(root, 'material_icons')
+    for category in list_dirs_only(iconpack_root):
+        category_root = join(iconpack_root, category)
+        for resolution in list_dirs_only(category_root):
+            resolution_root = join(category_root, resolution)
+            for image in list_images(resolution_root):
+                convert_image(join(resolution_root, image))
+
+
+def get_android_icons_file(color, resolution, name):
+    iconpack_root = join(root, 'android_icons')
+    color_root = join(iconpack_root, color)
+    resolution_root = join(color_root, resolution)
+    full_name = name + '.png'
+    return join(resolution_root, full_name)
 
 
 def handle_android_icons():
@@ -24,7 +68,8 @@ def handle_android_icons():
                 }
     assetdata = []
     for asset in assets:
-        data = {'name': os.path.splitext(asset)[0],
+        name = os.path.splitext(asset)[0]
+        data = {'name': name,
                 'pack': id,
                 'category': 'all',
                 'resolutions': resolutions,
@@ -38,6 +83,7 @@ def handle_android_icons():
 
 def list_dirs_only(dir):
     return [f for f in os.listdir(dir) if os.path.isdir(join(dir, f))]
+
 
 def list_images(dir):
     return [f for f in os.listdir(dir) if f.endswith('.png')]
@@ -54,6 +100,14 @@ def extract_data(icon_file_name):
     return name, color, size
 
 
+def get_material_icons_file(category, color, size, resolution, name):
+    iconpack_root = join(root, 'material_icons')
+    category_root = join(iconpack_root, category)
+    resolution_root = join(category_root, 'drawable-' + resolution)
+    full_name = "_".join([name, color, size]) + '.png'
+    return join(resolution_root, full_name)
+
+
 def handle_material_icons():
     iconpack_root = join(root, 'material_icons')
     categories = list_dirs_only(iconpack_root)
@@ -62,7 +116,7 @@ def handle_material_icons():
                 'id': id,
                 'url': material_icons_url,
                 'path': 'material_icons/',
-                'categories':categories
+                'categories': categories
                 }
     assetdata = []
     for category in categories:
@@ -90,6 +144,7 @@ def handle_material_icons():
     return packdata
 
 
+convert_images()
 android_icons_data = handle_android_icons()
 material_icons_data = handle_material_icons()
 packs = [android_icons_data, material_icons_data]

@@ -52,13 +52,18 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
     }
 
     private void initFileChooser() {
-        addBrowseFolderListener(descriptor.getTitle(), null, project, descriptor);
         addBrowseFolderListener(new TextBrowseFolderListener(descriptor) {
             @Override
             @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
                 setText(chosenFile.getCanonicalPath());
+            }
+
+            @Nullable
+            @Override
+            protected Project getProject() {
+                return project;
             }
 
             @Nullable

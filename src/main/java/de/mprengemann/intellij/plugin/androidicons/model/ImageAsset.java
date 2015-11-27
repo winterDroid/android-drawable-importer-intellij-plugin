@@ -1,8 +1,10 @@
 package de.mprengemann.intellij.plugin.androidicons.model;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
-public class ImageAsset {
+public class ImageAsset implements Comparable<ImageAsset> {
 
     private final String name;
     private final String pack;
@@ -47,5 +49,15 @@ public class ImageAsset {
 
     public List<String> getSizes() {
         return sizes;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
+    public int compareTo(@NotNull ImageAsset o) {
+        return getName().compareTo(o.getName());
     }
 }

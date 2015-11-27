@@ -13,10 +13,6 @@
 
 package de.mprengemann.intellij.plugin.androidicons.dialogs;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressManager;
@@ -24,7 +20,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.SystemInfo;
+import com.intellij.ui.ComboboxSpeedSearch;
+import com.intellij.ui.JBColor;
+import com.intellij.ui.LayeredIcon;
+import com.intellij.ui.ListCellRendererWrapper;
 import com.intellij.util.Consumer;
+import com.intellij.util.ui.EmptyIcon;
 import de.mprengemann.intellij.plugin.androidicons.IconApplication;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IconsImporterController;
@@ -54,9 +55,6 @@ import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.text.FieldPosition;
-import java.text.Format;
-import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,9 +137,9 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
             iconImporterController.setExportRoot(path);
         }
     };
-    private final ActionListener searchFieldListener = new ActionListener() {
+    private final ItemListener searchFieldListener = new ItemListener() {
         @Override
-        public void actionPerformed(ActionEvent event) {
+        public void itemStateChanged(ItemEvent e) {
             final ImageAsset selectedItem = (ImageAsset) searchField.getSelectedItem();
             if (selectedItem == null) {
                 return;
@@ -149,6 +147,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
             iconImporterController.setSelectedAsset(selectedItem);
         }
     };
+    private ComboboxSpeedSearch comboboxSpeedSearch;
 
     public IconImporter(Project project, Module module) {
         super(project, true);
@@ -193,21 +192,20 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
     }
 
     private void initSearch() {
-        final List<ImageAsset> assetList = new ArrayList<ImageAsset>();
-        assetList.addAll(androidIconsController.getAssets(androidIconsController.getCategories()));
-        assetList.addAll(materialIconsController.getAssets(materialIconsController.getCategories()));
-
-        final TextFilterator<ImageAsset> textFilterator = GlazedLists.textFilterator(ImageAsset.class, "name");
-        final EventList<ImageAsset> assets = GlazedLists.eventList(assetList);
-        final AssetFormat format = new AssetFormat();
-        final AutoCompleteSupport support = AutoCompleteSupport.install(searchField, assets, textFilterator, format);
-        support.setStrict(true);
-        support.setHidesPopupOnFocusLost(true);
-        support.setBeepOnStrictViolation(true);
-        support.setCorrectsCase(true);
-        //noinspection GtkPreferredJComboBoxRenderer
+        final List<ImageAsset> imageAssets = new ArrayList<ImageAsset>();
+        imageAssets.addAll(androidIconsController.getAssets(androidIconsController.getCategories()));
+        imageAssets.addAll(materialIconsController.getAssets(materialIconsController.getCategories()));
+        for (ImageAsset imageAsset : imageAssets) {
+            searchField.addItem(imageAsset);
+        }
         searchField.setRenderer(new AssetSpinnerRenderer());
-        searchField.addActionListener(searchFieldListener);
+        comboboxSpeedSearch = new ComboboxSpeedSearch(searchField) {
+            @Override
+            protected String getElementText(Object element) {
+                return element instanceof ImageAsset ? ((ImageAsset) element).getName() : "";
+            }
+        };
+        searchField.addItemListener(searchFieldListener);
     }
 
     private void initCheckBox(final Resolution resolution, final JCheckBox checkBox) {
@@ -287,9 +285,9 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
     }
 
     private void updateSearch() {
-        searchField.removeActionListener(searchFieldListener);
+        searchField.removeItemListener(searchFieldListener);
         searchField.setSelectedItem(iconImporterController.getSelectedAsset());
-        searchField.addActionListener(searchFieldListener);
+        searchField.addItemListener(searchFieldListener);
     }
 
     private void updateImage() {
@@ -373,35 +371,46 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         });
     }
 
-    private class AssetSpinnerRenderer extends DefaultListCellRenderer {
+//    private class AssetSpinnerRenderer extends DefaultListCellRenderer {
+//        @Override
+//        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+//            ImageAsset asset = (ImageAsset) value;
+//            JLabel label = (JLabel) super.getListCellRendererComponent(list, asset.getName(), index, isSelected, cellHasFocus);
+//            if (label == null ||
+//                iconImporterController == null) {
+//                return label;
+//            }
+//            File imageFile = iconImporterController.getThumbnailFile(asset);
+//            if (imageFile != null && imageFile.exists()) {
+//                label.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
+//            }
+//            return label;
+//        }
+//    }
+
+    private class AssetSpinnerRenderer extends ListCellRendererWrapper<ImageAsset> {
+        private final Icon EMPTY_ICON = EmptyIcon.ICON_18;
+
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            ImageAsset asset = (ImageAsset) value;
-            JLabel label = (JLabel) super.getListCellRendererComponent(list, asset.getName(), index, isSelected, cellHasFocus);
-            if (label == null ||
-                iconImporterController == null) {
-                return label;
+        public void customize(JList list, ImageAsset imageAsset, int index, boolean selected, boolean hasFocus) {
+            LayeredIcon layeredIcon = new LayeredIcon(2);
+            if (iconImporterController == null) {
+                return;
             }
-            File imageFile = iconImporterController.getThumbnailFile(asset);
+            File imageFile = iconImporterController.getThumbnailFile(imageAsset);
             if (imageFile != null && imageFile.exists()) {
-                label.setIcon(new ImageIcon(imageFile.getAbsolutePath()));
+                final ImageIcon icon = new ImageIcon(imageFile.getAbsolutePath());
+                layeredIcon.setIcon(icon, 1, (- icon.getIconWidth() + EMPTY_ICON.getIconWidth())/2, (EMPTY_ICON.getIconHeight() - icon.getIconHeight())/2);
             }
-            return label;
-        }
-    }
-
-    private class AssetFormat extends Format {
-        @Override
-        public StringBuffer format(Object obj, @NotNull StringBuffer toAppendTo, @NotNull FieldPosition pos) {
-            if (obj != null) {
-                toAppendTo.append(((ImageAsset) obj).getName());
+            setIcon(layeredIcon);
+            final String searchQuery = comboboxSpeedSearch.getEnteredPrefix();
+            if (searchQuery != null &&
+                searchQuery.trim().length() > 0 &&
+                imageAsset.getName().contains(searchQuery)) {
+                setBackground(JBColor.YELLOW);
+            } else {
+                setBackground(null);
             }
-            return toAppendTo;
-        }
-
-        @Override
-        public Object parseObject(String s, @NotNull ParsePosition parsePosition) {
-            return null;
         }
     }
 }

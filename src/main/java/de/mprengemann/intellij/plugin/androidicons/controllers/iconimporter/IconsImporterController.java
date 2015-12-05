@@ -2,6 +2,7 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter;
 
 import com.intellij.openapi.project.Project;
 import com.jgoodies.common.base.Objects;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.IIconPackController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
@@ -30,19 +31,27 @@ public class IconsImporterController implements IIconsImporterController {
     private String exportName;
     private String exportRoot;
 
-    public IconsImporterController(IAndroidIconsController androidIconsController,
+    public IconsImporterController(IDefaultsController defaultsController,
+                                   IAndroidIconsController androidIconsController,
                                    IMaterialIconsController materialIconsController) {
         this.androidIconsController = androidIconsController;
         this.materialIconsController = materialIconsController;
         this.observerSet = new HashSet<IconsImporterObserver>();
 
-        final String category = androidIconsController.getCategories().get(0);
-        this.selectedAsset = androidIconsController.getAssets(category).get(0);
-        this.selectedSize = selectedAsset.getSizes().get(0);
-        this.selectedColor = selectedAsset.getColors().get(0);
+        final ImageAsset defaultImageAsset = defaultsController.getImageAsset();
+        if (defaultImageAsset == null) {
+            final String category = androidIconsController.getCategories().get(0);
+            this.selectedAsset = androidIconsController.getAssets(category).get(0);
+            this.selectedSize = selectedAsset.getSizes().get(0);
+            this.selectedColor = selectedAsset.getColors().get(0);
+        } else {
+            this.selectedAsset = defaultImageAsset;
+            this.selectedSize = defaultsController.getSize();
+            this.selectedColor = defaultsController.getColor();
+        }
 
         this.exportName = null;
-        this.exportResolutions = new HashSet<Resolution>();
+        this.exportResolutions = defaultsController.getResolutions();
     }
 
     @Override
@@ -273,6 +282,11 @@ public class IconsImporterController implements IIconsImporterController {
         } else if (!exportResolutions.contains(resolution) && export) {
             exportResolutions.add(resolution);
         }
+    }
+
+    @Override
+    public Set<Resolution> getExportResolutions() {
+        return exportResolutions;
     }
 
     private void notifyUpdated() {

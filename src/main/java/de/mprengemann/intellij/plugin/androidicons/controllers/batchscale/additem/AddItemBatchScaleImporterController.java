@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -14,7 +15,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,16 +36,18 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     private float aspectRatio;
     private boolean isNinePatch;
 
-    public AddItemBatchScaleImporterController(VirtualFile root, File file) {
+    public AddItemBatchScaleImporterController(IDefaultsController defaultsController,
+                                               VirtualFile root,
+                                               File file) {
         this.observers = new HashSet<AddItemBatchScaleDialogObserver>();
-        this.targetResolutions = new HashSet<Resolution>(Arrays.asList(Resolution.values()));
+        this.targetResolutions = defaultsController.getResolutions();
         init(file);
 
         final String fileName = file.getName();
         exportName = ExportNameUtils.getExportNameFromFilename(fileName);
-        sourceResolution = Resolution.XHDPI;
-        algorithm = ResizeAlgorithm.SCALR;
-        method = algorithm.getMethods().get(0);
+        sourceResolution = defaultsController.getSourceResolution();
+        algorithm = defaultsController.getAlgorithm();
+        method = defaultsController.getMethod();
         if (root != null) {
             exportRoot = root.getCanonicalPath();
         } else {
@@ -54,7 +56,8 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         isNinePatch = fileName.endsWith(".9.png");
     }
 
-    public AddItemBatchScaleImporterController(Resolution sourceResolution, List<ImageInformation> information) {
+    public AddItemBatchScaleImporterController(Resolution sourceResolution,
+                                               List<ImageInformation> information) {
         this.observers = new HashSet<AddItemBatchScaleDialogObserver>();
         this.targetResolutions = new HashSet<Resolution>();
         for (ImageInformation imageInformation : information) {

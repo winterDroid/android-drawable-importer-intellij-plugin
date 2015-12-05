@@ -9,6 +9,7 @@ import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 public interface IIconsImporterController extends IController<IconsImporterObserver>{
     void setExportRoot(String exportRoot);
@@ -59,4 +60,5 @@ public interface IIconsImporterController extends IController<IconsImporterObser
 
     void setExportResolution(Resolution resolution, boolean export);
 
+    Set<Resolution> getExportResolutions();
 }

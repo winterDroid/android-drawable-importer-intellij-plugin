@@ -212,7 +212,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         final File realFile = new File(path);
         final ISettingsController settingsController = container.getControllerFactory().getSettingsController();
         final IDefaultsController defaultsController = container.getControllerFactory().getDefaultsController();
-        final VirtualFile root = settingsController.getResRootForProject(project);
+        final VirtualFile root = settingsController.getResourceRoot();
         final IAddItemBatchScaleImporterController addItemController =
             new AddItemBatchScaleImporterController(defaultsController, root, realFile);
         controller.addImage(addItemController.getSourceResolution(), addItemController.getImageInformation(project));
@@ -222,7 +222,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     private void addSingleFile(VirtualFile file) {
         container.getControllerFactory()
                  .getSettingsController()
-                 .saveLastImageFolder(project, file.getCanonicalPath());
+                 .saveLastImageFolder(file.getCanonicalPath());
         AddItemBatchScaleDialog addItemBatchScaleDialog =
             new AddItemBatchScaleDialog(project, module, controller, file);
         addItemBatchScaleDialog.show();
@@ -322,7 +322,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     }
 
     protected VirtualFile getInitialFile() {
-        String directoryName = container.getControllerFactory().getSettingsController().getLastImageFolder(project);
+        String directoryName = container.getControllerFactory().getSettingsController().getLastImageFolder();
         VirtualFile path;
         String expandPath = expandPath(directoryName);
         if (expandPath == null) {

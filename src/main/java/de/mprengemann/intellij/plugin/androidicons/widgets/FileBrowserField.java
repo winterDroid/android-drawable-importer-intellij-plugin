@@ -73,7 +73,7 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
                 if (path != null || settingsController == null) {
                     return path;
                 }
-                String directoryName = settingsController.getLastImageFolder(project);
+                String directoryName = settingsController.getLastImageFolder();
                 String expandPath = PathMacroManager.getInstance(project).expandPath(directoryName);
                 if (expandPath == null) {
                     return null;
@@ -109,7 +109,7 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
                 }
                 final VirtualFile file = virtualFiles.get(0);
                 final String filePath = file.getCanonicalPath();
-                settingsController.saveLastImageFolder(project, filePath);
+                settingsController.saveLastImageFolder(filePath);
                 setText(filePath);
             }
         });
@@ -117,7 +117,7 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
 
     public void initWithResourceRoot(Project project, Module module, ISettingsController settings) {
         init(project, settings);
-        final VirtualFile resourceDir = settingsController.getResRootForProject(this.project);
+        final VirtualFile resourceDir = settingsController.getResourceRoot();
         if (resourceDir == null) {
             final ResourcesDialog.ResourceSelectionListener listener = new ResourcesDialog.ResourceSelectionListener() {
                 @Override

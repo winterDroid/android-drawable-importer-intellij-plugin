@@ -13,6 +13,7 @@ public class SettingsController implements ISettingsController {
     private static final String RES_ROOT = "resourcesRoot";
     private static final String LAST_FOLDER_ROOT = "lastFolderRoot";
     private Set<SettingsObserver> observerSet;
+    private Project project;
 
     public SettingsController() {
         observerSet = new HashSet<SettingsObserver>();
@@ -29,14 +30,14 @@ public class SettingsController implements ISettingsController {
     }
 
     @Override
-    public void saveResRootForProject(Project project, String fileUrl) {
+    public void saveResRootForProject(String fileUrl) {
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
         propertiesComponent.setValue(RES_ROOT, fileUrl);
     }
 
     @Override
-    public VirtualFile getResRootForProject(Project project) {
-        String persistedFile = getResRootStringForProject(project);
+    public VirtualFile getResourceRoot() {
+        String persistedFile = getResourceRootPath();
         if (persistedFile != null) {
             return VirtualFileManager.getInstance().findFileByUrl(persistedFile);
         } else {
@@ -45,25 +46,31 @@ public class SettingsController implements ISettingsController {
     }
 
     @Override
-    public String getResRootStringForProject(Project project) {
+    public String getResourceRootPath() {
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
         return propertiesComponent.getValue(RES_ROOT);
     }
 
     @Override
-    public String getLastImageFolder(Project project) {
+    public String getLastImageFolder() {
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
         return propertiesComponent.getValue(LAST_FOLDER_ROOT);
     }
 
     @Override
-    public void saveLastImageFolder(Project project, String fileUrl) {
+    public void saveLastImageFolder(String fileUrl) {
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
         propertiesComponent.setValue(LAST_FOLDER_ROOT, fileUrl);
     }
 
     @Override
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    @Override
     public void tearDown() {
+        project = null;
         observerSet.clear();
         observerSet = null;
     }

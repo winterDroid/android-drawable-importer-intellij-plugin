@@ -1,5 +1,6 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers;
 
+import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.DefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.IIconsImporterController;
@@ -23,6 +24,11 @@ public class DefaultControllerFactory implements IControllerFactory {
                                     IconPack materialIcons) {
             androidIconsController = new AndroidIconsController(androidIcons);
             materialIconsController = new MaterialIconsController(materialIcons);
+    }
+
+    @Override
+    public void setProject(Project project) {
+        getSettingsController().setProject(project);
     }
 
     @Override

@@ -340,8 +340,8 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         defaultsController.setSize(iconImporterController.getSelectedSize());
         defaultsController.setResolutions(iconImporterController.getExportResolutions());
         super.doOKAction();
-        settingsController.saveResRootForProject(project,
-                                                 "file://" + iconImporterController.getExportRoot());
+        settingsController.saveResRootForProject(
+            "file://" + iconImporterController.getExportRoot());
     }
 
     private void importIcons() {

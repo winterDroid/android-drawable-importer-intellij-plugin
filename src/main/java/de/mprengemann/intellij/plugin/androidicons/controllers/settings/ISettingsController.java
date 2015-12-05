@@ -5,13 +5,15 @@ import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 
 public interface ISettingsController extends IController<SettingsObserver> {
-    void saveResRootForProject(Project project, String fileUrl);
+    void saveResRootForProject(String fileUrl);
 
-    VirtualFile getResRootForProject(Project project);
+    VirtualFile getResourceRoot();
 
-    String getResRootStringForProject(Project project);
+    String getResourceRootPath();
 
-    String getLastImageFolder(Project project);
+    String getLastImageFolder();
 
-    void saveLastImageFolder(Project project, String fileUrl);
+    void saveLastImageFolder(String fileUrl);
+
+    void setProject(Project project);
 }

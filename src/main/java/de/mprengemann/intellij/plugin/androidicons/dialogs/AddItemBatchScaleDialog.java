@@ -212,7 +212,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     }
 
     private void initController(File file) {
-        final VirtualFile root = settingsController.getResRootForProject(project);
+        final VirtualFile root = settingsController.getResourceRoot();
         controller = new AddItemBatchScaleImporterController(defaultsController, root, file);
     }
 

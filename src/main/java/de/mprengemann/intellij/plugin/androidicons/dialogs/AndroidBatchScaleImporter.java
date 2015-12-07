@@ -75,7 +75,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
                                                                                     false,
                                                                                     false,
                                                                                     false,
-                                                                                    false) {
+                                                                                    true) {
         public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
             if (file.isDirectory()) {
                 return super.isFileVisible(file, showHiddenFiles);
@@ -101,13 +101,31 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     private JButton editButton;
     private ImageTableModel tableModel;
     private final BatchScaleImporterController controller;
+    private final Consumer<List<VirtualFile>> fileChooserConsumer = new Consumer<List<VirtualFile>>() {
+        @Override
+        public void consume(final List<VirtualFile> virtualFiles) {
+            if (virtualFiles == null ||
+                virtualFiles.size() == 0) {
+                return;
+            }
+            final VirtualFile file = virtualFiles.get(0);
+            if (file == null) {
+                return;
+            }
+            if (virtualFiles.size() == 1 && !file.isDirectory()) {
+                addSingleFile(file);
+            } else {
+                addMultipleFiles(virtualFiles);
+            }
+        }
+    };
 
     public AndroidBatchScaleImporter(final Project project, final Module module) {
         super(project);
         this.project = project;
         this.container = ApplicationManager.getApplication().getComponent(IconApplication.class);
-        controller = new BatchScaleImporterController();
-        controller.addObserver(this);
+        this.controller = new BatchScaleImporterController();
+        this.controller.addObserver(this);
         this.module = module;
 
         setTitle("Batch Drawable Importer");
@@ -124,28 +142,19 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                FileChooser.chooseFile(imageDescriptor, project, getInitialFile(), new Consumer<VirtualFile>() {
-                    @Override
-                    public void consume(final VirtualFile file) {
-                        if (!file.isDirectory()) {
-                            addSingleFile(file);
-                        } else {
-                            addMultipleFiles(Arrays.asList(file));
-                        }
-                    }
-                });
+                FileChooser.chooseFiles(imageDescriptor, project, getInitialFile(), fileChooserConsumer);
             }
         });
         deleteButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                controller.removeImage(table.getSelectedRow());
+                controller.removeImages(table.getSelectedRows());
             }
         });
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                controller.editImage(project, module, table.getSelectedRow());
+                controller.editImages(project, module, table.getSelectedRows());
             }
         });
     }
@@ -164,19 +173,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
 
             @Override
             public void dropFiles(final List<VirtualFile> virtualFiles) {
-                if (virtualFiles == null ||
-                    virtualFiles.size() == 0) {
-                    return;
-                }
-                final VirtualFile file = virtualFiles.get(0);
-                if (file == null) {
-                    return;
-                }
-                if (virtualFiles.size() == 1 && !file.isDirectory()) {
-                    addSingleFile(file);
-                } else {
-                    addMultipleFiles(virtualFiles);
-                }
+                fileChooserConsumer.consume(virtualFiles);
             }
         });
     }
@@ -280,16 +277,19 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
 
     private void initRowSelection() {
         table.getColumnModel().setColumnSelectionAllowed(false);
-        table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (e.getValueIsAdjusting()) {
                     return;
                 }
-
                 int selectedRow = table.getSelectedRow();
-                updateImage(controller.getImage(selectedRow));
+                if (table.getSelectedRowCount() == 1) {
+                    updateImage(controller.getImage(selectedRow));
+                } else {
+                    updateImage(null);
+                }
             }
         });
     }
@@ -300,7 +300,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
             public void componentResized(ComponentEvent componentEvent) {
                 super.componentResized(componentEvent);
                 Dimension tableSize = table.getSize();
-                final int[] columnSizes = new int[]{ 20, 30, 20, 30 };
+                final int[] columnSizes = new int[]{ 20, 20, 20, 40 };
                 for (int i = 0; i < table.getColumnCount(); i++) {
                     TableColumn column = table.getColumnModel().getColumn(i);
                     column.setPreferredWidth((int) (tableSize.width * (columnSizes[i] / 100f)));
@@ -313,7 +313,6 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         if (imageContainer == null) {
             return;
         }
-
         if (item == null) {
             imageContainer.setIcon(null);
             return;

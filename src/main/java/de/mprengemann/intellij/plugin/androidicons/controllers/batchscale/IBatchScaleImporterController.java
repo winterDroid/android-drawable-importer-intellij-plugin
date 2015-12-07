@@ -13,9 +13,9 @@ public interface IBatchScaleImporterController extends IController<BatchScaleImp
 
     void addImage(Resolution sourceResolution, List<ImageInformation> imageInformation);
 
-    void editImage(Project project, Module module, int index);
+    void editImages(Project project, Module module, int[] indices);
 
-    void removeImage(int index);
+    void removeImages(int[] indices);
 
     void removeImage(String sourcePath);
 

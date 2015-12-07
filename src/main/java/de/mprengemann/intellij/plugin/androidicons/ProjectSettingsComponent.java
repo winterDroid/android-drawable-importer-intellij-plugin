@@ -11,8 +11,6 @@ public class ProjectSettingsComponent extends AbstractProjectComponent implement
 
     protected ProjectSettingsComponent(Project project) {
         super(project);
-        final IconApplication iconApplication = ApplicationManager.getApplication().getComponent(IconApplication.class);
-        this.controllerFactory = iconApplication.getControllerFactory();
     }
 
     @Override
@@ -21,8 +19,16 @@ public class ProjectSettingsComponent extends AbstractProjectComponent implement
     }
 
     @Override
-    public void projectClosed() {
-        this.controllerFactory.setProject(null);
+    public void initComponent() {
+        super.initComponent();
+        final IconApplication iconApplication = ApplicationManager.getApplication().getComponent(IconApplication.class);
+        this.controllerFactory = iconApplication.getControllerFactory();
+    }
+
+    @Override
+    public void disposeComponent() {
+        super.disposeComponent();
+        this.controllerFactory = null;
     }
 
     @NotNull

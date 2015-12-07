@@ -2,9 +2,11 @@ package de.mprengemann.intellij.plugin.androidicons.model;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ImageAsset implements Comparable<ImageAsset> {
+public class ImageAsset implements Comparable<ImageAsset>,
+                                   Serializable {
 
     private final String name;
     private final String pack;

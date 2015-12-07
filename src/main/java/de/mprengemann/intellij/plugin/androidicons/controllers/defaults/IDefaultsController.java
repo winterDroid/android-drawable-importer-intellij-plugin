@@ -28,5 +28,7 @@ public interface IDefaultsController {
     String getMethod();
     void setMethod(String method);
 
+    void restore();
+
     void tearDown();
 }

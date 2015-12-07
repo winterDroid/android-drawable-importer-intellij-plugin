@@ -28,7 +28,11 @@ public class DefaultControllerFactory implements IControllerFactory {
 
     @Override
     public void setProject(Project project) {
+        if (project == null) {
+            return;
+        }
         getSettingsController().setProject(project);
+        getDefaultsController().restore();
     }
 
     @Override

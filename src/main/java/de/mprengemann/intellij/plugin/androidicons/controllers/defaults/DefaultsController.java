@@ -11,28 +11,29 @@ import java.util.Set;
 
 public class DefaultsController implements IDefaultsController {
 
+    public static final HashSet<Resolution> DEFAULT_RESOLUTIONS = new HashSet<Resolution>(Arrays.asList(Resolution.MDPI,
+                                                                                                Resolution.HDPI,
+                                                                                                Resolution.XHDPI,
+                                                                                                Resolution.XXHDPI,
+                                                                                                Resolution.XXXHDPI));
+    public static final Resolution DEFAULT_SOURCE_RESOLUTION = Resolution.XHDPI;
+    public static final ResizeAlgorithm DEFAULT_ALGORITHM = ResizeAlgorithm.SCALR;
+    public static final String DEFAULT_METHOD = DEFAULT_ALGORITHM.getMethods().get(0);
+
     private Set<Resolution> resolutions;
     private Resolution sourceResolution;
 
     private ImageAsset imageAsset;
+    private ISettingsController settingsController;
 
     private ResizeAlgorithm algorithm;
     private String method;
 
-    private ISettingsController settingsController;
     private String size;
     private String color;
 
     public DefaultsController(ISettingsController settingsController) {
         this.settingsController = settingsController;
-        resolutions = new HashSet<Resolution>(Arrays.asList(Resolution.MDPI,
-                                                            Resolution.HDPI,
-                                                            Resolution.XHDPI,
-                                                            Resolution.XXHDPI,
-                                                            Resolution.XXXHDPI));
-        sourceResolution = Resolution.XHDPI;
-        algorithm = ResizeAlgorithm.SCALR;
-        method = this.algorithm.getMethods().get(0);
     }
 
     @Override
@@ -43,6 +44,7 @@ public class DefaultsController implements IDefaultsController {
     @Override
     public void setResolutions(Set<Resolution> resolutions) {
         this.resolutions = resolutions;
+        settingsController.saveResolutions(this.resolutions);
     }
 
     @Override
@@ -53,6 +55,7 @@ public class DefaultsController implements IDefaultsController {
     @Override
     public void setImageAsset(ImageAsset imageAsset) {
         this.imageAsset = imageAsset;
+        settingsController.saveImageAsset(this.imageAsset);
     }
 
     @Override
@@ -63,6 +66,7 @@ public class DefaultsController implements IDefaultsController {
     @Override
     public void setSourceResolution(Resolution sourceResolution) {
         this.sourceResolution = sourceResolution;
+        settingsController.saveSourceResolution(this.sourceResolution);
     }
 
     @Override
@@ -73,6 +77,7 @@ public class DefaultsController implements IDefaultsController {
     @Override
     public void setSize(String size) {
         this.size = size;
+        settingsController.saveSize(this.size);
     }
 
     @Override
@@ -83,6 +88,7 @@ public class DefaultsController implements IDefaultsController {
     @Override
     public void setColor(String color) {
         this.color = color;
+        settingsController.saveColor(this.color);
     }
 
     @Override
@@ -93,6 +99,7 @@ public class DefaultsController implements IDefaultsController {
     @Override
     public void setAlgorithm(ResizeAlgorithm algorithm) {
         this.algorithm = algorithm;
+        settingsController.saveAlgorithm(this.algorithm);
     }
 
     @Override
@@ -103,6 +110,18 @@ public class DefaultsController implements IDefaultsController {
     @Override
     public void setMethod(String method) {
         this.method = method;
+        settingsController.saveMethod(this.method);
+    }
+
+    @Override
+    public void restore() {
+        imageAsset = settingsController.getImageAsset();
+        resolutions = settingsController.getResolutions(DEFAULT_RESOLUTIONS);
+        sourceResolution = settingsController.getSourceResolution(DEFAULT_SOURCE_RESOLUTION);
+        algorithm = settingsController.getAlgorithm(DEFAULT_ALGORITHM);
+        method = settingsController.getMethod(DEFAULT_METHOD);
+        color = settingsController.getColor();
+        size = settingsController.getSize();
     }
 
     @Override

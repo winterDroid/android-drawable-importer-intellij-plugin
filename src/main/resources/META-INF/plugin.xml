@@ -68,7 +68,12 @@
     </application-components>
 
     <project-components>
-        <!-- Add your project components here -->
+        <component>
+            <interface-class>de.mprengemann.intellij.plugin.androidicons.IProjectSettingsComponent</interface-class>
+            <implementation-class>de.mprengemann.intellij.plugin.androidicons.ProjectSettingsComponent</implementation-class>
+            <option name="workspace" value="true"/>
+            <loadForDefaultProject/>
+        </component>
     </project-components>
 
     <actions>

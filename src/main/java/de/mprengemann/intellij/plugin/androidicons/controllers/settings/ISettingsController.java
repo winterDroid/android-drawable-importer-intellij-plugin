@@ -3,15 +3,40 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.settings;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
+import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
+import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
+
+import java.util.Set;
 
 public interface ISettingsController extends IController<SettingsObserver> {
-    void saveResRootForProject(Project project, String fileUrl);
+    void saveResRootForProject(String fileUrl);
+    VirtualFile getResourceRoot();
+    String getResourceRootPath();
 
-    VirtualFile getResRootForProject(Project project);
+    String getLastImageFolder();
+    void saveLastImageFolder(String fileUrl);
 
-    String getResRootStringForProject(Project project);
+    void setProject(Project project);
 
-    String getLastImageFolder(Project project);
+    void saveResolutions(Set<Resolution> resolutions);
+    Set<Resolution> getResolutions(Set<Resolution> defaultResolutions);
 
-    void saveLastImageFolder(Project project, String fileUrl);
+    void saveSourceResolution(Resolution sourceResolution);
+    Resolution getSourceResolution(Resolution defaultSourceResolution);
+
+    void saveAlgorithm(ResizeAlgorithm algorithm);
+    ResizeAlgorithm getAlgorithm(ResizeAlgorithm defaultAlgorithm);
+
+    void saveMethod(String method);
+    String getMethod(String defaultMethod);
+
+    void saveColor(String color);
+    String getColor();
+
+    void saveSize(String size);
+    String getSize();
+
+    void saveImageAsset(ImageAsset imageAsset);
+    ImageAsset getImageAsset();
 }

@@ -11,6 +11,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.BatchS
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.AddItemBatchScaleDialogObserver;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.AddItemBatchScaleImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.IAddItemBatchScaleImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
@@ -108,6 +109,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         }
     };
     private ISettingsController settingsController;
+    private IDefaultsController defaultsController;
 
     public AddItemBatchScaleDialog(final Project project,
                                    final Module module,
@@ -130,7 +132,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         }
 
         final File realFile = new File(path);
-        initSettingsController();
+        initRequiredControllers();
         initController(realFile);
         initTargetRoot();
         initInternal();
@@ -145,7 +147,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         this.project = project;
         this.module = module;
         this.batchScaleController = batchScaleImporterController;
-        initSettingsController();
+        initRequiredControllers();
         initController(sourceResolution, information);
         initTargetRoot();
         initInternal();
@@ -177,8 +179,6 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         for (ResizeAlgorithm algorithm : ResizeAlgorithm.values()) {
             algorithmSpinner.addItem(algorithm);
         }
-        algorithmSpinner.setSelectedItem(ResizeAlgorithm.SCALR);
-        algorithmSpinner.addActionListener(algorithmListener);
     }
 
     private void initCheckBoxes() {
@@ -212,13 +212,14 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     }
 
     private void initController(File file) {
-        final VirtualFile root = settingsController.getResRootForProject(project);
-        controller = new AddItemBatchScaleImporterController(root, file);
+        final VirtualFile root = settingsController.getResourceRoot();
+        controller = new AddItemBatchScaleImporterController(defaultsController, root, file);
     }
 
-    private void initSettingsController() {
+    private void initRequiredControllers() {
         final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
         settingsController = container.getControllerFactory().getSettingsController();
+        defaultsController = container.getControllerFactory().getDefaultsController();
     }
 
     private void initController(Resolution sourceResolution, List<ImageInformation> information) {
@@ -233,7 +234,12 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
 
     @Override
     protected void doOKAction() {
-        batchScaleController.addImage(controller.getSourceResolution(), controller.getImageInformation(project));
+        final List<ImageInformation> imageInformation = controller.getImageInformation(project);
+        batchScaleController.addImage(controller.getSourceResolution(), imageInformation);
+        defaultsController.setAlgorithm(controller.getAlgorithm());
+        defaultsController.setMethod(controller.getMethod());
+        defaultsController.setSourceResolution(controller.getSourceResolution());
+        defaultsController.setResolutions(controller.getTargetResolutions());
         super.doOKAction();
     }
 
@@ -243,8 +249,19 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         updateSourceResolution();
         updateTargetSize();
         updateTargetResolutions();
+        updateAlgorithms();
         updateAlgorithmMethod();
         updateImage(controller.getImageFile());
+    }
+
+    private void updateAlgorithms() {
+        algorithmSpinner.removeActionListener(algorithmListener);
+        algorithmSpinner.removeAllItems();
+        for (ResizeAlgorithm algorithm : ResizeAlgorithm.values()) {
+            algorithmSpinner.addItem(algorithm);
+        }
+        algorithmSpinner.setSelectedItem(controller.getAlgorithm());
+        algorithmSpinner.addActionListener(algorithmListener);
     }
 
     private void updateAlgorithmMethod() {

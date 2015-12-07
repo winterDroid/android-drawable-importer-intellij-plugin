@@ -56,7 +56,7 @@ public class ImageFileBrowserFolderActionListener extends ComponentWithBrowseBut
             if (project != null) {
                 directoryName = container.getControllerFactory()
                                          .getSettingsController()
-                                         .getLastImageFolder(project);
+                                         .getLastImageFolder();
             } else {
                 directoryName = FileUtil.toSystemIndependentName(directoryName);
             }
@@ -90,7 +90,7 @@ public class ImageFileBrowserFolderActionListener extends ComponentWithBrowseBut
             public void consume(VirtualFile file) {
                 container.getControllerFactory()
                          .getSettingsController()
-                         .saveLastImageFolder(project, file.getCanonicalPath());
+                         .saveLastImageFolder(file.getCanonicalPath());
                 onFileChoosen(file);
             }
         });

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="de.mprengemann.intellij.plugin.androidicons.dialogs.AndroidBatchScaleImporter">
-  <grid id="27dc6" binding="uiContainer" layout-manager="GridLayoutManager" row-count="13" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="uiContainer" layout-manager="GridLayoutManager" row-count="13" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
       <xy x="20" y="20" width="1200" height="450"/>
@@ -15,7 +15,7 @@
       <scrollpane id="92eed">
         <constraints>
           <grid row="0" column="0" row-span="13" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-            <preferred-size width="826" height="418"/>
+            <preferred-size width="800" height="418"/>
           </grid>
         </constraints>
         <properties/>
@@ -67,7 +67,7 @@
       </grid>
       <component id="bbccf" class="javax.swing.JLabel" binding="imageContainer">
         <constraints>
-          <grid row="1" column="3" row-span="11" col-span="1" vsize-policy="6" hsize-policy="0" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="2" row-span="11" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <alignmentX value="0.5"/>

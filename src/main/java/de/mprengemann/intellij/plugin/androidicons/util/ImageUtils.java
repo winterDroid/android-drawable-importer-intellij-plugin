@@ -38,8 +38,7 @@ public class ImageUtils {
     public static final String TARGET_FILE_PATTERN = "%s/drawable-%s/%s.png";
 
     public static void updateImage(JLabel imageContainer, File imageFile) {
-        if (imageFile == null ||
-            !imageFile.exists()) {
+        if (imageFile == null || !imageFile.exists()) {
             return;
         }
         BufferedImage img = null;
@@ -53,11 +52,10 @@ public class ImageUtils {
         }
         int imageWidth = img.getWidth();
         int imageHeight = img.getHeight();
-        int imageViewWidth = imageContainer.getWidth();
-        int imageViewHeight = imageContainer.getHeight();
+        int imageViewWidth = (int) imageContainer.getPreferredSize().getWidth();
+        int imageViewHeight = (int) imageContainer.getPreferredSize().getHeight();
         double factor = getScaleFactorToFit(new Dimension(imageWidth, imageHeight),
                                             new Dimension(imageViewWidth, imageViewHeight));
-        factor = Math.min(factor, 1f);
         imageWidth = (int) (factor * imageWidth);
         imageHeight = (int) (factor * imageHeight);
         if (imageWidth <= 0 || imageHeight <= 0 ||
@@ -88,7 +86,7 @@ public class ImageUtils {
             double dScaleHeight = getScaleFactor(original.height, toFit.height);
             dScale = Math.min(dScaleHeight, dScaleWidth);
         }
-        return dScale;
+        return Math.min(1f, dScale);
     }
 
     public static BufferedImage resizeNormalImage(ImageInformation information) throws IOException {

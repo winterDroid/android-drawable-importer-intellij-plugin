@@ -63,18 +63,18 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         for (ImageInformation imageInformation : information) {
             targetResolutions.add(imageInformation.getResolution());
         }
-        final ImageInformation baseinformation = information.get(0);
-        init(baseinformation.getImageFile());
+        final ImageInformation baseInformation = information.get(0);
+        init(baseInformation.getImageFile());
 
-        this.exportName = baseinformation.getExportName();
+        this.exportName = baseInformation.getExportName();
         this.sourceResolution = sourceResolution;
-        this.algorithm = baseinformation.getAlgorithm();
-        this.method = algorithm.getPrettyMethod(baseinformation.getMethod());
-        this.exportRoot = baseinformation.getExportPath();
-        this.isNinePatch = baseinformation.isNinePatch();
+        this.algorithm = baseInformation.getAlgorithm();
+        this.method = algorithm.getPrettyMethod(baseInformation.getMethod());
+        this.exportRoot = baseInformation.getExportPath();
+        this.isNinePatch = baseInformation.isNinePatch();
 
-        this.targetHeight = getOriginalTargetSize(sourceResolution, baseinformation.getResolution(), targetHeight, baseinformation.getFactor());
-        this.targetWidth = getOriginalTargetSize(sourceResolution, baseinformation.getResolution(), targetWidth, baseinformation.getFactor());
+        this.targetHeight = getOriginalTargetSize(sourceResolution, baseInformation.getResolution(), targetHeight, baseInformation.getFactor());
+        this.targetWidth = getOriginalTargetSize(sourceResolution, baseInformation.getResolution(), targetWidth, baseInformation.getFactor());
     }
 
     private void init(File file) {
@@ -237,6 +237,26 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
                                                       .setMethod(algorithm.getMethod(method))
                                                       .setExportPath(exportRoot)
                                                       .setNinePatch(isNinePatch)
+                                                      .build();
+        final List<ImageInformation> images = new ArrayList<ImageInformation>();
+        for (Resolution resolution : targetResolutions) {
+            images.add(ImageInformation.newBuilder(base)
+                                       .setResolution(resolution)
+                                       .setFactor(getRealScaleFactor(resolution))
+                                       .build());
+        }
+        return images;
+    }
+
+    @Override
+    public List<ImageInformation> getImageInformation(Project project,
+                                                      String selectedFile,
+                                                      List<ImageInformation> imageInformation,
+                                                      Resolution sourceResolution) {
+        final ImageInformation base = ImageInformation.newBuilder(imageInformation.get(0))
+                                                      .setAlgorithm(algorithm)
+                                                      .setMethod(algorithm.getMethod(method))
+                                                      .setExportPath(exportRoot)
                                                       .build();
         final List<ImageInformation> images = new ArrayList<ImageInformation>();
         for (Resolution resolution : targetResolutions) {

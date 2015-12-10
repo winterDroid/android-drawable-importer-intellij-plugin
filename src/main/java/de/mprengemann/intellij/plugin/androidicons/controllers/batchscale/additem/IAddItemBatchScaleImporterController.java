@@ -52,4 +52,9 @@ public interface IAddItemBatchScaleImporterController extends IController<AddIte
     int[] getScaledSize(Resolution resolution);
 
     List<ImageInformation> getImageInformation(Project project);
+
+    List<ImageInformation> getImageInformation(Project project,
+                             String selectedFile,
+                             List<ImageInformation> imageInformation,
+                             Resolution sourceResolution);
 }

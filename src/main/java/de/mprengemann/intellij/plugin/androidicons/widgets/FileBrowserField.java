@@ -4,6 +4,7 @@ import com.intellij.openapi.components.PathMacroManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
@@ -26,18 +27,59 @@ import java.util.List;
 public class FileBrowserField extends TextFieldWithBrowseButton {
 
     public static final FileChooserDescriptor RESOURCE_DIR_CHOOSER = FileChooserDescriptorFactory.createSingleFolderDescriptor();
-    public static final FileChooserDescriptor IMAGE_FILE_CHOOSER = FileChooserDescriptorFactory.createSingleFileDescriptor(
-        ImageFileTypeManager.getInstance().getImageFileType());
+    private static final FileType IMAGE_FILE_TYPE = ImageFileTypeManager.getInstance().getImageFileType();
+    public static final FileChooserDescriptor IMAGE_FILE_CHOOSER = new FileChooserDescriptor(true,
+                                                                                             false,
+                                                                                             false,
+                                                                                             false,
+                                                                                             false,
+                                                                                             false) {
+        public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
+            if (file.isDirectory()) {
+                return super.isFileVisible(file, showHiddenFiles);
+            }
+            return file.getFileType().equals(IMAGE_FILE_TYPE);
+        }
+
+        public boolean isFileSelectable(VirtualFile file) {
+            if (file.isDirectory()) {
+                return super.isFileSelectable(file);
+            }
+            return super.isFileSelectable(file) && file.getFileType().equals(IMAGE_FILE_TYPE);
+        }
+    };
+    public static final FileChooserDescriptor IMAGE_FILES_FOLDER_CHOOSER = new FileChooserDescriptor(true,
+                                                                                                     true,
+                                                                                                     false,
+                                                                                                     false,
+                                                                                                     false,
+                                                                                                     true) {
+        public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
+            if (file.isDirectory()) {
+                return super.isFileVisible(file, showHiddenFiles);
+            }
+            return file.getFileType().equals(IMAGE_FILE_TYPE);
+        }
+
+        public boolean isFileSelectable(VirtualFile file) {
+            if (file.isDirectory()) {
+                return super.isFileSelectable(file);
+            }
+            return super.isFileSelectable(file) && file.getFileType().equals(IMAGE_FILE_TYPE);
+        }
+    };
+
     static {
         RESOURCE_DIR_CHOOSER.setTitle("Select Resource Root");
-        IMAGE_FILE_CHOOSER.setTitle("Select Your Image Asset");
+        IMAGE_FILE_CHOOSER.setTitle("Select Image Asset");
+        //noinspection DialogTitleCapitalization
+        IMAGE_FILES_FOLDER_CHOOSER.setTitle("Select Image Asset(s)");
     }
 
     private Project project;
     private ISettingsController settingsController = null;
     private Consumer<File> listener;
     private FileChooserDescriptor descriptor;
-
 
     public FileBrowserField(FileChooserDescriptor descriptor) {
         super();
@@ -57,6 +99,9 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
             @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
             protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
                 super.onFileChoosen(chosenFile);
+                if (settingsController != null) {
+                    settingsController.saveLastImageFolder(chosenFile.getCanonicalPath());
+                }
                 setText(chosenFile.getCanonicalPath());
             }
 

@@ -190,7 +190,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     }
 
     @Override
-    public void setTargetName(String name) {
+    public void setExportName(String name) {
         if (exportName.equals(name)) {
             return;
         }

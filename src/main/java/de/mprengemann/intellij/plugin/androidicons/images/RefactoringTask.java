@@ -14,6 +14,7 @@
 package de.mprengemann.intellij.plugin.androidicons.images;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -43,32 +44,39 @@ import java.util.List;
 
 public class RefactoringTask extends Task.Backgroundable {
 
+    private static final String TAG = RefactoringTask.class.getSimpleName();
+    private static final Logger LOGGER = Logger.getInstance(TAG);
     private Project project;
     private List<ImageInformation> imageInformationList = new ArrayList<ImageInformation>();
     private int selection;
+    private ProgressIndicator progressIndicator;
 
     public RefactoringTask(Project project) {
-        super(project, "Import Images", false);
+        super(project, "Import Images", true);
         this.project = project;
     }
 
-    private void refactor(ProgressIndicator indicator) throws IOException, ProcessCanceledException {
-        indicator.setText("Import Images");
-        indicator.checkCanceled();
-        indicator.setIndeterminate(false);
+    private void refactor() throws IOException, ProcessCanceledException {
+        progressIndicator.setText("Import Images");
+        progressIndicator.checkCanceled();
+        progressIndicator.setIndeterminate(false);
         for (int i = 0; i < imageInformationList.size(); i++) {
             ImageInformation information = imageInformationList.get(i);
-            indicator.checkCanceled();
+            progressIndicator.setText2(information.getExportName());
+            progressIndicator.checkCanceled();
             exportTempImage(information);
-            indicator.setFraction((float) (i + 1) / (float) imageInformationList.size());
+            progressIndicator.setFraction((float) (i + 1) / (float) imageInformationList.size());
         }
 
+        progressIndicator.setIndeterminate(true);
+        progressIndicator.setText2("");
         UIUtil.invokeLaterIfNeeded(new DumbAwareRunnable() {
             public void run() {
                 try {
                     move(project, imageInformationList);
                     LocalFileSystem.getInstance().refresh(true);
-                } catch (IOException ignored) {
+                } catch (IOException e) {
+                    LOGGER.error(e);
                 }
             }
         });
@@ -81,22 +89,30 @@ public class RefactoringTask extends Task.Backgroundable {
         imageInformationList.add(imageInformation);
     }
 
+    protected void onPreExecute() {}
+
     @Override
     public void run(@NotNull final ProgressIndicator progressIndicator) {
         if (imageInformationList.size() == 0) {
             return;
         }
+        this.progressIndicator = progressIndicator;
+        onPreExecute();
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
             public void run() {
                 try {
-                    refactor(progressIndicator);
-                } catch (ProcessCanceledException ignored) {
-                } catch (IOException ignored) {
+                    refactor();
+                } catch (ProcessCanceledException e) {
+                    FileUtils.deleteQuietly(ImageInformation.getTempDir());
+                } catch (Exception e) {
+                    LOGGER.error(e);
                 }
             }
         });
     }
+
+    protected void onPostExecute() {}
 
     private boolean checkFileExist(@Nullable PsiDirectory targetDirectory,
                                    int[] choice,
@@ -107,45 +123,49 @@ public class RefactoringTask extends Task.Backgroundable {
             return false;
         }
         final PsiFile existing = targetDirectory.findFile(name);
-        if (existing != null && !existing.equals(file)) {
-            int selection;
-            if (choice == null || choice[0] == -1) {
-                String message = String.format("File '%s' already exists in directory '%s'",
-                                               name,
-                                               targetDirectory.getVirtualFile().getPath());
-                String[] options = choice == null ? new String[] {"Overwrite", "Skip"}
-                                                  : new String[] {"Overwrite", "Skip", "Overwrite for all", "Skip for all"};
-                selection = Messages.showDialog(message, title, options, 0, Messages.getQuestionIcon());
-                if (selection == 2 || selection == 3) {
-                    this.selection = selection;
-                }
-            } else {
-                selection = choice[0];
+        if (existing == null || existing.equals(file)) {
+            return false;
+        }
+        int selection;
+        if (choice == null || choice[0] == -1) {
+            final String message = String.format("File '%s' already exists in directory '%s'",
+                                           name,
+                                           targetDirectory.getVirtualFile().getPath());
+            String[] options = choice == null ? new String[] {"Overwrite", "Skip"}
+                                              : new String[] {"Overwrite", "Skip", "Overwrite for all", "Skip for all"};
+            selection = Messages.showDialog(message, title, options, 0, Messages.getQuestionIcon());
+            if (selection == 2 || selection == 3) {
+                this.selection = selection;
             }
+        } else {
+            selection = choice[0];
+        }
 
-            if (choice != null && selection > 1) {
-                choice[0] = selection % 2;
-                selection = choice[0];
-            }
+        if (choice != null && selection > 1) {
+            choice[0] = selection % 2;
+            selection = choice[0];
+        }
 
-            if (selection == 0 && file != existing) {
-                existing.delete();
-            } else {
-                return true;
-            }
+        if (selection == 0 && file != existing) {
+            existing.delete();
+        } else {
+            return true;
         }
 
         return false;
     }
 
-    private void copy(Project project, String description, List<File> sources, List<File> targets) throws IOException {
+    private void copy(Project project,
+                      String description,
+                      List<File> sources,
+                      List<File> targets) throws IOException {
         final PsiManager instance = PsiManager.getInstance(project);
         final List<PsiFile> files = new ArrayList<PsiFile>();
         final List<PsiDirectory> dirs = new ArrayList<PsiDirectory>();
         final List<String> names = new ArrayList<String>();
 
         for (File source : sources) {
-            LocalFileSystem.getInstance().refreshAndFindFileByIoFile(source);
+            LocalFileSystem.getInstance().findFileByIoFile(source);
             final VirtualFile vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(source);
             if (vFile != null) {
                 PsiFile item = instance.findFile(vFile);
@@ -192,23 +212,7 @@ public class RefactoringTask extends Task.Backgroundable {
             return;
         }
 
-        throw new FileNotFoundException();
-    }
-
-    private void move(Project project,
-                      final String description,
-                      final List<File> sources,
-                      final List<File> targets) throws IOException {
-        copy(project, description, sources, targets);
-        RunnableUtils.runWriteCommand(project, new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    FileUtils.forceDelete(ImageInformation.getTempDir());
-                } catch (IOException ignored) {
-                }
-            }
-        }, description);
+        throw new FileNotFoundException(sources.toString());
     }
 
     private void move(Project project, List<ImageInformation> scalingInformationList) throws IOException {
@@ -220,12 +224,18 @@ public class RefactoringTask extends Task.Backgroundable {
             targets.add(information.getTargetFile());
         }
 
-        String description = ExportNameUtils.getExportDescription(scalingInformationList);
-
-        move(project, description, tempFiles, targets);
+        final String description = ExportNameUtils.getExportDescription(scalingInformationList);
+        copy(project, description, tempFiles, targets);
+        RunnableUtils.runWriteCommand(project, new Runnable() {
+            @Override
+            public void run() {
+                FileUtils.deleteQuietly(ImageInformation.getTempDir());
+                onPostExecute();
+            }
+        }, description);
     }
 
-    private void exportTempImage(ImageInformation information) {
+    private void exportTempImage(final ImageInformation information) {
         try {
             BufferedImage resizeImageJpg;
             if (information.isNinePatch()) {
@@ -234,8 +244,8 @@ public class RefactoringTask extends Task.Backgroundable {
                 resizeImageJpg = ImageUtils.resizeNormalImage(information);
             }
             ImageUtils.saveImageTempFile(resizeImageJpg, information);
-
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            LOGGER.error(e);
         }
     }
 }

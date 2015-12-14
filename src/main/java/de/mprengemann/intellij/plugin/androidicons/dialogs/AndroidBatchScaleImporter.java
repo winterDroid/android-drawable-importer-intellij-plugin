@@ -18,9 +18,10 @@ import com.intellij.openapi.components.PathMacroManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.ex.FileDrop;
-import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.IconLoader;
@@ -39,10 +40,10 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.addite
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.IAddItemBatchScaleImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
-import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.MathUtils;
+import de.mprengemann.intellij.plugin.androidicons.widgets.FileBrowserField;
 import org.apache.commons.io.FilenameUtils;
 import org.intellij.images.fileTypes.ImageFileTypeManager;
 import org.jetbrains.annotations.NotNull;
@@ -69,27 +70,6 @@ import java.util.List;
 
 public class AndroidBatchScaleImporter extends DialogWrapper implements BatchScaleImporterObserver {
 
-    private final FileType imageFileType = ImageFileTypeManager.getInstance().getImageFileType();
-    private final FileChooserDescriptor imageDescriptor = new FileChooserDescriptor(true,
-                                                                                    true,
-                                                                                    false,
-                                                                                    false,
-                                                                                    false,
-                                                                                    true) {
-        public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
-            if (file.isDirectory()) {
-                return super.isFileVisible(file, showHiddenFiles);
-            }
-            return file.getFileType().equals(imageFileType);
-        }
-
-        public boolean isFileSelectable(VirtualFile file) {
-            if (file.isDirectory()) {
-                return super.isFileSelectable(file);
-            }
-            return super.isFileSelectable(file) && file.getFileType().equals(imageFileType);
-        }
-    };
     private final Project project;
     private final Module module;
     private final IconApplication container;
@@ -112,10 +92,20 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
             if (file == null) {
                 return;
             }
+            container.getControllerFactory().getSettingsController().saveLastImageFolder(file.getCanonicalPath());
             if (virtualFiles.size() == 1 && !file.isDirectory()) {
                 addSingleFile(file);
             } else {
-                addMultipleFiles(virtualFiles);
+                new Task.Modal(project, "Adding Files...", true) {
+                    @Override
+                    public void run(@NotNull ProgressIndicator progressIndicator) {
+                        progressIndicator.setIndeterminate(true);
+                        try {
+                            addMultipleFiles(virtualFiles, progressIndicator);
+                        } catch (ProcessCanceledException ignored) {
+                        }
+                    }
+                }.queue();
             }
         }
     };
@@ -142,7 +132,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                FileChooser.chooseFiles(imageDescriptor, project, getInitialFile(), fileChooserConsumer);
+                FileChooser.chooseFiles(FileBrowserField.IMAGE_FILES_FOLDER_CHOOSER, project, getInitialFile(), fileChooserConsumer);
             }
         });
         deleteButton.addActionListener(new AbstractAction() {
@@ -163,7 +153,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         new FileDrop(table, new FileDrop.Target() {
             @Override
             public FileChooserDescriptor getDescriptor() {
-                return imageDescriptor;
+                return FileBrowserField.IMAGE_FILES_FOLDER_CHOOSER;
             }
 
             @Override
@@ -178,16 +168,19 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         });
     }
 
-    private void addMultipleFiles(List<VirtualFile> virtualFiles) {
+    private void addMultipleFiles(List<VirtualFile> virtualFiles, final ProgressIndicator progressIndicator) throws ProcessCanceledException {
         for (final VirtualFile file : virtualFiles) {
+            progressIndicator.checkCanceled();
             if (file.isDirectory()) {
+                progressIndicator.setText2(file.getCanonicalPath());
                 VfsUtilCore.visitChildrenRecursively(file, new VirtualFileVisitor() {
                     @Override
-                    public boolean visitFile(@NotNull VirtualFile child) {
+                    public boolean visitFile(@NotNull VirtualFile child) throws ProcessCanceledException {
                         if (file.equals(child)) {
                             return true;
                         }
-                        addMultipleFiles(Arrays.asList(child));
+                        progressIndicator.checkCanceled();
+                        addMultipleFiles(Arrays.asList(child), progressIndicator);
                         return true;
                     }
                 });
@@ -198,7 +191,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
     }
 
     private void addSingleFileImmediately(VirtualFile file) {
-        if (!file.getFileType().equals(imageFileType)) {
+        if (!file.getFileType().equals(ImageFileTypeManager.getInstance().getImageFileType())) {
             return;
         }
         // Hack
@@ -380,8 +373,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
 
     @Override
     protected void doOKAction() {
-        RefactoringTask task = controller.getExportTask(project);
-        ProgressManager.getInstance().run(task);
+        controller.getExportTask(project).queue();
         super.doOKAction();
     }
 

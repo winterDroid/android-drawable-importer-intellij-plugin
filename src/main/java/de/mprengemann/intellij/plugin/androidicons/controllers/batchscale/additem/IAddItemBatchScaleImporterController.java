@@ -41,7 +41,7 @@ public interface IAddItemBatchScaleImporterController extends IController<AddIte
 
     void setTargetRoot(String path);
 
-    void setTargetName(String name);
+    void setExportName(String name);
 
     void setAlgorithm(ResizeAlgorithm algorithm);
 

@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.util.io.ZipUtil;
 import de.mprengemann.intellij.plugin.androidicons.controllers.DefaultControllerFactory;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IControllerFactory;
@@ -16,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -56,6 +59,7 @@ public class IconApplication implements ApplicationComponent {
             }
 
             final File contentFile = ResourceLoader.getBundledResource("content.json");
+            assert contentFile != null;
             final FileReader fileReader = new FileReader(contentFile);
             final Type listType = new TypeToken<ArrayList<IconPack>>() {}.getType();
             GsonBuilder gsonBuilder = new GsonBuilder();
@@ -66,12 +70,24 @@ public class IconApplication implements ApplicationComponent {
             materialIcons = iconPacks.get(1);
 
             if (export) {
-                final File archiveFile = ResourceLoader.getBundledResource("icon_packs.zip");
-                ZipUtil.extract(archiveFile, ResourceLoader.getExportPath(), null, true);
+                new Task.Modal(null, "Prepare Android Drawable Importer", false) {
+                    @Override
+                    public void run(@NotNull ProgressIndicator progressIndicator) {
+                        progressIndicator.setIndeterminate(true);
+                        final File archiveFile = ResourceLoader.getBundledResource("icon_packs.zip");
+                        final File bundledResource = ResourceLoader.getBundledResource("icon_packs.properties");
+                        final File localResource = new File(ResourceLoader.getExportPath(), "icon_packs.properties");
 
-                final File bundledResource = ResourceLoader.getBundledResource("icon_packs.properties");
-                final File localResource = new File(ResourceLoader.getExportPath(), "icon_packs.properties");
-                FileUtils.copyFile(bundledResource, localResource);
+                        try {
+                            assert archiveFile != null;
+                            ZipUtil.extract(archiveFile, ResourceLoader.getExportPath(), null, true);
+                            assert bundledResource != null;
+                            FileUtils.copyFile(bundledResource, localResource);
+                        } catch (IOException e) {
+                            LOGGER.error(e);
+                        }
+                    }
+                }.queue();
             }
         } catch (Exception e) {
             LOGGER.error(e);

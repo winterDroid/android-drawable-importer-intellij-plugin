@@ -52,6 +52,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private JCheckBox XHDPICheckBox;
     private JCheckBox XXHDPICheckBox;
     private JCheckBox XXXHDPICheckBox;
+    private JCheckBox TVDPICheckBox;
     private JComboBox sourceResolutionSpinner;
     private JFormattedTextField targetWidth;
     private JFormattedTextField targetHeight;
@@ -59,7 +60,6 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private FileBrowserField targetRoot;
     private JComboBox algorithmSpinner;
     private JComboBox methodSpinner;
-    private JCheckBox TVDPICheckBox;
     private IAddItemBatchScaleImporterController controller;
     private final ActionListener sourceResolutionListener = new ActionListener() {
         @Override
@@ -206,7 +206,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         targetName.addPropertyChangeListener("value", new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-                controller.setTargetName((String) targetName.getValue());
+                controller.setExportName((String) targetName.getValue());
             }
         });
     }

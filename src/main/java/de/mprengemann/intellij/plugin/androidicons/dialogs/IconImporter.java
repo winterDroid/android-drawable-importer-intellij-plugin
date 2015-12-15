@@ -15,7 +15,6 @@ package de.mprengemann.intellij.plugin.androidicons.dialogs;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
@@ -34,7 +33,6 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter.Icon
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
-import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.IconPack;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -352,8 +350,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
     }
 
     private void importIcons() {
-        final RefactoringTask task = iconImporterController.getTask(project);
-        ProgressManager.getInstance().run(task);
+        iconImporterController.getTask(project).queue();
     }
 
     @Nullable

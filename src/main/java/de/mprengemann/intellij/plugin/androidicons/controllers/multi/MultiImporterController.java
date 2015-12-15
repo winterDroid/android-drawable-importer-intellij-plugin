@@ -7,16 +7,21 @@ import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class MultiImporterController implements IMultiImporterController {
 
     private Set<MultiImporterObserver> observers;
+    private Map<Resolution, List<ImageInformation>> zipImageInformationMap;
     private Map<Resolution, ImageInformation> imageInformationMap;
     private String targetRoot;
     private String exportName;
@@ -25,6 +30,7 @@ public class MultiImporterController implements IMultiImporterController {
     public MultiImporterController() {
         this.observers = new HashSet<MultiImporterObserver>();
         this.imageInformationMap = new HashMap<Resolution, ImageInformation>();
+        this.zipImageInformationMap = new HashMap<Resolution, List<ImageInformation>>();
     }
 
     @Override
@@ -66,13 +72,48 @@ public class MultiImporterController implements IMultiImporterController {
     }
 
     @Override
+    public void addZipImage(File source, Resolution resolution) {
+        if (!zipImageInformationMap.containsKey(resolution)) {
+            zipImageInformationMap.put(resolution, new ArrayList<ImageInformation>());
+        }
+        zipImageInformationMap.get(resolution).add(ImageInformation.newBuilder()
+                                                                .setImageFile(source)
+                                                                .setResolution(resolution)
+                                                                .setExportName(FilenameUtils.getBaseName(source.getName()))
+                                                                .build());
+    }
+
+    @Override
+    public Map<Resolution, List<ImageInformation>> getZipImages() {
+        return zipImageInformationMap;
+    }
+
+    @Override
+    public void resetZipInformation() {
+        zipImageInformationMap.clear();
+    }
+
+    @Override
     public RefactoringTask getTask(Project project) {
         RefactoringTask task = new RefactoringTask(project);
-        for (ImageInformation imageInformation : imageInformationMap.values()) {
-            task.addImage(ImageInformation.newBuilder(imageInformation)
+        for (Resolution resolution : imageInformationMap.keySet()) {
+            task.addImage(ImageInformation.newBuilder(imageInformationMap.get(resolution))
                                           .setExportPath(targetRoot)
                                           .setExportName(exportName)
                                           .build());
+        }
+        return task;
+    }
+
+    @Override
+    public RefactoringTask getZipTask(Project project, File tempDir) {
+        RefactoringTask task = new ZipRefactoringTask(project, tempDir);
+        for (Resolution resolution : zipImageInformationMap.keySet()) {
+            for (ImageInformation imageInformation : zipImageInformationMap.get(resolution)) {
+                task.addImage(ImageInformation.newBuilder(imageInformation)
+                                              .setExportPath(targetRoot)
+                                              .build());
+            }
         }
         return task;
     }
@@ -82,7 +123,7 @@ public class MultiImporterController implements IMultiImporterController {
         if (Objects.equal(exportName, this.exportName)) {
             return;
         }
-        this.exportName = exportName;
+        this.exportName = ExportNameUtils.getExportNameFromFilename(exportName);
         notifyUpdated();
     }
 
@@ -117,5 +158,24 @@ public class MultiImporterController implements IMultiImporterController {
     @Override
     public void tearDown() {
         observers.clear();
+    }
+
+    private static class ZipRefactoringTask extends RefactoringTask {
+        private File tempDir;
+
+        public ZipRefactoringTask(Project project, File tempDir) {
+            super(project);
+            this.tempDir = tempDir;
+        }
+
+        @Override
+        public boolean shouldStartInBackground() {
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute() {
+            FileUtils.deleteQuietly(tempDir);
+        }
     }
 }

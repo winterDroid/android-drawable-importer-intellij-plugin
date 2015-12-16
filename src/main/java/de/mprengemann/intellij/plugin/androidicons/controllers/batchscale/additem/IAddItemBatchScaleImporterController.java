@@ -3,6 +3,7 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.addit
 import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
@@ -49,12 +50,18 @@ public interface IAddItemBatchScaleImporterController extends IController<AddIte
 
     List<String> getMethods();
 
+    Format getFormat();
+
+    boolean isNinePatch();
+
+    void setFormat(Format format);
+
     int[] getScaledSize(Resolution resolution);
 
     List<ImageInformation> getImageInformation(Project project);
 
     List<ImageInformation> getImageInformation(Project project,
-                             String selectedFile,
-                             List<ImageInformation> imageInformation,
-                             Resolution sourceResolution);
+                                               String selectedFile,
+                                               List<ImageInformation> imageInformation,
+                                               Resolution sourceResolution);
 }

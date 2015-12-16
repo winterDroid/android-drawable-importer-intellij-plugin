@@ -310,7 +310,7 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
             imageContainer.setIcon(null);
             return;
         }
-        ImageUtils.updateImage(imageContainer, item.getImageFile());
+        ImageUtils.updateImage(imageContainer, item.getImageFile(), item.getFormat());
     }
 
     protected VirtualFile getInitialFile() {

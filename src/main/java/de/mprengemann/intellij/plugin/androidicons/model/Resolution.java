@@ -17,6 +17,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 
 import java.lang.reflect.Type;
 
@@ -30,6 +31,9 @@ public enum Resolution {
     TVDPI;
 
     public static Resolution from(String value) {
+        if (TextUtils.isEmpty(value)) {
+            throw new IllegalArgumentException();
+        }
         if (value.equalsIgnoreCase(LDPI.toString())) {
             return LDPI;
         } else if (value.equalsIgnoreCase(MDPI.toString())) {

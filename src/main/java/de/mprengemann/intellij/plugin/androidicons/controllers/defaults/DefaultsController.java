@@ -2,6 +2,7 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.defaults;
 
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
@@ -19,6 +20,7 @@ public class DefaultsController implements IDefaultsController {
     public static final Resolution DEFAULT_SOURCE_RESOLUTION = Resolution.XHDPI;
     public static final ResizeAlgorithm DEFAULT_ALGORITHM = ResizeAlgorithm.SCALR;
     public static final String DEFAULT_METHOD = DEFAULT_ALGORITHM.getMethods().get(0);
+    public static final Format DEFAULT_FORMAT = Format.PNG;
 
     private Set<Resolution> resolutions;
     private Resolution sourceResolution;
@@ -28,6 +30,7 @@ public class DefaultsController implements IDefaultsController {
 
     private ResizeAlgorithm algorithm;
     private String method;
+    private Format format;
 
     private String size;
     private String color;
@@ -114,11 +117,23 @@ public class DefaultsController implements IDefaultsController {
     }
 
     @Override
+    public Format getFormat() {
+        return format;
+    }
+
+    @Override
+    public void setFormat(Format format) {
+        this.format = format;
+        settingsController.saveFormat(this.format);
+    }
+
+    @Override
     public void restore() {
         imageAsset = settingsController.getImageAsset();
         resolutions = settingsController.getResolutions(DEFAULT_RESOLUTIONS);
         sourceResolution = settingsController.getSourceResolution(DEFAULT_SOURCE_RESOLUTION);
         algorithm = settingsController.getAlgorithm(DEFAULT_ALGORITHM);
+        format = settingsController.getFormat(DEFAULT_FORMAT);
         method = settingsController.getMethod(DEFAULT_METHOD);
         color = settingsController.getColor();
         size = settingsController.getSize();

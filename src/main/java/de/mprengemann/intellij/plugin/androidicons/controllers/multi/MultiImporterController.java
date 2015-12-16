@@ -2,7 +2,9 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.multi;
 
 import com.google.common.base.Objects;
 import com.intellij.openapi.project.Project;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
@@ -26,11 +28,13 @@ public class MultiImporterController implements IMultiImporterController {
     private String targetRoot;
     private String exportName;
     private Resolution mostRecentResolution;
+    private Format format;
 
-    public MultiImporterController() {
+    public MultiImporterController(IDefaultsController defaultsController) {
         this.observers = new HashSet<MultiImporterObserver>();
         this.imageInformationMap = new HashMap<Resolution, ImageInformation>();
         this.zipImageInformationMap = new HashMap<Resolution, List<ImageInformation>>();
+        this.format = defaultsController.getFormat();
     }
 
     @Override
@@ -62,9 +66,11 @@ public class MultiImporterController implements IMultiImporterController {
     public void addImage(File source, Resolution resolution) {
         imageInformationMap.put(resolution, ImageInformation.newBuilder()
                                                             .setImageFile(source)
-                                                            .setResolution(resolution)
+                                                            .setNinePatch(source.getName().endsWith(".9.png"))
+                                                            .setTargetResolution(resolution)
                                                             .build());
         mostRecentResolution = resolution;
+        setFormat(format);
         if (TextUtils.isEmpty(exportName)) {
             exportName = ExportNameUtils.getExportNameFromFilename(source.getName());
         }
@@ -77,10 +83,12 @@ public class MultiImporterController implements IMultiImporterController {
             zipImageInformationMap.put(resolution, new ArrayList<ImageInformation>());
         }
         zipImageInformationMap.get(resolution).add(ImageInformation.newBuilder()
-                                                                .setImageFile(source)
-                                                                .setResolution(resolution)
-                                                                .setExportName(FilenameUtils.getBaseName(source.getName()))
-                                                                .build());
+                                                                   .setImageFile(source)
+                                                                   .setTargetResolution(resolution)
+                                                                   .setFormat(format)
+                                                                   .setNinePatch(source.getName().endsWith(".9.png"))
+                                                                   .setExportName(FilenameUtils.getBaseName(source.getName()))
+                                                                   .build());
     }
 
     @Override
@@ -100,6 +108,7 @@ public class MultiImporterController implements IMultiImporterController {
             task.addImage(ImageInformation.newBuilder(imageInformationMap.get(resolution))
                                           .setExportPath(targetRoot)
                                           .setExportName(exportName)
+                                          .setFormat(format)
                                           .build());
         }
         return task;
@@ -153,6 +162,30 @@ public class MultiImporterController implements IMultiImporterController {
         for (MultiImporterObserver observer : observers) {
             observer.updated();
         }
+    }
+
+    @Override
+    public boolean containsNinePatch() {
+        for (ImageInformation information : imageInformationMap.values()) {
+            if (information.isNinePatch()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Format getFormat() {
+        return format;
+    }
+
+    @Override
+    public void setFormat(Format format) {
+        if (this.format == format) {
+            return;
+        }
+        this.format = containsNinePatch() ? Format.PNG : format;
+        notifyUpdated();
     }
 
     @Override

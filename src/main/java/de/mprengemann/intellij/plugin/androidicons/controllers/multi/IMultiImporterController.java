@@ -3,6 +3,7 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.multi;
 import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
@@ -36,4 +37,9 @@ public interface IMultiImporterController extends IController<MultiImporterObser
 
     void setMostRecentImage(Resolution resolution);
 
+    boolean containsNinePatch();
+
+    Format getFormat();
+
+    void setFormat(Format format);
 }

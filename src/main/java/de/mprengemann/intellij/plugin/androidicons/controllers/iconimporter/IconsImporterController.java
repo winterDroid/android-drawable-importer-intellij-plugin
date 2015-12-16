@@ -7,6 +7,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.icons.IIconPackCo
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -28,6 +29,7 @@ public class IconsImporterController implements IIconsImporterController {
     private ImageAsset selectedAsset;
     private String selectedSize;
     private String selectedColor;
+    private Format format;
     private String exportName;
     private String exportRoot;
 
@@ -50,6 +52,7 @@ public class IconsImporterController implements IIconsImporterController {
             this.selectedColor = defaultsController.getColor();
         }
 
+        this.format = Format.PNG;
         this.exportName = null;
         this.exportResolutions = defaultsController.getResolutions();
     }
@@ -246,15 +249,35 @@ public class IconsImporterController implements IIconsImporterController {
     }
 
     @Override
+    public void setFormat(Format format) {
+        if (this.format == format) {
+            return;
+        }
+        this.format = isNinePatch() ? Format.PNG : format;
+        notifyUpdated();
+    }
+
+    @Override
+    public boolean isNinePatch() {
+        return false;
+    }
+
+    @Override
+    public Format getFormat() {
+        return format;
+    }
+
+    @Override
     public RefactoringTask getTask(Project project) {
         final RefactoringTask task = new RefactoringTask(project);
         final ImageInformation baseInformation = ImageInformation.newBuilder()
                                                                  .setExportName(getExportName())
                                                                  .setExportPath(getExportRoot())
+                                                                 .setFormat(getFormat())
                                                                  .build();
         for (Resolution resolution : exportResolutions) {
             ImageInformation.Builder imageInformationBuilder = ImageInformation.newBuilder(baseInformation);
-            imageInformationBuilder.setResolution(resolution);
+            imageInformationBuilder.setTargetResolution(resolution);
             final File selectedImageFile;
             if (getSelectedAsset().getResolutions().contains(resolution)) {
                 selectedImageFile = getSelectedImageFile(resolution);

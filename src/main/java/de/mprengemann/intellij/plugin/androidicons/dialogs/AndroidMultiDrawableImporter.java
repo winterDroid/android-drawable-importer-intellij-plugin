@@ -39,6 +39,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.multi.MultiImport
 import de.mprengemann.intellij.plugin.androidicons.controllers.multi.MultiImporterObserver;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleMouseListener;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
@@ -53,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.activation.MimetypesFileTypeMap;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -119,6 +121,15 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
     private JLabel imageContainer;
     private ExportNameField resExportName;
     private JPanel uiContainer;
+    private JComboBox formatSpinner;
+    private final ActionListener formatListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            final JComboBox source = (JComboBox) e.getSource();
+            final Format selectedItem = (Format) source.getSelectedItem();
+            controller.setFormat(selectedItem);
+        }
+    };
     private final ISettingsController settingsController;
     private final IconApplication container;
 
@@ -129,7 +140,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
 
         container = ApplicationManager.getApplication().getComponent(IconApplication.class);
         settingsController = container.getControllerFactory().getSettingsController();
-        this.controller = new MultiImporterController();
+        this.controller = new MultiImporterController(container.getControllerFactory().getDefaultsController());
         this.controller.addObserver(this);
 
         initResourceRoot();
@@ -164,6 +175,9 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
     @Override
     protected void doOKAction() {
         controller.getTask(project).queue();
+        if (!controller.containsNinePatch()) {
+            container.getControllerFactory().getDefaultsController().setFormat(controller.getFormat());
+        }
         super.doOKAction();
     }
 
@@ -172,6 +186,18 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
         updateImage();
         updateTargetRoot();
         updateName();
+        updateFormat();
+    }
+
+    private void updateFormat() {
+        formatSpinner.removeActionListener(formatListener);
+        formatSpinner.removeAllItems();
+        for (Format format : Format.values()) {
+            formatSpinner.addItem(format);
+        }
+        formatSpinner.setSelectedItem(controller.getFormat());
+        formatSpinner.setEnabled(!controller.containsNinePatch());
+        formatSpinner.addActionListener(formatListener);
     }
 
     private void updateTargetRoot() {
@@ -201,7 +227,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
         if (file == null) {
             return;
         }
-        ImageUtils.updateImage(imageContainer, file);
+        ImageUtils.updateImage(imageContainer, file, controller.getFormat());
     }
 
     @Nullable

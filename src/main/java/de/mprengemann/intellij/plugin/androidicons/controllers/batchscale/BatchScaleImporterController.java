@@ -155,7 +155,7 @@ public class BatchScaleImporterController implements IBatchScaleImporterControll
         final List<ImageInformation> imageInformations = images.get(sourcePath);
         final List<Resolution> resolutions = new ArrayList<Resolution>();
         for (ImageInformation image : imageInformations) {
-            resolutions.add(image.getResolution());
+            resolutions.add(image.getTargetResolution());
         }
         return resolutions;
     }

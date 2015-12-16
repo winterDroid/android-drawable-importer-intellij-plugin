@@ -1,6 +1,7 @@
 package de.mprengemann.intellij.plugin.androidicons.controllers.defaults;
 
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
@@ -28,7 +29,9 @@ public interface IDefaultsController {
     String getMethod();
     void setMethod(String method);
 
-    void restore();
+    Format getFormat();
+    void setFormat(Format format);
 
+    void restore();
     void tearDown();
 }

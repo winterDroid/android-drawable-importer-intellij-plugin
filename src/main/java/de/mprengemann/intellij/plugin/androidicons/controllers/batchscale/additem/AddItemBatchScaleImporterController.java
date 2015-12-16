@@ -61,7 +61,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         this.observers = new HashSet<AddItemBatchScaleDialogObserver>();
         this.targetResolutions = new HashSet<Resolution>();
         for (ImageInformation imageInformation : information) {
-            targetResolutions.add(imageInformation.getResolution());
+            targetResolutions.add(imageInformation.getTargetResolution());
         }
         final ImageInformation baseInformation = information.get(0);
         init(baseInformation.getImageFile());
@@ -73,8 +73,8 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         this.exportRoot = baseInformation.getExportPath();
         this.isNinePatch = baseInformation.isNinePatch();
 
-        this.targetHeight = getOriginalTargetSize(sourceResolution, baseInformation.getResolution(), targetHeight, baseInformation.getFactor());
-        this.targetWidth = getOriginalTargetSize(sourceResolution, baseInformation.getResolution(), targetWidth, baseInformation.getFactor());
+        this.targetHeight = getOriginalTargetSize(sourceResolution, baseInformation.getTargetResolution(), targetHeight, baseInformation.getFactor());
+        this.targetWidth = getOriginalTargetSize(sourceResolution, baseInformation.getTargetResolution(), targetWidth, baseInformation.getFactor());
     }
 
     private void init(File file) {
@@ -241,7 +241,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         final List<ImageInformation> images = new ArrayList<ImageInformation>();
         for (Resolution resolution : targetResolutions) {
             images.add(ImageInformation.newBuilder(base)
-                                       .setResolution(resolution)
+                                       .setTargetResolution(resolution)
                                        .setFactor(getRealScaleFactor(resolution))
                                        .build());
         }
@@ -261,7 +261,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         final List<ImageInformation> images = new ArrayList<ImageInformation>();
         for (Resolution resolution : targetResolutions) {
             images.add(ImageInformation.newBuilder(base)
-                                       .setResolution(resolution)
+                                       .setTargetResolution(resolution)
                                        .setFactor(getRealScaleFactor(resolution))
                                        .build());
         }

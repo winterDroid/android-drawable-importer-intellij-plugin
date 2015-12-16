@@ -62,7 +62,7 @@ public class MultiImporterController implements IMultiImporterController {
     public void addImage(File source, Resolution resolution) {
         imageInformationMap.put(resolution, ImageInformation.newBuilder()
                                                             .setImageFile(source)
-                                                            .setResolution(resolution)
+                                                            .setTargetResolution(resolution)
                                                             .build());
         mostRecentResolution = resolution;
         if (TextUtils.isEmpty(exportName)) {
@@ -78,7 +78,7 @@ public class MultiImporterController implements IMultiImporterController {
         }
         zipImageInformationMap.get(resolution).add(ImageInformation.newBuilder()
                                                                 .setImageFile(source)
-                                                                .setResolution(resolution)
+                                                                .setTargetResolution(resolution)
                                                                 .setExportName(FilenameUtils.getBaseName(source.getName()))
                                                                 .build());
     }

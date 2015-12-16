@@ -48,7 +48,7 @@ public class ExportNameUtils {
             }
             for (Iterator<ImageInformation> iterator = scalingInformationList.iterator(); iterator.hasNext(); ) {
                 ImageInformation information = iterator.next();
-                builder.append(information.getResolution());
+                builder.append(information.getTargetResolution());
                 if (iterator.hasNext()) {
                     builder.append(", ");
                 }

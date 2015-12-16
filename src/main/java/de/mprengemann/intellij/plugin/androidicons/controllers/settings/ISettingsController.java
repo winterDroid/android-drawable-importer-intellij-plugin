@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
@@ -39,4 +40,7 @@ public interface ISettingsController extends IController<SettingsObserver> {
 
     void saveImageAsset(ImageAsset imageAsset);
     ImageAsset getImageAsset();
+
+    void saveFormat(Format format);
+    Format getFormat(Format defaultFormat);
 }

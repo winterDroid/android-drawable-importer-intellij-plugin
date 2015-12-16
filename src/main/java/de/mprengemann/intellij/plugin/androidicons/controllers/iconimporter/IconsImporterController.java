@@ -254,7 +254,7 @@ public class IconsImporterController implements IIconsImporterController {
                                                                  .build();
         for (Resolution resolution : exportResolutions) {
             ImageInformation.Builder imageInformationBuilder = ImageInformation.newBuilder(baseInformation);
-            imageInformationBuilder.setResolution(resolution);
+            imageInformationBuilder.setTargetResolution(resolution);
             final File selectedImageFile;
             if (getSelectedAsset().getResolutions().contains(resolution)) {
                 selectedImageFile = getSelectedImageFile(resolution);

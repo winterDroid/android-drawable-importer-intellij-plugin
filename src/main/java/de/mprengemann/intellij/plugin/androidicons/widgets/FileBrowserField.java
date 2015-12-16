@@ -96,9 +96,8 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
     private void initFileChooser() {
         addBrowseFolderListener(new TextBrowseFolderListener(descriptor) {
             @Override
-            @SuppressWarnings("deprecation") // Otherwise not compatible to AndroidStudio
-            protected void onFileChoosen(@NotNull VirtualFile chosenFile) {
-                super.onFileChoosen(chosenFile);
+            protected void onFileChosen(@NotNull VirtualFile chosenFile) {
+                super.onFileChosen(chosenFile);
                 if (settingsController != null) {
                     settingsController.saveLastImageFolder(chosenFile.getCanonicalPath());
                 }

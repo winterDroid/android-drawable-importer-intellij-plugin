@@ -432,9 +432,6 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         @Override
         public void customize(JList list, ImageAsset imageAsset, int index, boolean selected, boolean hasFocus) {
             LayeredIcon layeredIcon = new LayeredIcon(2);
-            if (controller == null) {
-                return;
-            }
             File imageFile = controller.getThumbnailFile(imageAsset);
             if (imageFile != null && imageFile.exists()) {
                 final ImageIcon icon = new ImageIcon(imageFile.getAbsolutePath());

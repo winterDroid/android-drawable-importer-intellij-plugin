@@ -14,6 +14,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefault
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.widgets.FileBrowserField;
@@ -50,6 +51,7 @@ public class EditItemsBatchScaleDialog extends DialogWrapper implements AddItemB
     private FileBrowserField targetRoot;
     private JComboBox algorithmSpinner;
     private JComboBox methodSpinner;
+    private JComboBox formatSpinner;
     private IAddItemBatchScaleImporterController controller;
     private final ActionListener sourceResolutionListener = new ActionListener() {
         @Override
@@ -85,6 +87,14 @@ public class EditItemsBatchScaleDialog extends DialogWrapper implements AddItemB
             } else {
                 controller.removeTargetResolution(resolution);
             }
+        }
+    };
+    private final ActionListener formatListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            final JComboBox source = (JComboBox) e.getSource();
+            final Format selectedItem = (Format) source.getSelectedItem();
+            controller.setFormat(selectedItem);
         }
     };
     private ISettingsController settingsController;
@@ -199,6 +209,17 @@ public class EditItemsBatchScaleDialog extends DialogWrapper implements AddItemB
         updateTargetResolutions();
         updateAlgorithms();
         updateAlgorithmMethod();
+        updateFormat();
+    }
+
+    private void updateFormat() {
+        formatSpinner.removeActionListener(formatListener);
+        formatSpinner.removeAllItems();
+        for (Format format : Format.values()) {
+            formatSpinner.addItem(format);
+        }
+        formatSpinner.setSelectedItem(controller.getFormat());
+        formatSpinner.addActionListener(formatListener);
     }
 
     private void updateAlgorithms() {

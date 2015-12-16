@@ -281,6 +281,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
                                                       .setAlgorithm(algorithm)
                                                       .setMethod(algorithm.getMethod(method))
                                                       .setExportPath(exportRoot)
+                                                      .setFormat(format)
                                                       .build();
         final List<ImageInformation> images = new ArrayList<ImageInformation>();
         for (Resolution resolution : targetResolutions) {

@@ -379,7 +379,12 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
 
     @Override
     public void updated() {
-        updateTable();
+        UIUtil.invokeLaterIfNeeded(new Runnable() {
+            @Override
+            public void run() {
+                updateTable();
+            }
+        });
     }
 
     private void updateTable() {

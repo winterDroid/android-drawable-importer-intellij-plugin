@@ -35,7 +35,7 @@ import java.util.List;
 
 public class ImageUtils {
 
-    public static void updateImage(JLabel imageContainer, File imageFile) {
+    public static void updateImage(JLabel imageContainer, File imageFile, Format format) {
         if (imageFile == null || !imageFile.exists()) {
             return;
         }
@@ -65,7 +65,11 @@ public class ImageUtils {
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         int x = (imageViewWidth - imageWidth) / 2;
         int y = (imageViewHeight - imageHeight) / 2;
-        g2.drawImage(img, x, y, imageWidth, imageHeight, null);
+        if (format == Format.PNG) {
+            g2.drawImage(img, x, y, imageWidth, imageHeight, null);
+        } else {
+            g2.drawImage(img, x, y, imageWidth, imageHeight, Color.WHITE, null);
+        }
         g2.dispose();
         imageContainer.setIcon(new ImageIcon(tmp));
     }
@@ -398,7 +402,9 @@ public class ImageUtils {
 
     private static BufferedImage ensureJpgCompatibility(BufferedImage image) {
         BufferedImage imageRGB = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-        imageRGB.createGraphics().drawImage(image, 0, 0, imageRGB.getWidth(), imageRGB.getHeight(), Color.WHITE, null);
+        Graphics2D g2 = imageRGB.createGraphics();
+        g2.drawImage(image, 0, 0, imageRGB.getWidth(), imageRGB.getHeight(), Color.WHITE, null);
+        g2.dispose();
         return imageRGB;
     }
 }

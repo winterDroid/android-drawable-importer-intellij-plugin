@@ -179,8 +179,10 @@ public class EditItemsBatchScaleDialog extends DialogWrapper implements AddItemB
             final Resolution originalSourceResolution = sourceResolution.get(i);
             final String selectedFile = selectedFiles.get(i);
 
-            final List<ImageInformation> imageInformation =
-                controller.getImageInformation(project, selectedFile, originalImageInformation, originalSourceResolution);
+            final List<ImageInformation> imageInformation = controller.getImageInformation(project,
+                                                                                           selectedFile,
+                                                                                           originalImageInformation,
+                                                                                           originalSourceResolution);
             batchScaleController.addImage(controller.getSourceResolution(), imageInformation);
         }
 

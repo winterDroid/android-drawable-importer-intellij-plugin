@@ -15,6 +15,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefault
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
@@ -60,6 +61,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private FileBrowserField targetRoot;
     private JComboBox algorithmSpinner;
     private JComboBox methodSpinner;
+    private JComboBox formatSpinner;
     private IAddItemBatchScaleImporterController controller;
     private final ActionListener sourceResolutionListener = new ActionListener() {
         @Override
@@ -106,6 +108,14 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
             } else if (source == targetWidth) {
                 controller.setTargetWidth(((Number) targetWidth.getValue()).intValue());
             }
+        }
+    };
+    private final ActionListener formatListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            final JComboBox source = (JComboBox) e.getSource();
+            final Format selectedItem = (Format) source.getSelectedItem();
+            controller.setFormat(selectedItem);
         }
     };
     private ISettingsController settingsController;
@@ -157,7 +167,6 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         initCheckBoxes();
         initExportName();
         initExportRoot();
-        initAlgorithms();
         init();
         pack();
         setResizable(false);
@@ -173,12 +182,6 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
                 controller.setTargetRoot(file.getAbsolutePath());
             }
         });
-    }
-
-    private void initAlgorithms() {
-        for (ResizeAlgorithm algorithm : ResizeAlgorithm.values()) {
-            algorithmSpinner.addItem(algorithm);
-        }
     }
 
     private void initCheckBoxes() {
@@ -240,6 +243,9 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         defaultsController.setMethod(controller.getMethod());
         defaultsController.setSourceResolution(controller.getSourceResolution());
         defaultsController.setResolutions(controller.getTargetResolutions());
+        if (!controller.isNinePatch()) {
+            defaultsController.setFormat(controller.getFormat());
+        }
         super.doOKAction();
     }
 
@@ -251,6 +257,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         updateTargetResolutions();
         updateAlgorithms();
         updateAlgorithmMethod();
+        updateFormat();
         updateImage(controller.getImageFile());
     }
 
@@ -274,6 +281,17 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         methodSpinner.setSelectedItem(controller.getMethod());
         methodSpinner.setEnabled(methods.size() > 1);
         methodSpinner.addActionListener(methodListener);
+    }
+
+    private void updateFormat() {
+        formatSpinner.removeActionListener(formatListener);
+        formatSpinner.removeAllItems();
+        for (Format format : Format.values()) {
+            formatSpinner.addItem(format);
+        }
+        formatSpinner.setSelectedItem(controller.getFormat());
+        formatSpinner.setEnabled(!controller.isNinePatch());
+        formatSpinner.addActionListener(formatListener);
     }
 
     private void updateTargetSize() {
@@ -331,7 +349,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
                     imageContainer.setIcon(null);
                     return;
                 }
-                ImageUtils.updateImage(imageContainer, file);
+                ImageUtils.updateImage(imageContainer, file, controller.getFormat());
             }
         });
     }

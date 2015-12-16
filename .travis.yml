@@ -1,5 +1,13 @@
 language: java
 sudo: false
+env:
+  matrix:
+  - IDEA_VERSION=IC-14.1.5
+  - IDEA_VERSION=IC-15.0.2
+  - IDEA_VERSION=LATEST-EAP-SNAPSHOT
+  global:
+  - secure: rxGwzbOkokoH6I4X54YGz0rMaAou8p49Nmxx+QijDtkVY9vmmp4QiNBas9xvokLb+PzRZLRaPc/KzoUyHanxyQto81sIANPMzJOM+USFKyEjm7omhEGPTQKmO0JilyIBQLs0jwOeL+rk52gK8azsehx6mHb9YxZYhICjY5Wf2zM=
+  - secure: oeD5dImqF6/3mt093p0f36/1/axtg1cXF7L9mlvXDkLWsGB9XGj+9FOmD9fcTanCJsHn9udBMZm1GGNsNQTmrVJy67R6w46Z5Q6x2PuzjksUajnaDdeck4ZjEEVjR/W/yinSPA+bPUrbeiQNr2aMNg+sevZYPxC+D/mAkc0gLek=
 
 notifications:
   email: false
@@ -13,5 +21,13 @@ before_script:
   - if [ $TRAVIS_BRANCH == 'develop' ]; then export PLUGIN_CHANNEL=nightly; fi
 
 script:
-- ./gradlew buildPlugin
-- if [ $TRAVIS_PULL_REQUEST == 'false' ]; then ./gradlew publishPlugin; fi
+  - ./gradlew buildPlugin -PideaVersion=$IDEA_VERSION
+
+after_success:
+  - curl -Lo travis_after_all.py https://raw.github.com/winterDroid/travis_after_all/master/travis_after_all.py
+  - python travis_after_all.py
+  - export $(cat .to_export_back) &> /dev/null
+  - if [[ $BUILD_LEADER = YES && "$BUILD_AGGREGATE_STATUS" = "others_succeeded" && $TRAVIS_PULL_REQUEST = 'false' ]]; then ./gradlew publishPlugin; fi
+
+after_script:
+  - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS

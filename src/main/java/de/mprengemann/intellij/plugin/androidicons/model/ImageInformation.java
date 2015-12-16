@@ -124,7 +124,7 @@ public class ImageInformation {
         private boolean ninePatch = false;
         private Resolution targetResolution = Resolution.XHDPI;
         private ResizeAlgorithm algorithm = DefaultsController.DEFAULT_ALGORITHM;
-        private Object method = DefaultsController.DEFAULT_METHOD;
+        private Object method = DefaultsController.DEFAULT_ALGORITHM.getMethod(DefaultsController.DEFAULT_METHOD);
         private Format format = DefaultsController.DEFAULT_FORMAT;
 
         private Builder() {

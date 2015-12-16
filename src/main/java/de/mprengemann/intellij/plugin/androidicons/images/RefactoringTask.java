@@ -52,12 +52,11 @@ public class RefactoringTask extends Task.Backgroundable {
     private ProgressIndicator progressIndicator;
 
     public RefactoringTask(Project project) {
-        super(project, "Import Images", true);
+        super(project, "Importing Images...", true);
         this.project = project;
     }
 
     private void refactor() throws IOException, ProcessCanceledException {
-        progressIndicator.setText("Import Images");
         progressIndicator.checkCanceled();
         progressIndicator.setIndeterminate(false);
         for (int i = 0; i < imageInformationList.size(); i++) {
@@ -69,7 +68,7 @@ public class RefactoringTask extends Task.Backgroundable {
         }
 
         progressIndicator.setIndeterminate(true);
-        progressIndicator.setText2("");
+        progressIndicator.setText2("Finishing");
         UIUtil.invokeLaterIfNeeded(new DumbAwareRunnable() {
             public void run() {
                 try {

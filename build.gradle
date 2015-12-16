@@ -20,6 +20,7 @@ intellij {
     version 'IC-14.1.5'
     pluginName 'android-drawable-importer-intellij-plugin'
     plugins 'android'
+    updateSinceUntilBuild false
     downloadSources !(System.getenv('CI') ?: 'false')
 
     publish {

@@ -125,7 +125,6 @@ public class EditItemsBatchScaleDialog extends DialogWrapper implements AddItemB
         initAlgorithms();
         init();
         pack();
-        setResizable(false);
 
         controller.addObserver(this);
     }

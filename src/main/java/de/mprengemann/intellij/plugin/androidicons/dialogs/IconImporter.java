@@ -206,7 +206,6 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         controller.addObserver(this);
         init();
         pack();
-        setResizable(false);
     }
 
     private void initSearch() {

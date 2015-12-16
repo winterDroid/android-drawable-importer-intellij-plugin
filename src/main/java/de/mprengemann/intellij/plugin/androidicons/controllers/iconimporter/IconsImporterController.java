@@ -2,10 +2,12 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.iconimporter;
 
 import com.intellij.openapi.project.Project;
 import com.jgoodies.common.base.Objects;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.IIconPackController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.androidicons.IAndroidIconsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialicons.IMaterialIconsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -27,22 +29,32 @@ public class IconsImporterController implements IIconsImporterController {
     private ImageAsset selectedAsset;
     private String selectedSize;
     private String selectedColor;
+    private Format format;
     private String exportName;
     private String exportRoot;
 
-    public IconsImporterController(IAndroidIconsController androidIconsController,
+    public IconsImporterController(IDefaultsController defaultsController,
+                                   IAndroidIconsController androidIconsController,
                                    IMaterialIconsController materialIconsController) {
         this.androidIconsController = androidIconsController;
         this.materialIconsController = materialIconsController;
         this.observerSet = new HashSet<IconsImporterObserver>();
 
-        final String category = androidIconsController.getCategories().get(0);
-        this.selectedAsset = androidIconsController.getAssets(category).get(0);
-        this.selectedSize = selectedAsset.getSizes().get(0);
-        this.selectedColor = selectedAsset.getColors().get(0);
+        final ImageAsset defaultImageAsset = defaultsController.getImageAsset();
+        if (defaultImageAsset == null) {
+            final String category = androidIconsController.getCategories().get(0);
+            this.selectedAsset = androidIconsController.getAssets(category).get(0);
+            this.selectedSize = selectedAsset.getSizes().get(0);
+            this.selectedColor = selectedAsset.getColors().get(0);
+        } else {
+            this.selectedAsset = defaultImageAsset;
+            this.selectedSize = defaultsController.getSize();
+            this.selectedColor = defaultsController.getColor();
+        }
 
+        this.format = Format.PNG;
         this.exportName = null;
-        this.exportResolutions = new HashSet<Resolution>();
+        this.exportResolutions = defaultsController.getResolutions();
     }
 
     @Override
@@ -237,15 +249,35 @@ public class IconsImporterController implements IIconsImporterController {
     }
 
     @Override
+    public void setFormat(Format format) {
+        if (this.format == format) {
+            return;
+        }
+        this.format = isNinePatch() ? Format.PNG : format;
+        notifyUpdated();
+    }
+
+    @Override
+    public boolean isNinePatch() {
+        return false;
+    }
+
+    @Override
+    public Format getFormat() {
+        return format;
+    }
+
+    @Override
     public RefactoringTask getTask(Project project) {
         final RefactoringTask task = new RefactoringTask(project);
         final ImageInformation baseInformation = ImageInformation.newBuilder()
                                                                  .setExportName(getExportName())
                                                                  .setExportPath(getExportRoot())
+                                                                 .setFormat(getFormat())
                                                                  .build();
         for (Resolution resolution : exportResolutions) {
             ImageInformation.Builder imageInformationBuilder = ImageInformation.newBuilder(baseInformation);
-            imageInformationBuilder.setResolution(resolution);
+            imageInformationBuilder.setTargetResolution(resolution);
             final File selectedImageFile;
             if (getSelectedAsset().getResolutions().contains(resolution)) {
                 selectedImageFile = getSelectedImageFile(resolution);
@@ -273,6 +305,11 @@ public class IconsImporterController implements IIconsImporterController {
         } else if (!exportResolutions.contains(resolution) && export) {
             exportResolutions.add(resolution);
         }
+    }
+
+    @Override
+    public Set<Resolution> getExportResolutions() {
+        return exportResolutions;
     }
 
     private void notifyUpdated() {

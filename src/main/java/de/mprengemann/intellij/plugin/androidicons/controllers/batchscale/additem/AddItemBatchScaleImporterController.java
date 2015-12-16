@@ -4,7 +4,9 @@ import com.google.common.base.Objects;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
@@ -14,7 +16,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,43 +36,49 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     private String method;
     private float aspectRatio;
     private boolean isNinePatch;
+    private Format format;
 
-    public AddItemBatchScaleImporterController(VirtualFile root, File file) {
+    public AddItemBatchScaleImporterController(IDefaultsController defaultsController,
+                                               VirtualFile root,
+                                               File file) {
         this.observers = new HashSet<AddItemBatchScaleDialogObserver>();
-        this.targetResolutions = new HashSet<Resolution>(Arrays.asList(Resolution.values()));
+        this.targetResolutions = defaultsController.getResolutions();
         init(file);
 
         final String fileName = file.getName();
         exportName = ExportNameUtils.getExportNameFromFilename(fileName);
-        sourceResolution = Resolution.XHDPI;
-        algorithm = ResizeAlgorithm.SCALR;
-        method = algorithm.getMethods().get(0);
+        sourceResolution = defaultsController.getSourceResolution();
+        algorithm = defaultsController.getAlgorithm();
+        method = defaultsController.getMethod();
         if (root != null) {
             exportRoot = root.getCanonicalPath();
         } else {
             exportRoot = "";
         }
         isNinePatch = fileName.endsWith(".9.png");
+        format = isNinePatch ? Format.PNG : defaultsController.getFormat();
     }
 
-    public AddItemBatchScaleImporterController(Resolution sourceResolution, List<ImageInformation> information) {
+    public AddItemBatchScaleImporterController(Resolution sourceResolution,
+                                               List<ImageInformation> information) {
         this.observers = new HashSet<AddItemBatchScaleDialogObserver>();
         this.targetResolutions = new HashSet<Resolution>();
         for (ImageInformation imageInformation : information) {
-            targetResolutions.add(imageInformation.getResolution());
+            targetResolutions.add(imageInformation.getTargetResolution());
         }
-        final ImageInformation baseinformation = information.get(0);
-        init(baseinformation.getImageFile());
+        final ImageInformation baseInformation = information.get(0);
+        init(baseInformation.getImageFile());
 
-        this.exportName = baseinformation.getExportName();
+        this.exportName = baseInformation.getExportName();
         this.sourceResolution = sourceResolution;
-        this.algorithm = baseinformation.getAlgorithm();
-        this.method = algorithm.getPrettyMethod(baseinformation.getMethod());
-        this.exportRoot = baseinformation.getExportPath();
-        this.isNinePatch = baseinformation.isNinePatch();
+        this.algorithm = baseInformation.getAlgorithm();
+        this.method = algorithm.getPrettyMethod(baseInformation.getMethod());
+        this.exportRoot = baseInformation.getExportPath();
+        this.isNinePatch = baseInformation.isNinePatch();
+        this.format = baseInformation.getFormat();
 
-        this.targetHeight = getOriginalTargetSize(sourceResolution, baseinformation.getResolution(), targetHeight, baseinformation.getFactor());
-        this.targetWidth = getOriginalTargetSize(sourceResolution, baseinformation.getResolution(), targetWidth, baseinformation.getFactor());
+        this.targetHeight = getOriginalTargetSize(sourceResolution, baseInformation.getTargetResolution(), targetHeight, baseInformation.getFactor());
+        this.targetWidth = getOriginalTargetSize(sourceResolution, baseInformation.getTargetResolution(), targetWidth, baseInformation.getFactor());
     }
 
     private void init(File file) {
@@ -187,7 +194,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     }
 
     @Override
-    public void setTargetName(String name) {
+    public void setExportName(String name) {
         if (exportName.equals(name)) {
             return;
         }
@@ -220,6 +227,25 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     }
 
     @Override
+    public Format getFormat() {
+        return format;
+    }
+
+    @Override
+    public boolean isNinePatch() {
+        return isNinePatch;
+    }
+
+    @Override
+    public void setFormat(Format format) {
+        if (this.format == format) {
+            return;
+        }
+        this.format = format;
+        notifyUpdated();
+    }
+
+    @Override
     public int[] getScaledSize(Resolution resolution) {
         final float scaleFactor = RefactorUtils.getScaleFactor(resolution, sourceResolution);
         return new int[] {(int) (scaleFactor * targetWidth), (int) (scaleFactor * targetHeight)};
@@ -234,11 +260,33 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
                                                       .setMethod(algorithm.getMethod(method))
                                                       .setExportPath(exportRoot)
                                                       .setNinePatch(isNinePatch)
+                                                      .setFormat(format)
                                                       .build();
         final List<ImageInformation> images = new ArrayList<ImageInformation>();
         for (Resolution resolution : targetResolutions) {
             images.add(ImageInformation.newBuilder(base)
-                                       .setResolution(resolution)
+                                       .setTargetResolution(resolution)
+                                       .setFactor(getRealScaleFactor(resolution))
+                                       .build());
+        }
+        return images;
+    }
+
+    @Override
+    public List<ImageInformation> getImageInformation(Project project,
+                                                      String selectedFile,
+                                                      List<ImageInformation> imageInformation,
+                                                      Resolution sourceResolution) {
+        final ImageInformation base = ImageInformation.newBuilder(imageInformation.get(0))
+                                                      .setAlgorithm(algorithm)
+                                                      .setMethod(algorithm.getMethod(method))
+                                                      .setExportPath(exportRoot)
+                                                      .setFormat(format)
+                                                      .build();
+        final List<ImageInformation> images = new ArrayList<ImageInformation>();
+        for (Resolution resolution : targetResolutions) {
+            images.add(ImageInformation.newBuilder(base)
+                                       .setTargetResolution(resolution)
                                        .setFactor(getRealScaleFactor(resolution))
                                        .build());
         }

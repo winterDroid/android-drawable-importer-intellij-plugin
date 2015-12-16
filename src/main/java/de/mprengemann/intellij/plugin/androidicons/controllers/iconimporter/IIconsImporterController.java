@@ -4,11 +4,13 @@ import com.intellij.openapi.project.Project;
 import de.mprengemann.intellij.plugin.androidicons.controllers.IController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.IIconPackController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 public interface IIconsImporterController extends IController<IconsImporterObserver>{
     void setExportRoot(String exportRoot);
@@ -55,8 +57,15 @@ public interface IIconsImporterController extends IController<IconsImporterObser
 
     String getSelectedCategory();
 
+    void setFormat(Format format);
+
+    boolean isNinePatch();
+
+    Format getFormat();
+
     RefactoringTask getTask(Project project);
 
     void setExportResolution(Resolution resolution, boolean export);
 
+    Set<Resolution> getExportResolutions();
 }

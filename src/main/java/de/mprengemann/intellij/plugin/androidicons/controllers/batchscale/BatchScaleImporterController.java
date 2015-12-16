@@ -2,7 +2,9 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.batchscale;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import de.mprengemann.intellij.plugin.androidicons.dialogs.AddItemBatchScaleDialog;
+import de.mprengemann.intellij.plugin.androidicons.dialogs.EditItemsBatchScaleDialog;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -67,30 +69,54 @@ public class BatchScaleImporterController implements IBatchScaleImporterControll
     }
 
     @Override
-    public void editImage(Project project, Module module, int index) {
-        if (index >= sourceFiles.size() ||
-            0 > index) {
+    public void editImages(Project project, Module module, int[] indices) {
+        if (indices.length == 0) {
             return;
         }
-        final String sourceFile = sourceFiles.get(index);
-        final List<ImageInformation> imageInformations = images.get(sourceFile);
+        DialogWrapper dialogWrapper;
+        if (indices.length == 1){
+            final int index = indices[0];
+            if (index >= sourceFiles.size() || 0 > index) {
+                return;
+            }
+            final String sourceFile = sourceFiles.get(index);
+            final List<ImageInformation> imageInformation = images.get(sourceFile);
 
-        AddItemBatchScaleDialog addItemBatchScaleDialog =
-            new AddItemBatchScaleDialog(project,
+            dialogWrapper = new AddItemBatchScaleDialog(project,
                                         module,
                                         this,
                                         sourceResolutions.get(sourceFile),
-                                        imageInformations);
-        addItemBatchScaleDialog.show();
+                                        imageInformation);
+        } else {
+            final List<String> selectedFiles = new ArrayList<String>();
+            for (int index : indices) {
+                selectedFiles.add(sourceFiles.get(index));
+            }
+            final List<List<ImageInformation>> imageInformation = new ArrayList<List<ImageInformation>>();
+            final List<Resolution> sourceResolution = new ArrayList<Resolution>();
+            for (String selectedFile : selectedFiles) {
+                imageInformation.add(images.get(selectedFile));
+                sourceResolution.add(sourceResolutions.get(selectedFile));
+            }
+            dialogWrapper = new EditItemsBatchScaleDialog(project,
+                                                          module,
+                                                          this,
+                                                          selectedFiles,
+                                                          sourceResolution,
+                                                          imageInformation);
+        }
+        dialogWrapper.show();
     }
 
     @Override
-    public void removeImage(int index) {
-        if (index >= sourceFiles.size() ||
-            0 > index) {
-            return;
+    public void removeImages(int[] indices) {
+        for (int index : indices) {
+            if (index >= sourceFiles.size() ||
+                0 > index) {
+                return;
+            }
+            removeImage(sourceFiles.get(index));
         }
-        removeImage(sourceFiles.get(index));
     }
 
     @Override
@@ -129,7 +155,7 @@ public class BatchScaleImporterController implements IBatchScaleImporterControll
         final List<ImageInformation> imageInformations = images.get(sourcePath);
         final List<Resolution> resolutions = new ArrayList<Resolution>();
         for (ImageInformation image : imageInformations) {
-            resolutions.add(image.getResolution());
+            resolutions.add(image.getTargetResolution());
         }
         return resolutions;
     }

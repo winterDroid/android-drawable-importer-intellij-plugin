@@ -15,8 +15,8 @@ package de.mprengemann.intellij.plugin.androidicons.util;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.ui.UIUtil;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
-import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -35,11 +35,8 @@ import java.util.List;
 
 public class ImageUtils {
 
-    public static final String TARGET_FILE_PATTERN = "%s/drawable-%s/%s.png";
-
-    public static void updateImage(JLabel imageContainer, File imageFile) {
-        if (imageFile == null ||
-            !imageFile.exists()) {
+    public static void updateImage(JLabel imageContainer, File imageFile, Format format) {
+        if (imageFile == null || !imageFile.exists()) {
             return;
         }
         BufferedImage img = null;
@@ -53,11 +50,10 @@ public class ImageUtils {
         }
         int imageWidth = img.getWidth();
         int imageHeight = img.getHeight();
-        int imageViewWidth = imageContainer.getWidth();
-        int imageViewHeight = imageContainer.getHeight();
+        int imageViewWidth = (int) imageContainer.getPreferredSize().getWidth();
+        int imageViewHeight = (int) imageContainer.getPreferredSize().getHeight();
         double factor = getScaleFactorToFit(new Dimension(imageWidth, imageHeight),
                                             new Dimension(imageViewWidth, imageViewHeight));
-        factor = Math.min(factor, 1f);
         imageWidth = (int) (factor * imageWidth);
         imageHeight = (int) (factor * imageHeight);
         if (imageWidth <= 0 || imageHeight <= 0 ||
@@ -69,7 +65,11 @@ public class ImageUtils {
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         int x = (imageViewWidth - imageWidth) / 2;
         int y = (imageViewHeight - imageHeight) / 2;
-        g2.drawImage(img, x, y, imageWidth, imageHeight, null);
+        if (format == Format.PNG) {
+            g2.drawImage(img, x, y, imageWidth, imageHeight, null);
+        } else {
+            g2.drawImage(img, x, y, imageWidth, imageHeight, Color.WHITE, null);
+        }
         g2.dispose();
         imageContainer.setIcon(new ImageIcon(tmp));
     }
@@ -88,7 +88,7 @@ public class ImageUtils {
             double dScaleHeight = getScaleFactor(original.height, toFit.height);
             dScale = Math.min(dScaleHeight, dScaleWidth);
         }
-        return dScale;
+        return Math.min(1f, dScale);
     }
 
     public static BufferedImage resizeNormalImage(ImageInformation information) throws IOException {
@@ -383,25 +383,28 @@ public class ImageUtils {
         return null;
     }
 
-    public static File saveImageTempFile(BufferedImage resizeImageJpg,
+    public static File saveImageTempFile(BufferedImage resizedImage,
                                          ImageInformation imageInformation) throws IOException {
         File exportFile = imageInformation.getTempImage();
         if (exportFile != null) {
             if (!exportFile.getParentFile().exists()) {
                 FileUtils.forceMkdir(exportFile.getParentFile());
             }
-            ImageIO.write(resizeImageJpg, "PNG", exportFile);
+            if (imageInformation.getFormat() == Format.JPG) {
+                resizedImage = ensureJpgCompatibility(resizedImage);
+            }
+            ImageIO.write(resizedImage, imageInformation.getFormat().toString(), exportFile);
             return exportFile;
         } else {
             throw new IOException("Couldn't find .idea path.");
         }
     }
 
-    public static File getTargetFile(String path, Resolution resolution, String exportName) {
-        return new File(String.format(TARGET_FILE_PATTERN, path, resolution.toString().toLowerCase(), exportName));
-    }
-
-    public static File getTargetFile(ImageInformation information) {
-        return getTargetFile(information.getExportPath(), information.getResolution(), information.getExportName());
+    private static BufferedImage ensureJpgCompatibility(BufferedImage image) {
+        BufferedImage imageRGB = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = imageRGB.createGraphics();
+        g2.drawImage(image, 0, 0, imageRGB.getWidth(), imageRGB.getHeight(), Color.WHITE, null);
+        g2.dispose();
+        return imageRGB;
     }
 }

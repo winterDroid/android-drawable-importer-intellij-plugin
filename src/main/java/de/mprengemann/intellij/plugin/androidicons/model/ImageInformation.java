@@ -14,36 +14,39 @@
 package de.mprengemann.intellij.plugin.androidicons.model;
 
 import com.intellij.openapi.application.PathManager;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.DefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
-import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
-import org.imgscalr.Scalr;
 
 import java.io.File;
 
 public class ImageInformation {
 
+    public static final String TARGET_FILE_PATTERN = "%s/drawable-%s/%s.%s";
     public static final String TMP_ROOT_DIR = "plugin-images";
     private final File imageFile;
-    private final Resolution resolution;
+    private final Resolution targetResolution;
     private final float factor;
     private final String exportPath;
+    private final Format format;
     private final String exportName;
     private final boolean ninePatch;
     private ResizeAlgorithm algorithm;
     private Object method;
 
     private ImageInformation(File imageFile,
-                             Resolution resolution,
+                             Resolution targetResolution,
                              float factor,
                              String exportPath,
+                             Format format,
                              String exportName,
                              boolean isNinePatch,
                              ResizeAlgorithm algorithm,
                              Object method) {
         this.imageFile = imageFile;
-        this.resolution = resolution;
+        this.targetResolution = targetResolution;
         this.factor = factor;
         this.exportPath = exportPath;
+        this.format = format;
         this.exportName = exportName;
         this.ninePatch = isNinePatch;
         this.algorithm = algorithm;
@@ -63,19 +66,15 @@ public class ImageInformation {
     }
 
     public File getTempImage() {
-        return new File(getTempDir(), String.format("%s/%s", resolution.toString().toLowerCase(), exportName));
-    }
-
-    public File getTargetFile() {
-        return ImageUtils.getTargetFile(this);
+        return new File(getTempDir(), String.format("%s/%s", targetResolution.toString().toLowerCase(), exportName));
     }
 
     public File getImageFile() {
         return imageFile;
     }
 
-    public Resolution getResolution() {
-        return resolution;
+    public Resolution getTargetResolution() {
+        return targetResolution;
     }
 
     public float getFactor() {
@@ -102,6 +101,18 @@ public class ImageInformation {
         return method;
     }
 
+    public Format getFormat() {
+        return format;
+    }
+
+    public File getTargetFile() {
+        return new File(String.format(TARGET_FILE_PATTERN,
+                                      exportPath,
+                                      targetResolution.toString().toLowerCase(),
+                                      exportName,
+                                      format.toString().toLowerCase()));
+    }
+
     public static class Builder {
 
         private File imageFile = null;
@@ -110,23 +121,25 @@ public class ImageInformation {
         private float factor = 1f;
 
         // Optional parameters
-        private Resolution resolution = Resolution.XHDPI;
         private boolean ninePatch = false;
-        private ResizeAlgorithm algorithm = ResizeAlgorithm.SCALR;
-        private Object method = Scalr.Method.AUTOMATIC;
+        private Resolution targetResolution = Resolution.XHDPI;
+        private ResizeAlgorithm algorithm = DefaultsController.DEFAULT_ALGORITHM;
+        private Object method = DefaultsController.DEFAULT_METHOD;
+        private Format format = DefaultsController.DEFAULT_FORMAT;
 
         private Builder() {
         }
 
         private Builder(ImageInformation imageInformation) {
             this.imageFile = imageInformation.imageFile;
-            this.resolution = imageInformation.resolution;
+            this.targetResolution = imageInformation.targetResolution;
             this.factor = imageInformation.factor;
             this.exportPath = imageInformation.exportPath;
             this.exportName = imageInformation.exportName;
             this.ninePatch = imageInformation.ninePatch;
             this.algorithm = imageInformation.algorithm;
             this.method = imageInformation.method;
+            this.format = imageInformation.format;
         }
 
         public Builder setExportName(String exportName) {
@@ -139,8 +152,8 @@ public class ImageInformation {
             return this;
         }
 
-        public Builder setResolution(Resolution resolution) {
-            this.resolution = resolution;
+        public Builder setTargetResolution(Resolution targetResolution) {
+            this.targetResolution = targetResolution;
             return this;
         }
 
@@ -151,7 +164,7 @@ public class ImageInformation {
 
         public Builder setNinePatch(boolean ninePatch) {
             this.ninePatch = ninePatch;
-            return this;
+            return setFormat(format);
         }
 
         public Builder setAlgorithm(ResizeAlgorithm algorithm) {
@@ -172,11 +185,17 @@ public class ImageInformation {
             return this;
         }
 
+        public Builder setFormat(Format format) {
+            this.format = isNinePatch() ? Format.PNG : format;
+            return this;
+        }
+
         public ImageInformation build() {
             return new ImageInformation(this.imageFile,
-                                        this.resolution,
+                                        this.targetResolution,
                                         this.factor,
                                         this.exportPath,
+                                        this.format,
                                         this.exportName,
                                         this.ninePatch,
                                         this.algorithm,
@@ -199,8 +218,8 @@ public class ImageInformation {
             return factor;
         }
 
-        public Resolution getResolution() {
-            return resolution;
+        public Resolution getTargetResolution() {
+            return targetResolution;
         }
 
         public boolean isNinePatch() {
@@ -213,6 +232,10 @@ public class ImageInformation {
 
         public Object getMethod() {
             return method;
+        }
+
+        public Format getFormat() {
+            return format;
         }
     }
 }

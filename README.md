@@ -9,21 +9,20 @@ You are able to select the asset, specify your color, change the target resource
 
 All the missing folders will be created automatically. If there are already drawables with the same name, you will be warned.  
 
-You can even search for your desired asset.
-
-*Currently Material Icons 2.0 is not supported, but it will be added soon.*
+You can even search for your desired asset by just start typing when the first spinner has focus.
    
 ![alt text](src/main/resources/images/icons_importer.png "Icons Import dialog")
    
 *You can download AndroidIcons [here](http://www.androidicons.com/) and Material Icons [here](https://github.com/google/material-design-icons) for free.*
 
 ## Batch Drawable Import  
-Select an asset and specify the source resolution. You can change the source size of the image as well. Specify all resolutions, to which the drawable should be resized to.  
+Select assets (or a whole folder) and specify the source resolutions. You can change the source size of every image as well. Specify all resolutions, to which it should be resized to.  
 
-This also works with 9-Patch-Images. But take care: sometimes it's necessary to remove / add about one "pixel" in the 9-Patch-Editor. But just try it :)  
+This works also with 9-Patch-Images. But take care: sometimes it's necessary to remove / add the one or other "pixel" in the 9-Patch-Editor. But just give it a try :)  
    
 ![alt text](src/main/resources/images/scale.png "Batch Drawable Import dialog")
 ![alt text](src/main/resources/images/scale_add.png "Batch Drawable Import Add dialog")
+![alt text](src/main/resources/images/scale_batch_edit.png "Batch Drawable Import batch edit dialog")
 
 ## Multisource-Drawable
 Ever got a zip with drawables for your Android project by your designer with the following structure?  
@@ -37,10 +36,12 @@ Ever got a zip with drawables for your Android project by your designer with the
 ```
             
 No problem! Now you can just select for every resolution a different asset, specify one name for them, and the rest is done by the plugin.
+Or even easier, you can select the whole zip, and this plugin will auto extract the asset to the best matching folder.
    
 ![alt text](src/main/resources/images/multi.png "Multi drawable sources import dialog")
+![alt text](src/main/resources/images/multi_zip.png "Multi drawable sources import dialog for ZIP archives")
 
-*Hint: When you select an asset, you can also just drag a file from your finder / explorer to the text field and drop it there.*
+*Hint: When you select an asset, you can also just drag a file from your explorer to the text field and drop it there.*
 
 ## Install Instructions (IntelliJ, Android Studio)
 
@@ -86,6 +87,8 @@ Afterwards click on the *Close* button. If IntelliJ asks you to restart, allow i
   `./gradlew runIdea`
 
 # Contribution
+
+[![Build Status](https://travis-ci.org/winterDroid/android-drawable-importer-intellij-plugin.svg)](https://travis-ci.org/winterDroid/android-drawable-importer-intellij-plugin)
 
 1. Fork it
 2. Checkout develop branch

@@ -2,29 +2,39 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.multi;
 
 import com.google.common.base.Objects;
 import com.intellij.openapi.project.Project;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.images.RefactoringTask;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ExportNameUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class MultiImporterController implements IMultiImporterController {
 
     private Set<MultiImporterObserver> observers;
+    private Map<Resolution, List<ImageInformation>> zipImageInformationMap;
     private Map<Resolution, ImageInformation> imageInformationMap;
     private String targetRoot;
     private String exportName;
     private Resolution mostRecentResolution;
+    private Format format;
 
-    public MultiImporterController() {
+    public MultiImporterController(IDefaultsController defaultsController) {
         this.observers = new HashSet<MultiImporterObserver>();
         this.imageInformationMap = new HashMap<Resolution, ImageInformation>();
+        this.zipImageInformationMap = new HashMap<Resolution, List<ImageInformation>>();
+        this.format = defaultsController.getFormat();
     }
 
     @Override
@@ -56,9 +66,11 @@ public class MultiImporterController implements IMultiImporterController {
     public void addImage(File source, Resolution resolution) {
         imageInformationMap.put(resolution, ImageInformation.newBuilder()
                                                             .setImageFile(source)
-                                                            .setResolution(resolution)
+                                                            .setNinePatch(source.getName().endsWith(".9.png"))
+                                                            .setTargetResolution(resolution)
                                                             .build());
         mostRecentResolution = resolution;
+        setFormat(format);
         if (TextUtils.isEmpty(exportName)) {
             exportName = ExportNameUtils.getExportNameFromFilename(source.getName());
         }
@@ -66,13 +78,51 @@ public class MultiImporterController implements IMultiImporterController {
     }
 
     @Override
+    public void addZipImage(File source, Resolution resolution) {
+        if (!zipImageInformationMap.containsKey(resolution)) {
+            zipImageInformationMap.put(resolution, new ArrayList<ImageInformation>());
+        }
+        zipImageInformationMap.get(resolution).add(ImageInformation.newBuilder()
+                                                                   .setImageFile(source)
+                                                                   .setTargetResolution(resolution)
+                                                                   .setFormat(format)
+                                                                   .setNinePatch(source.getName().endsWith(".9.png"))
+                                                                   .setExportName(FilenameUtils.getBaseName(source.getName()))
+                                                                   .build());
+    }
+
+    @Override
+    public Map<Resolution, List<ImageInformation>> getZipImages() {
+        return zipImageInformationMap;
+    }
+
+    @Override
+    public void resetZipInformation() {
+        zipImageInformationMap.clear();
+    }
+
+    @Override
     public RefactoringTask getTask(Project project) {
         RefactoringTask task = new RefactoringTask(project);
-        for (ImageInformation imageInformation : imageInformationMap.values()) {
-            task.addImage(ImageInformation.newBuilder(imageInformation)
+        for (Resolution resolution : imageInformationMap.keySet()) {
+            task.addImage(ImageInformation.newBuilder(imageInformationMap.get(resolution))
                                           .setExportPath(targetRoot)
                                           .setExportName(exportName)
+                                          .setFormat(format)
                                           .build());
+        }
+        return task;
+    }
+
+    @Override
+    public RefactoringTask getZipTask(Project project, File tempDir) {
+        RefactoringTask task = new ZipRefactoringTask(project, tempDir);
+        for (Resolution resolution : zipImageInformationMap.keySet()) {
+            for (ImageInformation imageInformation : zipImageInformationMap.get(resolution)) {
+                task.addImage(ImageInformation.newBuilder(imageInformation)
+                                              .setExportPath(targetRoot)
+                                              .build());
+            }
         }
         return task;
     }
@@ -82,7 +132,7 @@ public class MultiImporterController implements IMultiImporterController {
         if (Objects.equal(exportName, this.exportName)) {
             return;
         }
-        this.exportName = exportName;
+        this.exportName = ExportNameUtils.getExportNameFromFilename(exportName);
         notifyUpdated();
     }
 
@@ -115,7 +165,50 @@ public class MultiImporterController implements IMultiImporterController {
     }
 
     @Override
+    public boolean containsNinePatch() {
+        for (ImageInformation information : imageInformationMap.values()) {
+            if (information.isNinePatch()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Format getFormat() {
+        return format;
+    }
+
+    @Override
+    public void setFormat(Format format) {
+        if (this.format == format) {
+            return;
+        }
+        this.format = containsNinePatch() ? Format.PNG : format;
+        notifyUpdated();
+    }
+
+    @Override
     public void tearDown() {
         observers.clear();
+    }
+
+    private static class ZipRefactoringTask extends RefactoringTask {
+        private File tempDir;
+
+        public ZipRefactoringTask(Project project, File tempDir) {
+            super(project);
+            this.tempDir = tempDir;
+        }
+
+        @Override
+        public boolean shouldStartInBackground() {
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute() {
+            FileUtils.deleteQuietly(tempDir);
+        }
     }
 }

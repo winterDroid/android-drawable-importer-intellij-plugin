@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="de.mprengemann.intellij.plugin.androidicons.dialogs.EditItemsBatchScaleDialog">
+  <grid id="27dc6" binding="uiContainer" layout-manager="GridLayoutManager" row-count="10" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="900" height="250"/>
+    </constraints>
+    <properties>
+      <maximumSize width="-1" height="-1"/>
+      <minimumSize width="900" height="250"/>
+      <preferredSize width="-1" height="-1"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <component id="269fb" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Source-Resolution"/>
+        </properties>
+      </component>
+      <component id="f83f3" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Target-Resolution"/>
+        </properties>
+      </component>
+      <component id="d940e" class="javax.swing.JCheckBox" binding="LDPICheckBox" default-binding="true">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="541" height="20"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="LDPI"/>
+        </properties>
+      </component>
+      <component id="29f05" class="javax.swing.JCheckBox" binding="MDPICheckBox" default-binding="true">
+        <constraints>
+          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="541" height="20"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="MDPI"/>
+        </properties>
+      </component>
+      <component id="41eaf" class="javax.swing.JCheckBox" binding="HDPICheckBox" default-binding="true">
+        <constraints>
+          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="541" height="20"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="HDPI"/>
+        </properties>
+      </component>
+      <component id="c65f2" class="javax.swing.JCheckBox" binding="XHDPICheckBox" default-binding="true">
+        <constraints>
+          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="541" height="20"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="XHDPI"/>
+        </properties>
+      </component>
+      <component id="125bf" class="javax.swing.JComboBox" binding="sourceResolutionSpinner">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="56fa4" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Target-Root"/>
+        </properties>
+      </component>
+      <component id="3d284" class="de.mprengemann.intellij.plugin.androidicons.widgets.FileBrowserField" binding="targetRoot" custom-create="true">
+        <constraints>
+          <grid row="5" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <editable value="false"/>
+        </properties>
+      </component>
+      <component id="9fa77" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Algorithm"/>
+        </properties>
+      </component>
+      <component id="169fe" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Method"/>
+        </properties>
+      </component>
+      <component id="7f611" class="javax.swing.JComboBox" binding="algorithmSpinner">
+        <constraints>
+          <grid row="6" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="f56cf" class="javax.swing.JComboBox" binding="methodSpinner">
+        <constraints>
+          <grid row="7" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="a482f" class="javax.swing.JCheckBox" binding="XXHDPICheckBox" default-binding="true">
+        <constraints>
+          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="541" height="20"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="XXHDPI"/>
+        </properties>
+      </component>
+      <component id="7c7f8" class="javax.swing.JCheckBox" binding="XXXHDPICheckBox" default-binding="true">
+        <constraints>
+          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="541" height="20"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="XXXHDPI"/>
+        </properties>
+      </component>
+      <component id="6b77d" class="javax.swing.JCheckBox" binding="TVDPICheckBox">
+        <constraints>
+          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="541" height="20"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="TVDPI"/>
+        </properties>
+      </component>
+      <component id="12e27" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Format"/>
+        </properties>
+      </component>
+      <component id="172fc" class="javax.swing.JComboBox" binding="formatSpinner">
+        <constraints>
+          <grid row="8" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <model/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

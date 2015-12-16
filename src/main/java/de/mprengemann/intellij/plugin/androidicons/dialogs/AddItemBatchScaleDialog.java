@@ -11,9 +11,11 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.BatchS
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.AddItemBatchScaleDialogObserver;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.AddItemBatchScaleImporterController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.additem.IAddItemBatchScaleImporterController;
+import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
@@ -51,6 +53,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private JCheckBox XHDPICheckBox;
     private JCheckBox XXHDPICheckBox;
     private JCheckBox XXXHDPICheckBox;
+    private JCheckBox TVDPICheckBox;
     private JComboBox sourceResolutionSpinner;
     private JFormattedTextField targetWidth;
     private JFormattedTextField targetHeight;
@@ -58,7 +61,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private FileBrowserField targetRoot;
     private JComboBox algorithmSpinner;
     private JComboBox methodSpinner;
-    private JCheckBox TVDPICheckBox;
+    private JComboBox formatSpinner;
     private IAddItemBatchScaleImporterController controller;
     private final ActionListener sourceResolutionListener = new ActionListener() {
         @Override
@@ -107,7 +110,16 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
             }
         }
     };
+    private final ActionListener formatListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            final JComboBox source = (JComboBox) e.getSource();
+            final Format selectedItem = (Format) source.getSelectedItem();
+            controller.setFormat(selectedItem);
+        }
+    };
     private ISettingsController settingsController;
+    private IDefaultsController defaultsController;
 
     public AddItemBatchScaleDialog(final Project project,
                                    final Module module,
@@ -130,7 +142,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         }
 
         final File realFile = new File(path);
-        initSettingsController();
+        initRequiredControllers();
         initController(realFile);
         initTargetRoot();
         initInternal();
@@ -145,7 +157,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         this.project = project;
         this.module = module;
         this.batchScaleController = batchScaleImporterController;
-        initSettingsController();
+        initRequiredControllers();
         initController(sourceResolution, information);
         initTargetRoot();
         initInternal();
@@ -155,7 +167,6 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         initCheckBoxes();
         initExportName();
         initExportRoot();
-        initAlgorithms();
         init();
         pack();
         setResizable(false);
@@ -171,14 +182,6 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
                 controller.setTargetRoot(file.getAbsolutePath());
             }
         });
-    }
-
-    private void initAlgorithms() {
-        for (ResizeAlgorithm algorithm : ResizeAlgorithm.values()) {
-            algorithmSpinner.addItem(algorithm);
-        }
-        algorithmSpinner.setSelectedItem(ResizeAlgorithm.SCALR);
-        algorithmSpinner.addActionListener(algorithmListener);
     }
 
     private void initCheckBoxes() {
@@ -206,19 +209,20 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         targetName.addPropertyChangeListener("value", new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-                controller.setTargetName((String) targetName.getValue());
+                controller.setExportName((String) targetName.getValue());
             }
         });
     }
 
     private void initController(File file) {
-        final VirtualFile root = settingsController.getResRootForProject(project);
-        controller = new AddItemBatchScaleImporterController(root, file);
+        final VirtualFile root = settingsController.getResourceRoot();
+        controller = new AddItemBatchScaleImporterController(defaultsController, root, file);
     }
 
-    private void initSettingsController() {
+    private void initRequiredControllers() {
         final IconApplication container = ApplicationManager.getApplication().getComponent(IconApplication.class);
         settingsController = container.getControllerFactory().getSettingsController();
+        defaultsController = container.getControllerFactory().getDefaultsController();
     }
 
     private void initController(Resolution sourceResolution, List<ImageInformation> information) {
@@ -233,7 +237,15 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
 
     @Override
     protected void doOKAction() {
-        batchScaleController.addImage(controller.getSourceResolution(), controller.getImageInformation(project));
+        final List<ImageInformation> imageInformation = controller.getImageInformation(project);
+        batchScaleController.addImage(controller.getSourceResolution(), imageInformation);
+        defaultsController.setAlgorithm(controller.getAlgorithm());
+        defaultsController.setMethod(controller.getMethod());
+        defaultsController.setSourceResolution(controller.getSourceResolution());
+        defaultsController.setResolutions(controller.getTargetResolutions());
+        if (!controller.isNinePatch()) {
+            defaultsController.setFormat(controller.getFormat());
+        }
         super.doOKAction();
     }
 
@@ -243,8 +255,20 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         updateSourceResolution();
         updateTargetSize();
         updateTargetResolutions();
+        updateAlgorithms();
         updateAlgorithmMethod();
+        updateFormat();
         updateImage(controller.getImageFile());
+    }
+
+    private void updateAlgorithms() {
+        algorithmSpinner.removeActionListener(algorithmListener);
+        algorithmSpinner.removeAllItems();
+        for (ResizeAlgorithm algorithm : ResizeAlgorithm.values()) {
+            algorithmSpinner.addItem(algorithm);
+        }
+        algorithmSpinner.setSelectedItem(controller.getAlgorithm());
+        algorithmSpinner.addActionListener(algorithmListener);
     }
 
     private void updateAlgorithmMethod() {
@@ -257,6 +281,17 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         methodSpinner.setSelectedItem(controller.getMethod());
         methodSpinner.setEnabled(methods.size() > 1);
         methodSpinner.addActionListener(methodListener);
+    }
+
+    private void updateFormat() {
+        formatSpinner.removeActionListener(formatListener);
+        formatSpinner.removeAllItems();
+        for (Format format : Format.values()) {
+            formatSpinner.addItem(format);
+        }
+        formatSpinner.setSelectedItem(controller.getFormat());
+        formatSpinner.setEnabled(!controller.isNinePatch());
+        formatSpinner.addActionListener(formatListener);
     }
 
     private void updateTargetSize() {
@@ -294,11 +329,12 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
                                                 XXHDPICheckBox,
                                                 XXXHDPICheckBox,
                                                 TVDPICheckBox)) {
-            checkBox.addActionListener(resolutionActionListener);
+            checkBox.removeActionListener(resolutionActionListener);
             final Resolution resolution = ((ResolutionButtonModel) checkBox.getModel()).getResolution();
             checkBox.setSelected(resolutions.contains(resolution));
             final int[] sizes = controller.getScaledSize(resolution);
             checkBox.setText(String.format("%s (%d px x %d px)", resolution, sizes[0], sizes[1]));
+            checkBox.addActionListener(resolutionActionListener);
         }
     }
 
@@ -313,7 +349,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
                     imageContainer.setIcon(null);
                     return;
                 }
-                ImageUtils.updateImage(imageContainer, file);
+                ImageUtils.updateImage(imageContainer, file, controller.getFormat());
             }
         });
     }

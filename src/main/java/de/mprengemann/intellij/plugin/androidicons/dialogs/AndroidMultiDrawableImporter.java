@@ -151,7 +151,6 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
         setTitle("Android Multi Drawable Importer");
         init();
         pack();
-        setResizable(false);
     }
 
     @Nullable

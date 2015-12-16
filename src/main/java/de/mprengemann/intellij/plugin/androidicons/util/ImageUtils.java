@@ -15,8 +15,8 @@ package de.mprengemann.intellij.plugin.androidicons.util;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.ui.UIUtil;
+import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
-import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,8 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImageUtils {
-
-    public static final String TARGET_FILE_PATTERN = "%s/drawable-%s/%s.png";
 
     public static void updateImage(JLabel imageContainer, File imageFile) {
         if (imageFile == null || !imageFile.exists()) {
@@ -381,25 +379,26 @@ public class ImageUtils {
         return null;
     }
 
-    public static File saveImageTempFile(BufferedImage resizeImageJpg,
+    public static File saveImageTempFile(BufferedImage resizedImage,
                                          ImageInformation imageInformation) throws IOException {
         File exportFile = imageInformation.getTempImage();
         if (exportFile != null) {
             if (!exportFile.getParentFile().exists()) {
                 FileUtils.forceMkdir(exportFile.getParentFile());
             }
-            ImageIO.write(resizeImageJpg, "PNG", exportFile);
+            if (imageInformation.getFormat() == Format.JPG) {
+                resizedImage = ensureJpgCompatibility(resizedImage);
+            }
+            ImageIO.write(resizedImage, imageInformation.getFormat().toString(), exportFile);
             return exportFile;
         } else {
             throw new IOException("Couldn't find .idea path.");
         }
     }
 
-    public static File getTargetFile(String path, Resolution resolution, String exportName) {
-        return new File(String.format(TARGET_FILE_PATTERN, path, resolution.toString().toLowerCase(), exportName));
-    }
-
-    public static File getTargetFile(ImageInformation information) {
-        return getTargetFile(information.getExportPath(), information.getResolution(), information.getExportName());
+    private static BufferedImage ensureJpgCompatibility(BufferedImage image) {
+        BufferedImage imageRGB = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        imageRGB.createGraphics().drawImage(image, 0, 0, imageRGB.getWidth(), imageRGB.getHeight(), Color.WHITE, null);
+        return imageRGB;
     }
 }

@@ -30,6 +30,7 @@ public class ImageInformation {
     private final Format format;
     private final String exportName;
     private final boolean ninePatch;
+    private final boolean vector;
     private ResizeAlgorithm algorithm;
     private Object method;
 
@@ -40,6 +41,7 @@ public class ImageInformation {
                              Format format,
                              String exportName,
                              boolean isNinePatch,
+                             boolean isVector,
                              ResizeAlgorithm algorithm,
                              Object method) {
         this.imageFile = imageFile;
@@ -49,6 +51,7 @@ public class ImageInformation {
         this.format = format;
         this.exportName = exportName;
         this.ninePatch = isNinePatch;
+        this.vector = isVector;
         this.algorithm = algorithm;
         this.method = method;
     }
@@ -113,6 +116,10 @@ public class ImageInformation {
                                       format.toString().toLowerCase()));
     }
 
+    public boolean isVector() {
+        return vector;
+    }
+
     public static class Builder {
 
         private File imageFile = null;
@@ -122,6 +129,7 @@ public class ImageInformation {
 
         // Optional parameters
         private boolean ninePatch = false;
+        private boolean vector = false;
         private Resolution targetResolution = Resolution.XHDPI;
         private ResizeAlgorithm algorithm = DefaultsController.DEFAULT_ALGORITHM;
         private Object method = DefaultsController.DEFAULT_ALGORITHM.getMethod(DefaultsController.DEFAULT_METHOD);
@@ -137,6 +145,7 @@ public class ImageInformation {
             this.exportPath = imageInformation.exportPath;
             this.exportName = imageInformation.exportName;
             this.ninePatch = imageInformation.ninePatch;
+            this.vector = imageInformation.vector;
             this.algorithm = imageInformation.algorithm;
             this.method = imageInformation.method;
             this.format = imageInformation.format;
@@ -159,6 +168,11 @@ public class ImageInformation {
 
         public Builder setFactor(float factor) {
             this.factor = factor;
+            return this;
+        }
+
+        public Builder setVector(boolean vector) {
+            this.vector = vector;
             return this;
         }
 
@@ -198,6 +212,7 @@ public class ImageInformation {
                                         this.format,
                                         this.exportName,
                                         this.ninePatch,
+                                        this.vector,
                                         this.algorithm,
                                         this.method);
         }
@@ -224,6 +239,10 @@ public class ImageInformation {
 
         public boolean isNinePatch() {
             return ninePatch;
+        }
+
+        public boolean isVector() {
+            return vector;
         }
 
         public ResizeAlgorithm getAlgorithm() {

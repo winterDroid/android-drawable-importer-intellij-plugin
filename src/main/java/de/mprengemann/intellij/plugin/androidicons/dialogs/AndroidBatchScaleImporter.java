@@ -125,7 +125,6 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         initTable();
         init();
         pack();
-        setResizable(false);
     }
 
     private void initButtons(final Project project) {

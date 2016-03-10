@@ -57,7 +57,6 @@ public class IconPack {
         IconPack iconPack = (IconPack) o;
 
         return id.equals(iconPack.id);
-
     }
 
     @Override

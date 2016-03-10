@@ -91,6 +91,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
     private JComboBox searchField;
     private JCheckBox TVDPICheckBox;
     private JComboBox formatSpinner;
+
     private final ActionListener iconPackActionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -206,7 +207,6 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
         controller.addObserver(this);
         init();
         pack();
-        setResizable(false);
     }
 
     private void initSearch() {
@@ -323,7 +323,7 @@ public class IconImporter extends DialogWrapper implements IconsImporterObserver
     private void updateFormat() {
         formatSpinner.removeActionListener(formatListener);
         formatSpinner.removeAllItems();
-        for (Format format : Format.values()) {
+        for (Format format : Format.nonVectorValues()) {
             formatSpinner.addItem(format);
         }
         formatSpinner.setSelectedItem(controller.getFormat());

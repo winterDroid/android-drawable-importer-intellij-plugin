@@ -33,7 +33,6 @@ public class ResourcesDialog extends DialogWrapper {
 
     public ResourcesDialog(Project project, final List<VirtualFile> items, ResourceSelectionListener listener) {
         super(project, true);
-        setResizable(false);
         this.listener = listener;
         list.setRadioListListener(new RadioListListener() {
             @Override

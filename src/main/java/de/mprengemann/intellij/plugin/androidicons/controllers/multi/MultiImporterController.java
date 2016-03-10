@@ -82,12 +82,14 @@ public class MultiImporterController implements IMultiImporterController {
         if (!zipImageInformationMap.containsKey(resolution)) {
             zipImageInformationMap.put(resolution, new ArrayList<ImageInformation>());
         }
+        final String fileName = FilenameUtils.getBaseName(source.getName())
+                                             .replaceAll("(?i)[-_]+" + resolution.toString(), "");
         zipImageInformationMap.get(resolution).add(ImageInformation.newBuilder()
                                                                    .setImageFile(source)
                                                                    .setTargetResolution(resolution)
                                                                    .setFormat(format)
                                                                    .setNinePatch(source.getName().endsWith(".9.png"))
-                                                                   .setExportName(FilenameUtils.getBaseName(source.getName()))
+                                                                   .setExportName(fileName)
                                                                    .build());
     }
 

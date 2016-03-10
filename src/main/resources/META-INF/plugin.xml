@@ -43,6 +43,7 @@
     <change-notes><![CDATA[
       - Upgrade to Material Icons 2.2.0<br>
       - Added support for Vector Drawable Import from Material Icons<br>
+      - Removes resolution from filename if imported from Zip archive<br>
       - Fixed issue with Android Studio 1.5
     ]]>
     </change-notes>

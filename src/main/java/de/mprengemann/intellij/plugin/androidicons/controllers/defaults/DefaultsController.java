@@ -13,10 +13,10 @@ import java.util.Set;
 public class DefaultsController implements IDefaultsController {
 
     public static final HashSet<Resolution> DEFAULT_RESOLUTIONS = new HashSet<Resolution>(Arrays.asList(Resolution.MDPI,
-                                                                                                Resolution.HDPI,
-                                                                                                Resolution.XHDPI,
-                                                                                                Resolution.XXHDPI,
-                                                                                                Resolution.XXXHDPI));
+                                                                                                        Resolution.HDPI,
+                                                                                                        Resolution.XHDPI,
+                                                                                                        Resolution.XXHDPI,
+                                                                                                        Resolution.XXXHDPI));
     public static final Resolution DEFAULT_SOURCE_RESOLUTION = Resolution.XHDPI;
     public static final ResizeAlgorithm DEFAULT_ALGORITHM = ResizeAlgorithm.SCALR;
     public static final String DEFAULT_METHOD = DEFAULT_ALGORITHM.getMethods().get(0);

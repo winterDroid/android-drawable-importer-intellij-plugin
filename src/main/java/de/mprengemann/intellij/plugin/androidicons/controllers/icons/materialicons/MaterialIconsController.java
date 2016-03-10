@@ -48,6 +48,11 @@ public class MaterialIconsController implements IMaterialIconsController {
     }
 
     @Override
+    public boolean supportsVectors() {
+        return true;
+    }
+
+    @Override
     public Resolution getThumbnailResolution() {
         return Resolution.MDPI;
     }
@@ -79,13 +84,29 @@ public class MaterialIconsController implements IMaterialIconsController {
 
     @Override
     public File getImageFile(ImageAsset asset, String color, String size, Resolution resolution) {
-        final String localPath = String.format("%s/drawable-%s/%s_%s_%s.png",
+        final String localPath;
+        if (resolution == Resolution.ANYDPI) {
+            localPath = getVectorFilePath(asset);
+        } else {
+            localPath = getImageFilePath(asset, color, size, resolution);
+        }
+        return ResourceLoader.getAssetResource(new File(iconPack.getPath(), localPath).getPath());
+    }
+
+    private String getImageFilePath(ImageAsset asset, String color, String size, Resolution resolution) {
+        return String.format("%s/drawable-%s/%s_%s_%s.png",
                                                asset.getCategory(),
                                                resolution.toString().toLowerCase(),
                                                asset.getName(),
                                                color,
                                                size);
-        return ResourceLoader.getAssetResource(new File(iconPack.getPath(), localPath).getPath());
+    }
+
+    private String getVectorFilePath(ImageAsset asset) {
+        return String.format("%s/drawable-%s-v21/%s_black_24dp.xml",
+                             asset.getCategory(),
+                             Resolution.ANYDPI.toString().toLowerCase(),
+                             asset.getName());
     }
 
     @Override

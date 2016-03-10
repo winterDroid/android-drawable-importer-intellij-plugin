@@ -187,7 +187,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
     private void updateFormat() {
         formatSpinner.removeActionListener(formatListener);
         formatSpinner.removeAllItems();
-        for (Format format : Format.values()) {
+        for (Format format : Format.nonVectorValues()) {
             formatSpinner.addItem(format);
         }
         formatSpinner.setSelectedItem(controller.getFormat());

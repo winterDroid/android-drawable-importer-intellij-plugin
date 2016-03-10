@@ -3,6 +3,5 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.icons.materialic
 import de.mprengemann.intellij.plugin.androidicons.controllers.icons.IIconPackController;
 
 public interface IMaterialIconsController extends IIconPackController {
-
     void openHelp();
 }

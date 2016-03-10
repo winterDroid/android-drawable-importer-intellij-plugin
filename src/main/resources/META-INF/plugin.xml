@@ -21,6 +21,7 @@
         <b>1. AndroidIcons and Material Icons Drawable Import</b><br>
         You are able to select the asset, specify your color, change the target resource name and select all the resolutions you want to import.<br>
         All the missing folders will be created automatically. If there are already drawables with the same name, you will be warned. You can even search for your desired asset by just start typing when the first spinner has focus.<br>
+        Since Material Icons provide also Vector Drawables, those can be imported now as well!<br>
         <br>
         <b>2. Batch Drawable Import</b><br>
         Select assets (or a whole folder) and specify the source resolutions. You can change the source size of every image as well. Specify all resolutions, to which it should be resized to.<br>
@@ -40,14 +41,9 @@
     </description>
 
     <change-notes><![CDATA[
-      - Added option to select PNG or JPG as image format<br>
-      - Allow ZIP archive import from Multisource Importer<br>
-      - Support multi add/edit in Batch Scale Importer<br>
-      - Improved Search<br>
-      - Remember last settings like target resolutions<br>
-      - Upgrade to Material Icons 2.1.1<br>
-      - Fixed LDPI size calculation<br>
-      - Fixes various FileChooser issues
+      - Upgrade to Material Icons 2.2.0<br>
+      - Added support for Vector Drawable Import from Material Icons<br>
+      - Fixed issue with Android Studio 1.5
     ]]>
     </change-notes>
 
@@ -85,6 +81,8 @@
             <separator />
             <action id="de.mprengemann.intellij.plugin.androidicons.actions.IconsAction"
                     class="de.mprengemann.intellij.plugin.androidicons.actions.IconsAction" />
+            <action id="de.mprengemann.intellij.plugin.androidicons.actions.VectorsAction"
+                    class="de.mprengemann.intellij.plugin.androidicons.actions.VectorsAction" />
             <action id="de.mprengemann.intellij.plugin.androidicons.actions.AndroidBatchImportAction"
                     class="de.mprengemann.intellij.plugin.androidicons.actions.AndroidBatchImportAction" />
             <action id="de.mprengemann.intellij.plugin.androidicons.AndroidMultiDrawableImporter"

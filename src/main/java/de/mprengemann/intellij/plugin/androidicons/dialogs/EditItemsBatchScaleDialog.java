@@ -214,7 +214,7 @@ public class EditItemsBatchScaleDialog extends DialogWrapper implements AddItemB
     private void updateFormat() {
         formatSpinner.removeActionListener(formatListener);
         formatSpinner.removeAllItems();
-        for (Format format : Format.values()) {
+        for (Format format : Format.nonVectorValues()) {
             formatSpinner.addItem(format);
         }
         formatSpinner.setSelectedItem(controller.getFormat());
@@ -246,7 +246,7 @@ public class EditItemsBatchScaleDialog extends DialogWrapper implements AddItemB
     private void updateSourceResolution() {
         sourceResolutionSpinner.removeActionListener(sourceResolutionListener);
         sourceResolutionSpinner.removeAllItems();
-        for (Resolution resolution : Resolution.values()) {
+        for (Resolution resolution : Resolution.nonVectorValues()) {
             sourceResolutionSpinner.addItem(resolution);
         }
         sourceResolutionSpinner.setSelectedItem(controller.getSourceResolution());

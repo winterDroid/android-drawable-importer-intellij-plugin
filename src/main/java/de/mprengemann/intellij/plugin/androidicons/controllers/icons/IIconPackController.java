@@ -25,6 +25,8 @@ public interface IIconPackController {
 
     IconPack getIconPack();
 
+    boolean supportsVectors();
+
     Resolution getThumbnailResolution();
 
 }

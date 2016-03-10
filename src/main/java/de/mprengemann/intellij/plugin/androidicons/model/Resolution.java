@@ -28,7 +28,16 @@ public enum Resolution {
     XHDPI,
     XXHDPI,
     XXXHDPI,
-    TVDPI;
+    TVDPI,
+    ANYDPI;
+
+    private static final Resolution[] RESOLUTIONS_WITHOUT_SVG = new Resolution[] {
+        LDPI, MDPI, HDPI, XHDPI, XXHDPI, XXXHDPI, TVDPI
+    };
+
+    public static Resolution[] nonVectorValues() {
+        return RESOLUTIONS_WITHOUT_SVG;
+    }
 
     public static Resolution from(String value) {
         if (TextUtils.isEmpty(value)) {
@@ -48,6 +57,8 @@ public enum Resolution {
             return XXXHDPI;
         } else if (value.equalsIgnoreCase(TVDPI.toString())) {
             return TVDPI;
+        } else if (value.equalsIgnoreCase(ANYDPI.toString())) {
+            return ANYDPI;
         }
         return null;
     }

@@ -65,7 +65,7 @@ public class ImageUtils {
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         int x = (imageViewWidth - imageWidth) / 2;
         int y = (imageViewHeight - imageHeight) / 2;
-        if (format == Format.PNG) {
+        if (format == Format.PNG || format == Format.XML) {
             g2.drawImage(img, x, y, imageWidth, imageHeight, null);
         } else {
             g2.drawImage(img, x, y, imageWidth, imageHeight, Color.WHITE, null);

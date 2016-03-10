@@ -15,6 +15,7 @@ import de.mprengemann.intellij.plugin.androidicons.util.RefactorUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,19 +43,37 @@ public class IconsImporterController implements IIconsImporterController {
 
         final ImageAsset defaultImageAsset = defaultsController.getImageAsset();
         if (defaultImageAsset == null) {
-            final String category = androidIconsController.getCategories().get(0);
-            this.selectedAsset = androidIconsController.getAssets(category).get(0);
-            this.selectedSize = selectedAsset.getSizes().get(0);
-            this.selectedColor = selectedAsset.getColors().get(0);
+            final String category = materialIconsController.getCategories().get(0);
+            setSelectedAsset(materialIconsController.getAssets(category).get(0));
         } else {
-            this.selectedAsset = defaultImageAsset;
             this.selectedSize = defaultsController.getSize();
             this.selectedColor = defaultsController.getColor();
+            setSelectedAsset(defaultImageAsset);
         }
 
         this.format = Format.PNG;
         this.exportName = null;
         this.exportResolutions = defaultsController.getResolutions();
+    }
+
+    public IconsImporterController(IDefaultsController defaultsController,
+                                   IMaterialIconsController materialIconsController) {
+        this.androidIconsController = null;
+        this.materialIconsController = materialIconsController;
+        this.observerSet = new HashSet<IconsImporterObserver>();
+
+        final ImageAsset defaultImageAsset = defaultsController.getImageAsset();
+        if (defaultImageAsset == null ||
+            !defaultImageAsset.getIconPack().equals(materialIconsController.getIconPack().getId())) {
+            final String category = materialIconsController.getCategories().get(0);
+            setSelectedAsset(materialIconsController.getAssets(category).get(0));
+        } else {
+            setSelectedAsset(defaultImageAsset);
+        }
+
+        this.exportName = null;
+        this.format = Format.XML;
+        this.exportResolutions = Collections.singleton(Resolution.ANYDPI);
     }
 
     @Override
@@ -97,10 +116,11 @@ public class IconsImporterController implements IIconsImporterController {
     @NotNull
     private IIconPackController getControllerForIconPackId(String iconPack) {
         IIconPackController controller;
-        if (androidIconsController.getId().equals(iconPack)) {
-            controller = androidIconsController;
-        } else if (materialIconsController.getId().equals(iconPack)) {
+        if (materialIconsController.getId().equals(iconPack)) {
             controller = materialIconsController;
+        } else if (androidIconsController != null &&
+                   androidIconsController.getId().equals(iconPack)) {
+            controller = androidIconsController;
         } else {
             throw new IllegalArgumentException(iconPack + " not found!");
         }
@@ -278,16 +298,18 @@ public class IconsImporterController implements IIconsImporterController {
         for (Resolution resolution : exportResolutions) {
             ImageInformation.Builder imageInformationBuilder = ImageInformation.newBuilder(baseInformation);
             imageInformationBuilder.setTargetResolution(resolution);
+            imageInformationBuilder.setVector(resolution == Resolution.ANYDPI);
             final File selectedImageFile;
             if (getSelectedAsset().getResolutions().contains(resolution)) {
                 selectedImageFile = getSelectedImageFile(resolution);
             } else {
-                if (getSelectedIconPack().getId().equals("android_icons")) {
-                    selectedImageFile = getSelectedImageFile(Resolution.XXHDPI);
-                    imageInformationBuilder.setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.XXHDPI));
-                } else if (getSelectedIconPack().getId().equals("material_icons")) {
+                if (getSelectedIconPack().getId().equals(materialIconsController.getIconPack().getId())) {
                     selectedImageFile = getSelectedImageFile(Resolution.HDPI);
                     imageInformationBuilder.setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.HDPI));
+                } else if (androidIconsController != null &&
+                           getSelectedIconPack().getId().equals(androidIconsController.getIconPack().getId())) {
+                    selectedImageFile = getSelectedImageFile(Resolution.XXHDPI);
+                    imageInformationBuilder.setFactor(RefactorUtils.getScaleFactor(resolution, Resolution.XXHDPI));
                 } else {
                     throw new IllegalStateException();
                 }

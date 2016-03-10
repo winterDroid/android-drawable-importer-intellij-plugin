@@ -63,7 +63,11 @@ public class RefactoringTask extends Task.Backgroundable {
             ImageInformation information = imageInformationList.get(i);
             progressIndicator.setText2(information.getExportName());
             progressIndicator.checkCanceled();
-            exportTempImage(information);
+            if (information.isVector()) {
+                copyTempImage(information);
+            } else {
+                exportTempImage(information);
+            }
             progressIndicator.setFraction((float) (i + 1) / (float) imageInformationList.size());
         }
 
@@ -243,6 +247,22 @@ public class RefactoringTask extends Task.Backgroundable {
                 resizeImageJpg = ImageUtils.resizeNormalImage(information);
             }
             ImageUtils.saveImageTempFile(resizeImageJpg, information);
+        } catch (Exception e) {
+            LOGGER.error(e);
+        }
+    }
+
+    private void copyTempImage(ImageInformation information) {
+        try {
+            File exportFile = information.getTempImage();
+            if (exportFile != null) {
+                if (!exportFile.getParentFile().exists()) {
+                    FileUtils.forceMkdir(exportFile.getParentFile());
+                }
+                FileUtils.copyFile(information.getImageFile(), information.getTempImage());
+            } else {
+                throw new IOException("Couldn't find .idea path.");
+            }
         } catch (Exception e) {
             LOGGER.error(e);
         }

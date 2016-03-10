@@ -27,6 +27,11 @@ public class AndroidIconsController implements IAndroidIconsController {
     }
 
     @Override
+    public boolean supportsVectors() {
+        return false;
+    }
+
+    @Override
     public Resolution getThumbnailResolution() {
         return Resolution.LDPI;
     }
@@ -53,6 +58,9 @@ public class AndroidIconsController implements IAndroidIconsController {
 
     @Override
     public File getImageFile(ImageAsset asset, String color, String size, Resolution resolution) {
+        if (resolution == Resolution.ANYDPI) {
+            throw new IllegalStateException("Vectors not supported by AndroidIcons");
+        }
         final String localPath = String.format("%s/%s/%s.png",
                                                color,
                                                resolution.toString().toLowerCase(),

@@ -1,5 +1,5 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.0.41"
+    id "org.jetbrains.intellij" version "0.0.43"
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -17,10 +17,11 @@ sourceSets {
 }
 
 intellij {
-    version project.hasProperty('ideaVersion') ? ideaVersion : 'IC-14.1.5'
+    version project.hasProperty('ideaVersion') ? ideaVersion : 'IC-15.0.4'
     pluginName 'android-drawable-importer-intellij-plugin'
     plugins 'android'
     updateSinceUntilBuild false
+    sameSinceUntilBuild false
     downloadSources !Boolean.valueOf(System.getenv('CI'))
 
     publish {
@@ -34,7 +35,7 @@ intellij {
 
 group 'de.mprengemann.intellij.plugin.androidicons'
 
-def majorVersion = '0.4'
+def majorVersion = '0.5'
 version "${Boolean.valueOf(System.getenv('CI')) ? "$majorVersion-${System.getenv('TRAVIS_BUILD_NUMBER')}" : "$majorVersion"}"
 
 repositories {

@@ -7,11 +7,13 @@ This plugin consists of three main features. You can access them by **right-clic
 ## AndroidIcons and Material Icons Drawable Import
 You are able to select the asset, specify your color, change the target resource name and select all the resolutions you want to import.  
 
-All the missing folders will be created automatically. If there are already drawables with the same name, you will be warned.  
+All the missing folders will be created automatically. If there are already drawables with the same name, you will be warned.
+You can also import Vector Drawables from the Material Icons pack.
 
 You can even search for your desired asset by just start typing when the first spinner has focus.
    
 ![alt text](src/main/resources/images/icons_importer.png "Icons Import dialog")
+![alt text](src/main/resources/images/vector_importer.png "Vector Drawable Importer dialog")
    
 *You can download AndroidIcons [here](http://www.androidicons.com/) and Material Icons [here](https://github.com/google/material-design-icons) for free.*
 

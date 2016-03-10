@@ -2,7 +2,8 @@ language: java
 sudo: false
 env:
   matrix:
-  - IDEA_VERSION=IC-14.1.5
+  - IDEA_VERSION=IC-14.0.4
+  - IDEA_VERSION=IC-14.1.6
   - IDEA_VERSION=IC-15.0.2
   - IDEA_VERSION=LATEST-EAP-SNAPSHOT
   global:

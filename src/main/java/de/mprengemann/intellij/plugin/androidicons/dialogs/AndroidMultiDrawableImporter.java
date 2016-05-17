@@ -347,7 +347,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
                     int foundAssets = 0;
                     for (Resolution resolution : zipImages.keySet()) {
                         final List<ImageInformation> assetInformation = zipImages.get(resolution);
-                        if (assetInformation != null && assetInformation.size() > 0) {
+                        if (assetInformation != null && !assetInformation.isEmpty()) {
                             foundAssets += assetInformation.size();
                             foundResolutions.add(resolution);
                         }
@@ -358,7 +358,7 @@ public class AndroidMultiDrawableImporter extends DialogWrapper implements Multi
                     UIUtil.invokeLaterIfNeeded(new DumbAwareRunnable() {
                         public void run() {
                             final String title = String.format("Import '%s'", archiveName);
-                            if (foundResolutions.size() == 0 || finalFoundAssets == 0) {
+                            if (foundResolutions.isEmpty() || finalFoundAssets == 0) {
                                 Messages.showErrorDialog("No assets found.", title);
                                 FileUtils.deleteQuietly(tempDir);
                                 return;

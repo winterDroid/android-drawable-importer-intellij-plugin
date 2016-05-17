@@ -148,7 +148,7 @@ public class FileBrowserField extends TextFieldWithBrowseButton {
             @Override
             public void dropFiles(final List<VirtualFile> virtualFiles) {
                 if (virtualFiles == null ||
-                    virtualFiles.size() == 0) {
+                        virtualFiles.isEmpty()) {
                     return;
                 }
                 final VirtualFile file = virtualFiles.get(0);

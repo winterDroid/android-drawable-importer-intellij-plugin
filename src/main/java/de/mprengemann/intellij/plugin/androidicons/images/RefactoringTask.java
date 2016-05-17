@@ -96,7 +96,7 @@ public class RefactoringTask extends Task.Backgroundable {
 
     @Override
     public void run(@NotNull final ProgressIndicator progressIndicator) {
-        if (imageInformationList.size() == 0) {
+        if (imageInformationList.isEmpty()) {
             return;
         }
         this.progressIndicator = progressIndicator;
@@ -193,7 +193,7 @@ public class RefactoringTask extends Task.Backgroundable {
             }
         }
 
-        if (files.size() == dirs.size() && files.size() > 0) {
+        if (files.size() == dirs.size() && !files.isEmpty()) {
             selection = -1;
             RunnableUtils.runWriteCommand(project, new Runnable() {
                 @Override

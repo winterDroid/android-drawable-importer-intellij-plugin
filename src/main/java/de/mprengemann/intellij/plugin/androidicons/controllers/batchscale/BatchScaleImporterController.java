@@ -58,7 +58,7 @@ public class BatchScaleImporterController implements IBatchScaleImporterControll
     @Override
     public void addImage(Resolution sourceResolution, List<ImageInformation> imageInformation) {
         if (imageInformation == null ||
-            imageInformation.size() == 0) {
+                imageInformation.isEmpty()) {
             return;
         }
         final String sourcePath = imageInformation.get(0).getImageFile().getAbsolutePath();

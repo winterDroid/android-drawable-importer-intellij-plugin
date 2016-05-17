@@ -22,7 +22,10 @@ import java.util.List;
 import java.util.Set;
 
 public class ExportNameUtils {
-    
+
+    private ExportNameUtils() {
+    }
+
     public static String getExportNameFromFilename(String filename) {
         String exportName = FilenameUtils.removeExtension(filename);
         if (exportName.matches("[a-z0-9_.]*")) {

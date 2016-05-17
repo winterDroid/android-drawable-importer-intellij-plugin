@@ -1,6 +1,9 @@
 package de.mprengemann.intellij.plugin.androidicons.util;
 
 public final class TextUtils {
+    private TextUtils() {
+    }
+
     public static boolean isEmpty(final CharSequence s) {
         return s == null || s.length() == 0;
     }

@@ -35,6 +35,9 @@ import java.util.List;
 
 public class ImageUtils {
 
+    private ImageUtils() {
+    }
+
     public static void updateImage(JLabel imageContainer, File imageFile, Format format) {
         if (imageFile == null || !imageFile.exists()) {
             return;

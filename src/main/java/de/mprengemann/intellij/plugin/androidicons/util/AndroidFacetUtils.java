@@ -31,6 +31,9 @@ import java.util.Iterator;
 import java.util.List;
 
 public class AndroidFacetUtils {
+    private AndroidFacetUtils() {
+    }
+
     public static AndroidFacet getCurrentFacet(Project project, Module module) {
         AndroidFacet currentFacet = null;
         if (module == null) {

@@ -14,6 +14,9 @@
 package de.mprengemann.intellij.plugin.androidicons.util;
 
 public class MathUtils {
+    private MathUtils() {
+    }
+
     public static boolean floatEquals(float a, float b) {
         return Float.compare(a, b) == 0;
     }

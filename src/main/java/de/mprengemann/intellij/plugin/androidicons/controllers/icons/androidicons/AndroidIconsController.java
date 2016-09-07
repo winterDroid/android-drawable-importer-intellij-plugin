@@ -7,6 +7,7 @@ import de.mprengemann.intellij.plugin.androidicons.resources.ResourceLoader;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 public class AndroidIconsController implements IAndroidIconsController {
 
@@ -63,7 +64,7 @@ public class AndroidIconsController implements IAndroidIconsController {
         }
         final String localPath = String.format("%s/%s/%s.png",
                                                color,
-                                               resolution.toString().toLowerCase(),
+                                               resolution.toString().toLowerCase(Locale.ENGLISH),
                                                asset.getName());
         return ResourceLoader.getAssetResource(new File(iconPack.getPath(), localPath).getPath());
     }

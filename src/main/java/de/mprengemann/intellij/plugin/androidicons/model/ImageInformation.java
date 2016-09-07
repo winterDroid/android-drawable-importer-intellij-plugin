@@ -18,6 +18,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.Defaults
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 
 import java.io.File;
+import java.util.Locale;
 
 public class ImageInformation {
 
@@ -69,7 +70,9 @@ public class ImageInformation {
     }
 
     public File getTempImage() {
-        return new File(getTempDir(), String.format("%s/%s", targetResolution.toString().toLowerCase(), exportName));
+        return new File(getTempDir(), String.format("%s/%s",
+                                                    targetResolution.toString().toLowerCase(Locale.ENGLISH),
+                                                    exportName));
     }
 
     public File getImageFile() {
@@ -111,7 +114,7 @@ public class ImageInformation {
     public File getTargetFile() {
         return new File(String.format(TARGET_FILE_PATTERN,
                                       exportPath,
-                                      targetResolution.toString().toLowerCase(),
+                                      targetResolution.toString().toLowerCase(Locale.ENGLISH),
                                       exportName,
                                       format.toString().toLowerCase()));
     }

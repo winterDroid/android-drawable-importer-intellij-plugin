@@ -11,6 +11,7 @@ import de.mprengemann.intellij.plugin.androidicons.resources.ResourceLoader;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MaterialIconsController implements IMaterialIconsController {
@@ -96,7 +97,7 @@ public class MaterialIconsController implements IMaterialIconsController {
     private String getImageFilePath(ImageAsset asset, String color, String size, Resolution resolution) {
         return String.format("%s/drawable-%s/%s_%s_%s.png",
                                                asset.getCategory(),
-                                               resolution.toString().toLowerCase(),
+                                               resolution.toString().toLowerCase(Locale.ENGLISH),
                                                asset.getName(),
                                                color,
                                                size);
@@ -105,7 +106,7 @@ public class MaterialIconsController implements IMaterialIconsController {
     private String getVectorFilePath(ImageAsset asset) {
         return String.format("%s/drawable-%s-v21/%s_black_24dp.xml",
                              asset.getCategory(),
-                             Resolution.ANYDPI.toString().toLowerCase(),
+                             Resolution.ANYDPI.toString().toLowerCase(Locale.ENGLISH),
                              asset.getName());
     }
 

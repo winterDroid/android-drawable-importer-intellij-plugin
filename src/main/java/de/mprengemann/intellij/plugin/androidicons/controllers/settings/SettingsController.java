@@ -10,6 +10,7 @@ import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -110,7 +111,14 @@ public class SettingsController implements ISettingsController {
         }
         Set<Resolution> resolutions = new HashSet<Resolution>();
         for (String value : values) {
-            resolutions.add(Resolution.from(value));
+            if (TextUtils.isEmpty(value)) {
+                return defaultResolutions;
+            }
+            final Resolution resolution = Resolution.from(value);
+            if (resolution == null) {
+                return defaultResolutions;
+            }
+            resolutions.add(resolution);
         }
         return resolutions;
     }

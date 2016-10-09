@@ -1,11 +1,12 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.0.43"
+    id "org.jetbrains.intellij" version "0.1.10"
 }
 
 apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'java'
 
-sourceCompatibility = 1.6
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
 
 sourceSets {
     main {
@@ -17,7 +18,7 @@ sourceSets {
 }
 
 intellij {
-    version project.hasProperty('ideaVersion') ? ideaVersion : 'IC-15.0.4'
+    version project.hasProperty('ideaVersion') ? ideaVersion : 'IC-2016.2.4'
     pluginName 'android-drawable-importer-intellij-plugin'
     plugins 'android'
     updateSinceUntilBuild false

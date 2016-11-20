@@ -41,6 +41,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.addite
 import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
+import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.MathUtils;
 import de.mprengemann.intellij.plugin.androidicons.widgets.FileBrowserField;
@@ -202,8 +203,14 @@ public class AndroidBatchScaleImporter extends DialogWrapper implements BatchSca
         final ISettingsController settingsController = container.getControllerFactory().getSettingsController();
         final IDefaultsController defaultsController = container.getControllerFactory().getDefaultsController();
         final VirtualFile root = settingsController.getResourceRoot();
+        String exportRoot = "";
+        if (root != null) {
+            exportRoot = root.getCanonicalPath();
+        } else {
+            exportRoot = AndroidFacetUtils.getResourcesRoot(project, module);
+        }
         final IAddItemBatchScaleImporterController addItemController =
-            new AddItemBatchScaleImporterController(defaultsController, root, realFile);
+            new AddItemBatchScaleImporterController(defaultsController, exportRoot, realFile);
         controller.addImage(addItemController.getSourceResolution(), addItemController.getImageInformation(project));
         addItemController.tearDown();
     }

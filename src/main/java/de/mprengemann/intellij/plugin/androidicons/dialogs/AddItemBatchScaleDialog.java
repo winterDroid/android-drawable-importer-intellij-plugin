@@ -18,6 +18,7 @@ import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
 import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
+import de.mprengemann.intellij.plugin.androidicons.util.AndroidFacetUtils;
 import de.mprengemann.intellij.plugin.androidicons.util.ImageUtils;
 import de.mprengemann.intellij.plugin.androidicons.widgets.ExportNameField;
 import de.mprengemann.intellij.plugin.androidicons.widgets.FileBrowserField;
@@ -214,7 +215,13 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
 
     private void initController(File file) {
         final VirtualFile root = settingsController.getResourceRoot();
-        controller = new AddItemBatchScaleImporterController(defaultsController, root, file);
+        String exportRoot = "";
+        if (root != null) {
+            exportRoot = root.getCanonicalPath();
+        } else {
+            exportRoot = AndroidFacetUtils.getResourcesRoot(project, module);
+        }
+        controller = new AddItemBatchScaleImporterController(defaultsController, exportRoot, file);
     }
 
     private void initRequiredControllers() {

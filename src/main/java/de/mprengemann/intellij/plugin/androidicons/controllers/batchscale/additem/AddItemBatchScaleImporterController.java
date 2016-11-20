@@ -39,7 +39,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     private Format format;
 
     public AddItemBatchScaleImporterController(IDefaultsController defaultsController,
-                                               VirtualFile root,
+                                               String exportRoot,
                                                File file) {
         this.observers = new HashSet<AddItemBatchScaleDialogObserver>();
         this.targetResolutions = defaultsController.getResolutions();
@@ -50,11 +50,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         sourceResolution = defaultsController.getSourceResolution();
         algorithm = defaultsController.getAlgorithm();
         method = defaultsController.getMethod();
-        if (root != null) {
-            exportRoot = root.getCanonicalPath();
-        } else {
-            exportRoot = "";
-        }
+        this.exportRoot = exportRoot;
         isNinePatch = fileName.endsWith(".9.png");
         format = isNinePatch ? Format.PNG : defaultsController.getFormat();
     }

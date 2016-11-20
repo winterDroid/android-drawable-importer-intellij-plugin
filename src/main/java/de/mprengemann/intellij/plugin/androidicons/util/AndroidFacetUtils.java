@@ -19,15 +19,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.android.facet.AndroidFacet;
-import org.jetbrains.android.util.AndroidUtils;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class AndroidFacetUtils {
@@ -47,6 +41,17 @@ public class AndroidFacetUtils {
             }
         }
         return currentFacet;
+    }
+
+    public static String getResourcesRoot(Project project, Module module) {
+        final AndroidFacet currentFacet = AndroidFacetUtils.getCurrentFacet(project, module);
+        final List<VirtualFile> allResourceDirectories = currentFacet.getAllResourceDirectories();
+        String exportRoot = "";
+        if (allResourceDirectories.size() == 1) {
+            exportRoot = allResourceDirectories.get(0).getCanonicalPath();
+        }
+
+        return exportRoot;
     }
 
     public static void updateActionVisibility(AnActionEvent e) {

@@ -25,6 +25,9 @@ public class RefactorUtils {
     private static final float FACTOR_XXXHDPI = 4f;
     private static final float FACTOR_TVDPI = 4f / 3f;
 
+    private RefactorUtils() {
+    }
+
     public static float getScaleFactor(Resolution target, Resolution baseLine) {
         switch (baseLine) {
             case MDPI:

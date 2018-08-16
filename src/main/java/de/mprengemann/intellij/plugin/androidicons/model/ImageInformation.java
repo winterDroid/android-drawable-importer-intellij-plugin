@@ -121,7 +121,7 @@ public class ImageInformation {
     public File getTargetFile() {
         return new File(String.format(TARGET_FILE_PATTERN,
                                       exportPath,
-                                      destination.toString().toLowerCase(),
+                                      destination.getFolderName(),
                                       targetResolution.toString().toLowerCase(Locale.ENGLISH),
                                       exportName,
                                       format.toString().toLowerCase()));

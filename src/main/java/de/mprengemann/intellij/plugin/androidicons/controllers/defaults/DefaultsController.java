@@ -22,7 +22,7 @@ public class DefaultsController implements IDefaultsController {
     public static final ResizeAlgorithm DEFAULT_ALGORITHM = ResizeAlgorithm.SCALR;
     public static final String DEFAULT_METHOD = DEFAULT_ALGORITHM.getMethods().get(0);
     public static final Format DEFAULT_FORMAT = Format.PNG;
-    public static final Destination DEFAULT_DESTINATION = Destination.Drawable;
+    public static final Destination DEFAULT_DESTINATION = Destination.DRAWABLE;
 
     private Set<Resolution> resolutions;
     private Resolution sourceResolution;

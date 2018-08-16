@@ -233,7 +233,7 @@ public class SettingsController implements ISettingsController {
 
     @Override
     public Format getFormat(Format defaultFormat) {
-        return Format.from(getOrDefault(FORMAT, defaultFormat.toString()));
+        return Format.valueOf(getOrDefault(FORMAT, defaultFormat.toString()));
     }
 
     @Override
@@ -243,7 +243,7 @@ public class SettingsController implements ISettingsController {
 
     @Override
     public Destination getDestination(Destination defaultDestination) {
-        return Destination.from(getOrDefault(DESTINATION,defaultDestination.toString()));
+        return Destination.valueOf(getOrDefault(DESTINATION, defaultDestination.toString()));
     }
 
     private String getOrDefault(String key, String defaultValue) {

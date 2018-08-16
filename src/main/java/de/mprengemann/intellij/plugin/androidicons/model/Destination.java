@@ -3,26 +3,18 @@ package de.mprengemann.intellij.plugin.androidicons.model;
 import de.mprengemann.intellij.plugin.androidicons.util.TextUtils;
 
 public enum Destination {
-    Drawable,
-    Mipmap;
+    DRAWABLE("drawable"),
+    MIPMAP("mipmap");
 
-    private static final Destination[] DESTINATION_VALUES = new Destination[] {
-        Drawable, Mipmap
-    };
 
-    public static Destination from(String string) {
-        if (TextUtils.isEmpty(string)) {
-            throw new IllegalArgumentException();
-        }
-        if (string.equalsIgnoreCase(Drawable.toString())) {
-            return Drawable;
-        } else if (string.equalsIgnoreCase(Mipmap.toString())) {
-            return Mipmap;
-        }
-        return null;
+    private final String folderName;
+
+    Destination(String folderName) {
+        this.folderName = folderName;
     }
 
-    public static Destination[] destinationValues() {
-        return DESTINATION_VALUES;
+    public String getFolderName() {
+        return folderName;
     }
+
 }

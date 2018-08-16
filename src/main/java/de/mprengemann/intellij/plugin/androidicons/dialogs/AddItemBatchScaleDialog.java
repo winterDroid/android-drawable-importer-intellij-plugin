@@ -316,7 +316,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private void updateDestination() {
         destinationSpinner.removeActionListener(destinationListener);
         destinationSpinner.removeAllItems();
-        for (Destination format : Destination.destinationValues()) {
+        for (Destination format : Destination.values()) {
             destinationSpinner.addItem(format);
         }
         destinationSpinner.setSelectedItem(controller.getDestination());

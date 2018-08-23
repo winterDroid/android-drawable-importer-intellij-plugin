@@ -3,9 +3,9 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.batchscale.addit
 import com.google.common.base.Objects;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefaultsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.Destination;
 import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -37,6 +37,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     private float aspectRatio;
     private boolean isNinePatch;
     private Format format;
+    private Destination destination;
 
     public AddItemBatchScaleImporterController(IDefaultsController defaultsController,
                                                String exportRoot,
@@ -53,6 +54,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         this.exportRoot = exportRoot;
         isNinePatch = fileName.endsWith(".9.png");
         format = isNinePatch ? Format.PNG : defaultsController.getFormat();
+        destination = defaultsController.getDestination();
     }
 
     public AddItemBatchScaleImporterController(Resolution sourceResolution,
@@ -72,6 +74,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
         this.exportRoot = baseInformation.getExportPath();
         this.isNinePatch = baseInformation.isNinePatch();
         this.format = baseInformation.getFormat();
+        destination = baseInformation.getDestination();
 
         this.targetHeight = getOriginalTargetSize(sourceResolution, baseInformation.getTargetResolution(), targetHeight, baseInformation.getFactor());
         this.targetWidth = getOriginalTargetSize(sourceResolution, baseInformation.getTargetResolution(), targetWidth, baseInformation.getFactor());
@@ -242,6 +245,21 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
     }
 
     @Override
+    public Destination getDestination() {
+        return destination;
+    }
+
+    @Override
+    public void setDestination(Destination destination) {
+        if (this.destination == destination) {
+            return;
+        }
+        this.destination = destination;
+        notifyUpdated();
+
+    }
+
+    @Override
     public int[] getScaledSize(Resolution resolution) {
         final float scaleFactor = RefactorUtils.getScaleFactor(resolution, sourceResolution);
         return new int[] {(int) (scaleFactor * targetWidth), (int) (scaleFactor * targetHeight)};
@@ -257,6 +275,7 @@ public class AddItemBatchScaleImporterController implements IAddItemBatchScaleIm
                                                       .setExportPath(exportRoot)
                                                       .setNinePatch(isNinePatch)
                                                       .setFormat(format)
+                                                      .setDestination(destination)
                                                       .build();
         final List<ImageInformation> images = new ArrayList<ImageInformation>();
         for (Resolution resolution : targetResolutions) {

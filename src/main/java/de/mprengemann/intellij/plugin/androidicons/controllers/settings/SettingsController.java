@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.Base64;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.Destination;
 import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -33,6 +34,7 @@ public class SettingsController implements ISettingsController {
     private static final String SIZE = "size";
     private static final String ASSET = "asset";
     private static final String FORMAT = "format";
+    private static final String DESTINATION = "destination";
 
     private Set<SettingsObserver> observerSet;
     private Project project;
@@ -231,7 +233,17 @@ public class SettingsController implements ISettingsController {
 
     @Override
     public Format getFormat(Format defaultFormat) {
-        return Format.from(getOrDefault(FORMAT, defaultFormat.toString()));
+        return Format.valueOf(getOrDefault(FORMAT, defaultFormat.toString()));
+    }
+
+    @Override
+    public void saveDestination(Destination destination) {
+        updateOrDelete(DESTINATION, destination);
+    }
+
+    @Override
+    public Destination getDestination(Destination defaultDestination) {
+        return Destination.valueOf(getOrDefault(DESTINATION, defaultDestination.toString()));
     }
 
     private String getOrDefault(String key, String defaultValue) {

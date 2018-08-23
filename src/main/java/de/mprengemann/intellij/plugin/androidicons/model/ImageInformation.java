@@ -22,13 +22,14 @@ import java.util.Locale;
 
 public class ImageInformation {
 
-    public static final String TARGET_FILE_PATTERN = "%s/drawable-%s/%s.%s";
+    public static final String TARGET_FILE_PATTERN = "%s/%s-%s/%s.%s";
     public static final String TMP_ROOT_DIR = "plugin-images";
     private final File imageFile;
     private final Resolution targetResolution;
     private final float factor;
     private final String exportPath;
     private final Format format;
+    private final Destination destination;
     private final String exportName;
     private final boolean ninePatch;
     private final boolean vector;
@@ -40,6 +41,7 @@ public class ImageInformation {
                              float factor,
                              String exportPath,
                              Format format,
+                             Destination destination,
                              String exportName,
                              boolean isNinePatch,
                              boolean isVector,
@@ -50,6 +52,7 @@ public class ImageInformation {
         this.factor = factor;
         this.exportPath = exportPath;
         this.format = format;
+        this.destination = destination;
         this.exportName = exportName;
         this.ninePatch = isNinePatch;
         this.vector = isVector;
@@ -111,9 +114,14 @@ public class ImageInformation {
         return format;
     }
 
+    public Destination getDestination() {
+        return destination;
+    }
+
     public File getTargetFile() {
         return new File(String.format(TARGET_FILE_PATTERN,
                                       exportPath,
+                                      destination.getFolderName(),
                                       targetResolution.toString().toLowerCase(Locale.ENGLISH),
                                       exportName,
                                       format.toString().toLowerCase()));
@@ -137,6 +145,7 @@ public class ImageInformation {
         private ResizeAlgorithm algorithm = DefaultsController.DEFAULT_ALGORITHM;
         private Object method = DefaultsController.DEFAULT_ALGORITHM.getMethod(DefaultsController.DEFAULT_METHOD);
         private Format format = DefaultsController.DEFAULT_FORMAT;
+        private Destination destination = DefaultsController.DEFAULT_DESTINATION;
 
         private Builder() {
         }
@@ -152,6 +161,7 @@ public class ImageInformation {
             this.algorithm = imageInformation.algorithm;
             this.method = imageInformation.method;
             this.format = imageInformation.format;
+            this.destination = imageInformation.destination;
         }
 
         public Builder setExportName(String exportName) {
@@ -207,12 +217,18 @@ public class ImageInformation {
             return this;
         }
 
+        public Builder setDestination(Destination destination) {
+            this.destination = destination;
+            return this;
+        }
+
         public ImageInformation build() {
             return new ImageInformation(this.imageFile,
                                         this.targetResolution,
                                         this.factor,
                                         this.exportPath,
                                         this.format,
+                                        this.destination,
                                         this.exportName,
                                         this.ninePatch,
                                         this.vector,

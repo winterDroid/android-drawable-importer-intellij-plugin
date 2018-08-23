@@ -15,6 +15,7 @@ import de.mprengemann.intellij.plugin.androidicons.controllers.defaults.IDefault
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
 import de.mprengemann.intellij.plugin.androidicons.listeners.SimpleKeyListener;
+import de.mprengemann.intellij.plugin.androidicons.model.Destination;
 import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageInformation;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -63,6 +64,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
     private JComboBox algorithmSpinner;
     private JComboBox methodSpinner;
     private JComboBox formatSpinner;
+    private JComboBox destinationSpinner;
     private IAddItemBatchScaleImporterController controller;
     private final ActionListener sourceResolutionListener = new ActionListener() {
         @Override
@@ -119,6 +121,16 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
             controller.setFormat(selectedItem);
         }
     };
+
+    private final ActionListener destinationListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            final JComboBox source = (JComboBox) e.getSource();
+            final Destination selectedItem = (Destination) source.getSelectedItem();
+            controller.setDestination(selectedItem);
+        }
+    };
+
     private ISettingsController settingsController;
     private IDefaultsController defaultsController;
 
@@ -251,6 +263,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         if (!controller.isNinePatch()) {
             defaultsController.setFormat(controller.getFormat());
         }
+        defaultsController.setDestination(controller.getDestination());
         super.doOKAction();
     }
 
@@ -263,6 +276,7 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         updateAlgorithms();
         updateAlgorithmMethod();
         updateFormat();
+        updateDestination();
         updateImage(controller.getImageFile());
     }
 
@@ -297,6 +311,16 @@ public class AddItemBatchScaleDialog extends DialogWrapper implements AddItemBat
         formatSpinner.setSelectedItem(controller.getFormat());
         formatSpinner.setEnabled(!controller.isNinePatch());
         formatSpinner.addActionListener(formatListener);
+    }
+
+    private void updateDestination() {
+        destinationSpinner.removeActionListener(destinationListener);
+        destinationSpinner.removeAllItems();
+        for (Destination format : Destination.values()) {
+            destinationSpinner.addItem(format);
+        }
+        destinationSpinner.setSelectedItem(controller.getDestination());
+        destinationSpinner.addActionListener(destinationListener);
     }
 
     private void updateTargetSize() {

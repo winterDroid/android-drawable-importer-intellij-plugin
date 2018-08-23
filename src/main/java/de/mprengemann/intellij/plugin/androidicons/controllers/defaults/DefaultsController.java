@@ -2,6 +2,7 @@ package de.mprengemann.intellij.plugin.androidicons.controllers.defaults;
 
 import de.mprengemann.intellij.plugin.androidicons.controllers.settings.ISettingsController;
 import de.mprengemann.intellij.plugin.androidicons.images.ResizeAlgorithm;
+import de.mprengemann.intellij.plugin.androidicons.model.Destination;
 import de.mprengemann.intellij.plugin.androidicons.model.Format;
 import de.mprengemann.intellij.plugin.androidicons.model.ImageAsset;
 import de.mprengemann.intellij.plugin.androidicons.model.Resolution;
@@ -21,6 +22,7 @@ public class DefaultsController implements IDefaultsController {
     public static final ResizeAlgorithm DEFAULT_ALGORITHM = ResizeAlgorithm.SCALR;
     public static final String DEFAULT_METHOD = DEFAULT_ALGORITHM.getMethods().get(0);
     public static final Format DEFAULT_FORMAT = Format.PNG;
+    public static final Destination DEFAULT_DESTINATION = Destination.DRAWABLE;
 
     private Set<Resolution> resolutions;
     private Resolution sourceResolution;
@@ -31,6 +33,7 @@ public class DefaultsController implements IDefaultsController {
     private ResizeAlgorithm algorithm;
     private String method;
     private Format format;
+    private Destination destination;
 
     private String size;
     private String color;
@@ -128,12 +131,24 @@ public class DefaultsController implements IDefaultsController {
     }
 
     @Override
+    public Destination getDestination() {
+        return destination;
+    }
+
+    @Override
+    public void setDestination(Destination destination) {
+        this.destination = destination;
+        settingsController.saveDestination(this.destination);
+    }
+
+    @Override
     public void restore() {
         imageAsset = settingsController.getImageAsset();
         resolutions = settingsController.getResolutions(DEFAULT_RESOLUTIONS);
         sourceResolution = settingsController.getSourceResolution(DEFAULT_SOURCE_RESOLUTION);
         algorithm = settingsController.getAlgorithm(DEFAULT_ALGORITHM);
         format = settingsController.getFormat(DEFAULT_FORMAT);
+        destination = settingsController.getDestination(DEFAULT_DESTINATION);
         method = settingsController.getMethod(DEFAULT_METHOD);
         color = settingsController.getColor();
         size = settingsController.getSize();
@@ -147,6 +162,8 @@ public class DefaultsController implements IDefaultsController {
         size = null;
         color = null;
         algorithm = null;
+        format = null;
+        destination = null;
         method = null;
         settingsController = null;
     }

@@ -86,7 +86,7 @@ Afterwards click on the *Close* button. If IntelliJ asks you to restart, allow i
 1. Clone
   `git clone git@github.com:winterDroid/android-drawable-importer-intellij-plugin.git`
 2. Run Gradle Wrapper In project root.
-  `./gradlew runIdea`
+  `./gradlew runIde`
 
 # Contribution
 

@@ -1,12 +1,12 @@
 plugins {
-    id "org.jetbrains.intellij" version "0.1.10"
+    id "org.jetbrains.intellij" version "0.3.12"
 }
 
 apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'java'
 
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 sourceSets {
     main {
@@ -18,20 +18,19 @@ sourceSets {
 }
 
 intellij {
-    version project.hasProperty('ideaVersion') ? ideaVersion : 'IC-2016.2.4'
+    version project.hasProperty('ideaVersion') ? ideaVersion : 'IC-2018.2.5'
     pluginName 'android-drawable-importer-intellij-plugin'
-    plugins 'android'
+    plugins = ['android']
+
     updateSinceUntilBuild false
     sameSinceUntilBuild false
     downloadSources !Boolean.valueOf(System.getenv('CI'))
+}
 
-    publish {
-        username 'Prengepower'
-        pluginId '7658'
-
-        password System.getenv('PLUGIN_PASSWORD')
-        channel System.getenv('PLUGIN_CHANNEL') ?: ''
-    }
+publishPlugin {
+    username 'Prengepower'
+    password System.getenv('PLUGIN_PASSWORD')
+    channels System.getenv('PLUGIN_CHANNEL') ?: ''
 }
 
 group 'de.mprengemann.intellij.plugin.androidicons'

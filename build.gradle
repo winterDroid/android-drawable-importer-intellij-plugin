@@ -36,7 +36,7 @@ intellij {
 
 group 'de.mprengemann.intellij.plugin.androidicons'
 
-def majorVersion = '0.5'
+def majorVersion = '0.6'
 version "${Boolean.valueOf(System.getenv('CI')) ? "$majorVersion-${System.getenv('TRAVIS_BUILD_NUMBER')}" : "$majorVersion"}"
 
 repositories {
